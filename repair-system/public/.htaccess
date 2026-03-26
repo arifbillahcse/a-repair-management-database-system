@@ -1,0 +1,73 @@
+# =============================================================================
+# Repair Management System — Public directory .htaccess
+# Requires: Apache mod_rewrite
+# =============================================================================
+
+Options -Indexes
+Options -MultiViews
+
+# ── Redirect HTTP → HTTPS in production ──────────────────────────────────────
+# Uncomment in production:
+# RewriteCond %{HTTPS} off
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ── URL rewriting ──────────────────────────────────────────────────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If the request is for a real file/directory, serve it directly
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Otherwise, send everything through index.php
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# ── Security headers ───────────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Prevent caching of sensitive pages
+    <FilesMatch "\.(php)$">
+        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+    </FilesMatch>
+
+    # Cache static assets
+    <FilesMatch "\.(css|js|ico|png|jpg|jpeg|gif|woff2?)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+</IfModule>
+
+# ── Disable PHP in uploads directory ──────────────────────────────────────────
+<IfModule mod_php.c>
+    <FilesMatch "\.php$">
+        <If "%{REQUEST_URI} =~ m#^/uploads/#">
+            php_flag engine off
+        </If>
+    </FilesMatch>
+</IfModule>
+
+# ── Block access to hidden files (.env, .git, etc.) ───────────────────────────
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# ── Deny direct access to backup/log files ────────────────────────────────────
+<FilesMatch "\.(sql|log|bak|sh|md)$">
+    Require all denied
+</FilesMatch>
+
+# ── MIME types ────────────────────────────────────────────────────────────────
+<IfModule mod_mime.c>
+    AddType application/javascript .js
+    AddType text/css .css
+</IfModule>
+
+# ── Compression ───────────────────────────────────────────────────────────────
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json
+</IfModule>
