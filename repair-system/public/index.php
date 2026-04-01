@@ -109,12 +109,14 @@ $router->get( '/api/customers/search',     'RepairController@customerSearch');
 
 // Customers
 $router->get( '/customers',                'CustomerController@index');
+$router->get( '/customers/export',         'CustomerController@export');       // CSV download
 $router->get( '/customers/create',         'CustomerController@create');
 $router->post('/customers',                'CustomerController@store');
 $router->get( '/customers/:id',            'CustomerController@show');
 $router->get( '/customers/:id/edit',       'CustomerController@edit');
 $router->post('/customers/:id',            'CustomerController@update');
 $router->post('/customers/:id/delete',     'CustomerController@destroy');
+$router->get( '/api/customers/autocomplete','CustomerController@autocomplete'); // AJAX
 
 // Invoices
 $router->get( '/invoices',                 'InvoiceController@index');
