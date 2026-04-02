@@ -126,9 +126,14 @@ $router->get( '/api/customers/autocomplete','CustomerController@autocomplete'); 
 $router->get( '/invoices',                 'InvoiceController@index');
 $router->post('/invoices',                 'InvoiceController@store');
 $router->get( '/invoices/:id',             'InvoiceController@show');
+$router->get( '/invoices/:id/print',       'InvoiceController@printInvoice');
 $router->post('/invoices/:id/paid',        'InvoiceController@markPaid');
+$router->post('/invoices/:id/send',        'InvoiceController@markSent');
 $router->post('/invoices/:id/delete',      'InvoiceController@destroy');
 $router->get( '/repairs/:id/invoice',      'InvoiceController@createFromRepair');
+
+// Reports
+$router->get( '/reports',                  'ReportController@index');
 
 // Staff
 $router->get( '/staff',                    'StaffController@index');
