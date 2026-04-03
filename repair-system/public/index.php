@@ -144,5 +144,12 @@ $router->get( '/staff/:id/edit',           'StaffController@edit');
 $router->post('/staff/:id',                'StaffController@update');
 $router->post('/staff/:id/delete',         'StaffController@destroy');
 
+// Admin
+$router->get(  '/admin/settings',                    'AdminController@settings');
+$router->post( '/admin/settings',                    'AdminController@settings');
+$router->get(  '/admin/users',                       'AdminController@users');
+$router->post( '/admin/users/:id/toggle',            'AdminController@toggleUser');
+$router->post( '/admin/users/:id/reset-password',    'AdminController@resetPassword');
+
 // ── 9. Dispatch ───────────────────────────────────────────────────────────────
 $router->dispatch();
