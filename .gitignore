@@ -4,6 +4,9 @@ repair-system/config/.env
 # Composer vendor
 repair-system/vendor/
 
+# Sessions
+repair-system/sessions/
+
 # Logs
 repair-system/logs/*.log
 

@@ -27,22 +27,22 @@ class Auth
     public static function startSession(): void
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
+            // Use app-local session directory so it's always writable
+            $sessionPath = APP_ROOT . '/sessions';
+            if (!is_dir($sessionPath)) {
+                mkdir($sessionPath, 0700, true);
+            }
+            session_save_path($sessionPath);
+
             session_name(SESSION_NAME);
             session_set_cookie_params([
-                'lifetime' => 0,                 // until browser closes
+                'lifetime' => 0,
                 'path'     => '/',
-                'secure'   => isset($_SERVER['HTTPS']),
+                'secure'   => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
             session_start();
-        }
-
-        // Regenerate session ID periodically to prevent fixation
-        if (!isset($_SESSION['_last_regen']) ||
-            (time() - $_SESSION['_last_regen']) > 300) {
-            session_regenerate_id(true);
-            $_SESSION['_last_regen'] = time();
         }
 
         // Enforce session timeout
@@ -99,6 +99,9 @@ class Auth
             $newHash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
             $this->db->update('users', ['password_hash' => $newHash], 'user_id = ?', [$user['user_id']]);
         }
+
+        // Regenerate session ID on login to prevent session fixation
+        session_regenerate_id(true);
 
         // Persist auth in session
         $this->clearFailedAttempts();
