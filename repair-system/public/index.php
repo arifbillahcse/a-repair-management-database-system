@@ -144,6 +144,12 @@ $router->get( '/staff/:id/edit',           'StaffController@edit');
 $router->post('/staff/:id',                'StaffController@update');
 $router->post('/staff/:id/delete',         'StaffController@destroy');
 
+// Import (Admin only)
+$router->get(  '/import',                            'ImportController@index');
+$router->post( '/import/upload',                     'ImportController@upload');
+$router->get(  '/import/summary',                    'ImportController@summary');
+$router->get(  '/import/template/:type',             'ImportController@downloadTemplate');
+
 // Admin
 $router->get(  '/admin/settings',                    'AdminController@settings');
 $router->post( '/admin/settings',                    'AdminController@settings');
