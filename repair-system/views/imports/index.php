@@ -1,5 +1,6 @@
 <?php
 Auth::requireRole('admin');
+$preType = in_array($_GET['type'] ?? '', ['customers','repairs','invoices','staff']) ? $_GET['type'] : 'customers';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -82,7 +83,7 @@ Auth::requireRole('admin');
                 <div class="card-body">
                     <div class="import-type-grid">
                         <div class="import-type-card">
-                            <input type="radio" id="type-customers" name="import_type" value="customers" checked>
+                            <input type="radio" id="type-customers" name="import_type" value="customers" <?= $preType==='customers'?'checked':'' ?>>
                             <label for="type-customers"></label>
                             <div class="import-type-icon">👥</div>
                             <p class="import-type-label">Customers</p>
@@ -90,7 +91,7 @@ Auth::requireRole('admin');
                         </div>
 
                         <div class="import-type-card">
-                            <input type="radio" id="type-repairs" name="import_type" value="repairs">
+                            <input type="radio" id="type-repairs" name="import_type" value="repairs" <?= $preType==='repairs'?'checked':'' ?>>
                             <label for="type-repairs"></label>
                             <div class="import-type-icon">🔧</div>
                             <p class="import-type-label">Repairs</p>
@@ -233,6 +234,11 @@ document.addEventListener('DOMContentLoaded', function () {
             submitBtn.disabled = true;
         }
     }
+
+    // Show correct template link on load
+    templateLinks.forEach(link => link.style.display = 'none');
+    const initial = document.querySelector('input[name="import_type"]:checked');
+    if (initial) document.querySelector('.template-link[data-type="' + initial.value + '"]').style.display = 'inline-flex';
 
     // Set initial import type in form
     const initialType = document.querySelector('input[name="import_type"]:checked').value;

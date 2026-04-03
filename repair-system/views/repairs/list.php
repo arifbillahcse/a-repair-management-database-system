@@ -89,6 +89,15 @@ function rep_sortIcon(string $col): string
         </p>
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+        <?php if (Auth::isAdmin()): ?>
+        <a href="<?= BASE_URL ?>/import?type=repairs" class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>Import CSV
+        </a>
+        <?php endif; ?>
         <a href="<?= BASE_URL ?>/repairs/create" class="btn btn-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
