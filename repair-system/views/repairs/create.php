@@ -133,13 +133,11 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                         </div>
                         <div class="form-group" style="margin-bottom:0">
                             <label class="form-label" for="deviceModel">
-                                Model <span class="required">*</span>
+                                Model
                             </label>
                             <input type="text" id="deviceModel" name="device_model" class="form-input <?= isset($err['device_model'])?'is-invalid':'' ?>"
                                    value="<?= Utils::e($fd['device_model'] ?? '') ?>"
-                                   placeholder="iPhone 14, Galaxy S23…" maxlength="150"
-                                   data-validate="required" required>
-                            <?php if (isset($err['device_model'])): ?><div class="invalid-feedback"><?= Utils::e($err['device_model']) ?></div><?php endif; ?>
+                                   placeholder="iPhone 14, Galaxy S23…" maxlength="150">
                         </div>
                     </div>
                     <div class="form-grid-2" style="margin-bottom:1rem">

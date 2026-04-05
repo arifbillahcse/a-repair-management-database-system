@@ -308,7 +308,6 @@ class RepairController
     {
         $errors = [];
         if (empty($data['customer_id']))                      { $errors['customer_id']         = 'Customer is required.'; }
-        if (empty(trim($data['device_model'] ?? '')))         { $errors['device_model']        = 'Device model is required.'; }
         if (empty($data['date_in']))                          { $errors['date_in']             = 'Date received is required.'; }
         if (empty(trim($data['problem_description'] ?? '')))  { $errors['problem_description'] = 'Problem description is required.'; }
         if (!empty($data['estimate_amount']) && !is_numeric($data['estimate_amount'])) {

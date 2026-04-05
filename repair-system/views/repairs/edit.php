@@ -117,13 +117,11 @@ $statusFlow  = REPAIR_STATUS_FLOW[$repair['status']] ?? [];
                         </div>
                         <div class="form-group" style="margin-bottom:0">
                             <label class="form-label" for="deviceModel">
-                                Model <span class="required">*</span>
+                                Model
                             </label>
-                            <input type="text" id="deviceModel" name="device_model" class="form-input <?= isset($err['device_model'])?'is-invalid':'' ?>"
+                            <input type="text" id="deviceModel" name="device_model" class="form-input"
                                    value="<?= Utils::e($fd['device_model'] ?? '') ?>" maxlength="150"
-                                   placeholder="iPhone 14, Galaxy S23…"
-                                   data-validate="required" required>
-                            <?php if (isset($err['device_model'])): ?><div class="invalid-feedback"><?= Utils::e($err['device_model']) ?></div><?php endif; ?>
+                                   placeholder="iPhone 14, Galaxy S23…">
                         </div>
                     </div>
                     <div class="form-grid-2" style="margin-bottom:1rem">
