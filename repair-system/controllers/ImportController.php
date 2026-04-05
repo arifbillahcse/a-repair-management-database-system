@@ -339,22 +339,37 @@ class ImportController
             ])));
 
             try {
-                $this->db->insert('repairs', [
-                    'customer_id'           => $customerId,
-                    'staff_id'              => null,
-                    'device_brand'          => $deviceName ?: null,
-                    'device_model'          => null,
-                    'device_serial_number'  => $deviceSerial ?: null,
-                    'problem_description'   => $problemDesc ?: null,
-                    'work_done'             => $workDone ?: null,
-                    'status'                => $status,
-                    'notes'                 => $combinedNotes ?: null,
-                    'date_in'               => $parsedDateIn,
-                    'date_out'              => $parsedDateOut,
-                    'created_at'            => $parsedDateIn,
-                    'updated_at'            => date('Y-m-d H:i:s'),
+                $pdo = $this->db->getPdo();
+                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                $stmt = $pdo->prepare("
+                    INSERT INTO repairs
+                        (customer_id, staff_id, device_brand, device_model,
+                         device_serial_number, problem_description, work_done,
+                         status, notes, date_in, date_out, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ");
+
+                $stmt->execute([
+                    $customerId,
+                    null,
+                    $deviceName ?: null,
+                    null,
+                    $deviceSerial ?: null,
+                    $problemDesc ?: null,
+                    $workDone ?: null,
+                    $status,
+                    $combinedNotes ?: null,
+                    $parsedDateIn,
+                    $parsedDateOut,
+                    $parsedDateIn,
+                    date('Y-m-d H:i:s'),
                 ]);
+
                 $result['success']++;
+            } catch (PDOException $e) {
+                $result['errors'][] = "Row {$row}: SQL error — " . $e->getMessage();
+                $result['skipped']++;
             } catch (Exception $e) {
                 $result['errors'][] = "Row {$row}: " . $e->getMessage();
                 $result['skipped']++;
