@@ -155,43 +155,94 @@ class ImportController
             return $result;
         }
 
-        // Skip header
-        fgetcsv($handle);
+        // Read header row and map column names to indexes
+        $rawHeader = fgetcsv($handle);
+        if (!$rawHeader) {
+            $result['errors'][] = 'Empty file or missing header row';
+            fclose($handle);
+            return $result;
+        }
+
+        // Strip UTF-8 BOM from first column if present
+        $rawHeader[0] = ltrim($rawHeader[0], "\xEF\xBB\xBF");
+        $header = array_map('trim', $rawHeader);
+        $col = array_flip($header); // column name → index
+
+        // Handle duplicate tax_id columns: first=tax_id, second=vat_number
+        $taxIdIndexes = array_keys($header, 'tax_id');
+        $taxIdCol     = $taxIdIndexes[0] ?? null;
+        $vatCol       = $taxIdIndexes[1] ?? ($col['vat_number'] ?? null);
 
         while (($data = fgetcsv($handle)) !== false) {
             $row++;
-
             if (empty(array_filter($data))) continue;
 
-            $first_name = trim($data[0] ?? '');
-            $last_name  = trim($data[1] ?? '');
-            $email      = trim($data[2] ?? '');
-            $phone      = trim($data[3] ?? '');
-            $client_type = trim($data[4] ?? 'individual');
-            $address    = trim($data[5] ?? '');
+            $g = fn(string $key) => trim($data[$col[$key] ?? -1] ?? '');
 
-            if (!$first_name || !$last_name) {
-                $result['errors'][] = "Row {$row}: First and last name required";
+            $full_name   = $g('full_name');
+            $legacy_id   = $g('ClientID');
+            $client_type = $g('client_type') ?: 'individual';
+            $address     = $g('address');
+            $phone_land  = $g('phone_landline');
+            $phone_mob   = $g('phone_mobile');
+            $email       = strtolower($g('email'));
+            $tax_id      = strtoupper($g('tax_id'));
+            $vat_number  = $vatCol !== null ? strtoupper(trim($data[$vatCol] ?? '')) : '';
+            $postal_code = $g('postal_code');
+            $city        = $g('city');
+            $province    = strtoupper($g('province'));
+            $notes       = $g('notes');
+
+            if (!$full_name) {
+                $result['errors'][] = "Row {$row}: Name (full_name) is required";
                 $result['skipped']++;
                 continue;
             }
 
-            if ($email && !Utils::isValidEmail($email)) {
-                $result['errors'][] = "Row {$row}: Invalid email format";
-                $result['skipped']++;
-                continue;
+            if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $result['errors'][] = "Row {$row}: Invalid email — skipping email only";
+                $email = '';
             }
+
+            // Skip duplicate legacy_id if already imported
+            if ($legacy_id) {
+                $exists = $this->db->fetchOne(
+                    'SELECT customer_id FROM customers WHERE legacy_id = ? LIMIT 1',
+                    [$legacy_id]
+                );
+                if ($exists) {
+                    $result['errors'][] = "Row {$row}: ClientID {$legacy_id} already imported — skipped";
+                    $result['skipped']++;
+                    continue;
+                }
+            }
+
+            // Normalize client_type to our values
+            $typeMap = [
+                'privato'  => 'individual', 'individual' => 'individual',
+                'azienda'  => 'company',    'company'    => 'company',
+                'freelancer' => 'freelancer',
+            ];
+            $client_type = $typeMap[strtolower($client_type)] ?? 'individual';
 
             try {
                 $this->db->insert('customers', [
-                    'first_name'  => $first_name,
-                    'last_name'   => $last_name,
-                    'email'       => $email ?: null,
-                    'phone'       => $phone ?: null,
-                    'client_type' => $client_type,
-                    'address'     => $address ?: null,
-                    'created_at'  => date('Y-m-d H:i:s'),
-                    'updated_at'  => date('Y-m-d H:i:s'),
+                    'legacy_id'      => $legacy_id ?: null,
+                    'full_name'      => $full_name,
+                    'client_type'    => $client_type,
+                    'address'        => $address ?: null,
+                    'phone_landline' => $phone_land ?: null,
+                    'phone_mobile'   => $phone_mob ?: null,
+                    'email'          => $email ?: null,
+                    'tax_id'         => $tax_id ?: null,
+                    'vat_number'     => $vat_number ?: null,
+                    'postal_code'    => $postal_code ?: null,
+                    'city'           => $city ?: null,
+                    'province'       => $province ?: null,
+                    'notes'          => $notes ?: null,
+                    'status'         => 'active',
+                    'created_at'     => date('Y-m-d H:i:s'),
+                    'updated_at'     => date('Y-m-d H:i:s'),
                 ]);
                 $result['success']++;
             } catch (Exception $e) {

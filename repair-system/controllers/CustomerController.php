@@ -293,14 +293,8 @@ class CustomerController
 
     private function prepareData(array $post): array
     {
-        $firstName = Utils::sanitize($post['first_name'] ?? '');
-        $lastName  = Utils::sanitize($post['last_name']  ?? '');
-        $fullName  = Utils::sanitize($post['full_name']  ?? trim("{$firstName} {$lastName}"));
-
         return [
-            'first_name'     => $firstName,
-            'last_name'      => $lastName,
-            'full_name'      => $fullName ?: trim("{$firstName} {$lastName}"),
+            'full_name'      => Utils::sanitize($post['full_name'] ?? ''),
             'client_type'    => in_array($post['client_type'] ?? '', ['individual','company','freelancer'])
                                     ? $post['client_type']
                                     : 'individual',

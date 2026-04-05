@@ -63,30 +63,10 @@ function fv(array $v, string $field, string $default = ''): string {
         <div class="form-section-body">
             <div class="form-grid-2">
 
-                <!-- First name -->
-                <div class="form-group">
-                    <label for="first_name" class="form-label">First Name</label>
-                    <input type="text" id="first_name" name="first_name"
-                           class="form-input<?= ec($e,'first_name') ?>"
-                           value="<?= fv($v,'first_name') ?>"
-                           autocomplete="given-name">
-                    <?= fe($e,'first_name') ?>
-                </div>
-
-                <!-- Last name -->
-                <div class="form-group">
-                    <label for="last_name" class="form-label">Last Name</label>
-                    <input type="text" id="last_name" name="last_name"
-                           class="form-input<?= ec($e,'last_name') ?>"
-                           value="<?= fv($v,'last_name') ?>"
-                           autocomplete="family-name">
-                    <?= fe($e,'last_name') ?>
-                </div>
-
-                <!-- Full name / company name -->
+                <!-- Name (single field) -->
                 <div class="form-group form-col-full">
                     <label for="full_name" class="form-label">
-                        Full Name / Company Name <span class="required">*</span>
+                        Name / Company Name <span class="required">*</span>
                     </label>
                     <input type="text" id="full_name" name="full_name"
                            class="form-input<?= ec($e,'full_name') ?>"
@@ -94,9 +74,9 @@ function fv(array $v, string $field, string $default = ''): string {
                            data-rules="required"
                            data-error-for="full_name"
                            autocomplete="name"
+                           placeholder="Full name or company name"
                            required>
                     <?= fe($e,'full_name') ?>
-                    <p class="form-hint">Auto-filled from first + last name. Edit freely for companies.</p>
                 </div>
 
                 <!-- Client type -->

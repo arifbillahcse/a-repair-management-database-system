@@ -74,31 +74,14 @@ function efv(array $v, string $field, string $default = ''): string {
         <div class="form-section-body">
             <div class="form-grid-2">
 
-                <div class="form-group">
-                    <label for="first_name" class="form-label">First Name</label>
-                    <input type="text" id="first_name" name="first_name"
-                           class="form-input<?= eec($e,'first_name') ?>"
-                           value="<?= efv($v,'first_name') ?>"
-                           autocomplete="given-name">
-                    <?= efe($e,'first_name') ?>
-                </div>
-
-                <div class="form-group">
-                    <label for="last_name" class="form-label">Last Name</label>
-                    <input type="text" id="last_name" name="last_name"
-                           class="form-input<?= eec($e,'last_name') ?>"
-                           value="<?= efv($v,'last_name') ?>"
-                           autocomplete="family-name">
-                    <?= efe($e,'last_name') ?>
-                </div>
-
                 <div class="form-group form-col-full">
                     <label for="full_name" class="form-label">
-                        Full Name / Company Name <span class="required">*</span>
+                        Name / Company Name <span class="required">*</span>
                     </label>
                     <input type="text" id="full_name" name="full_name"
                            class="form-input<?= eec($e,'full_name') ?>"
                            value="<?= efv($v,'full_name') ?>"
+                           autocomplete="name"
                            data-rules="required" data-error-for="full_name" required>
                     <?= efe($e,'full_name') ?>
                 </div>
