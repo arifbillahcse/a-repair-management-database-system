@@ -212,8 +212,9 @@ class Utils
 
     // ── String helpers ────────────────────────────────────────────────────────
 
-    public static function truncate(string $text, int $maxLen = 80): string
+    public static function truncate(?string $text, int $maxLen = 80): string
     {
+        if ($text === null || $text === '') return '';
         return mb_strlen($text) > $maxLen
             ? mb_substr($text, 0, $maxLen) . '…'
             : $text;
