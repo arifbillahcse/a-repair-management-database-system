@@ -307,7 +307,7 @@ class RepairController
     private function validateRepair(array $data): array
     {
         $errors = [];
-        if (empty($data['customer_id']))                      { $errors['customer_id']         = 'Customer is required.'; }
+        // Customer is optional - allows importing repairs without customer link
         if (empty($data['date_in']))                          { $errors['date_in']             = 'Date received is required.'; }
         if (empty(trim($data['problem_description'] ?? '')))  { $errors['problem_description'] = 'Problem description is required.'; }
         if (!empty($data['estimate_amount']) && !is_numeric($data['estimate_amount'])) {
@@ -323,7 +323,7 @@ class RepairController
             : 'in_progress';
 
         return [
-            'customer_id'          => (int)$post['customer_id'],
+            'customer_id'          => !empty($post['customer_id']) ? (int)$post['customer_id'] : null,
             'staff_id'             => !empty($post['staff_id']) ? (int)$post['staff_id'] : null,
             'device_model'         => Utils::sanitize($post['device_model']         ?? ''),
             'device_serial_number' => Utils::sanitize($post['device_serial_number'] ?? ''),

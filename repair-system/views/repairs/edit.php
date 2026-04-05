@@ -86,7 +86,9 @@ $statusFlow  = REPAIR_STATUS_FLOW[$repair['status']] ?? [];
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Customer</h2>
+                    <?php if (!empty($repair['customer_id'])): ?>
                     <a href="<?= BASE_URL ?>/customers/<?= $repair['customer_id'] ?>" class="btn btn-xs btn-secondary">View Profile</a>
+                    <?php endif; ?>
                 </div>
                 <div class="card-body">
                     <div style="display:flex;align-items:center;gap:.65rem;padding:.55rem .75rem;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius)">

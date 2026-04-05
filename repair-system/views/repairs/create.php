@@ -71,7 +71,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                 <div class="card-body">
                     <div class="form-group">
                         <label class="form-label" for="custSearch">
-                            Customer <span class="required">*</span>
+                            Customer <span style="font-size:.75rem;color:var(--text-muted)">(optional)</span>
                         </label>
 
                         <input type="hidden" name="customer_id" id="customerId" value="<?= $custId ?: '' ?>">
