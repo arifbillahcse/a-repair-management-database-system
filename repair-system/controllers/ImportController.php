@@ -265,48 +265,94 @@ class ImportController
             return $result;
         }
 
-        fgetcsv($handle);
+        // Read and normalize header row
+        $rawHeader = fgetcsv($handle);
+        if (!$rawHeader) {
+            $result['errors'][] = 'Empty file or missing header row';
+            fclose($handle);
+            return $result;
+        }
+        $rawHeader[0] = ltrim($rawHeader[0], "\xEF\xBB\xBF");
+        $header = array_map('trim', $rawHeader);
+        $col    = array_flip($header);
+
+        // Italian status → our status
+        $statusMap = [
+            'completato'        => 'completed',
+            'in sospeso'        => 'on_hold',
+            'in corso'          => 'in_progress',
+            'pronto'            => 'ready_for_pickup',
+            'ritirato'          => 'collected',
+            'annullato'         => 'cancelled',
+            'attesa ricambi'    => 'waiting_for_parts',
+            // English fallbacks
+            'completed'         => 'completed',
+            'on_hold'           => 'on_hold',
+            'in_progress'       => 'in_progress',
+            'ready_for_pickup'  => 'ready_for_pickup',
+            'collected'         => 'collected',
+            'cancelled'         => 'cancelled',
+            'waiting_for_parts' => 'waiting_for_parts',
+        ];
 
         while (($data = fgetcsv($handle)) !== false) {
             $row++;
-
             if (empty(array_filter($data))) continue;
 
-            $customer_id  = (int)($data[0] ?? 0);
-            $device_brand = trim($data[1] ?? '');
-            $device_model = trim($data[2] ?? '');
-            $device_issue = trim($data[3] ?? '');
-            $status       = trim($data[4] ?? 'in_progress');
-            $staff_id     = !empty($data[5]) ? (int)$data[5] : null;
-            $amount       = (float)($data[6] ?? 0);
-            $notes        = trim($data[7] ?? '');
+            $g = fn(string $key) => trim($data[$col[$key] ?? -1] ?? '');
 
-            if (!$customer_id || !$device_brand || !$device_issue) {
-                $result['errors'][] = "Row {$row}: Customer ID, device brand, and issue required";
-                $result['skipped']++;
-                continue;
+            $clientIdFk      = $g('ClientID_FK');
+            $deviceName      = $g('DeviceName');
+            $deviceSerial    = $g('DeviceSerial');
+            $problemDesc     = $g('ProblemDescription');
+            $workDone        = $g('WorkDone');
+            $statusRaw       = strtolower($g('Status'));
+            $notes           = $g('Notes');
+            $dateIn          = $g('DateIn');
+            $dateOut         = $g('DateOut');
+            $repairDate      = $g('RepairDate');
+
+            // Resolve customer via legacy_id
+            $customerId = null;
+            if ($clientIdFk !== '') {
+                $customer = $this->db->fetchOne(
+                    'SELECT customer_id FROM customers WHERE legacy_id = ? LIMIT 1',
+                    [$clientIdFk]
+                );
+                $customerId = $customer['customer_id'] ?? null;
+                if (!$customerId) {
+                    $result['errors'][] = "Row {$row}: ClientID_FK {$clientIdFk} not found in customers — imported without customer link";
+                }
             }
 
-            // Verify customer exists
-            $customer = $this->db->fetchOne('SELECT customer_id FROM customers WHERE customer_id = ?', [$customer_id]);
-            if (!$customer) {
-                $result['errors'][] = "Row {$row}: Customer ID {$customer_id} not found";
-                $result['skipped']++;
-                continue;
-            }
+            // Map status
+            $status = $statusMap[$statusRaw] ?? 'in_progress';
+
+            // Parse dates safely
+            $parsedDateIn  = $this->parseDate($dateIn)  ?: $this->parseDate($repairDate) ?: date('Y-m-d H:i:s');
+            $parsedDateOut = $this->parseDate($dateOut);
+
+            // Combine Notes + WorkDone
+            $combinedNotes = trim(implode("\n\n", array_filter([
+                $notes    ? "Notes: {$notes}"     : '',
+                $workDone ? "Work Done: {$workDone}" : '',
+            ])));
 
             try {
                 $this->db->insert('repairs', [
-                    'customer_id'   => $customer_id,
-                    'device_brand'  => $device_brand,
-                    'device_model'  => $device_model ?: null,
-                    'device_issue'  => $device_issue,
-                    'status'        => $status,
-                    'staff_id'      => $staff_id,
-                    'actual_amount' => $amount,
-                    'notes'         => $notes ?: null,
-                    'created_at'    => date('Y-m-d H:i:s'),
-                    'updated_at'    => date('Y-m-d H:i:s'),
+                    'customer_id'           => $customerId,
+                    'staff_id'              => null,
+                    'device_brand'          => $deviceName ?: null,
+                    'device_model'          => null,
+                    'device_serial_number'  => $deviceSerial ?: null,
+                    'problem_description'   => $problemDesc ?: null,
+                    'work_done'             => $workDone ?: null,
+                    'status'                => $status,
+                    'notes'                 => $combinedNotes ?: null,
+                    'date_in'               => $parsedDateIn,
+                    'date_out'              => $parsedDateOut,
+                    'created_at'            => $parsedDateIn,
+                    'updated_at'            => date('Y-m-d H:i:s'),
                 ]);
                 $result['success']++;
             } catch (Exception $e) {
@@ -317,6 +363,38 @@ class ImportController
 
         fclose($handle);
         return $result;
+    }
+
+    /**
+     * Parse various date formats from Excel/CSV safely.
+     * Returns MySQL datetime string or null.
+     */
+    private function parseDate(string $raw): ?string
+    {
+        if ($raw === '' || $raw === '0') return null;
+
+        // Already MySQL format: 2025-12-15 00:00:00
+        if (preg_match('/^\d{4}-\d{2}-\d{2}/', $raw)) {
+            return date('Y-m-d H:i:s', strtotime($raw)) ?: null;
+        }
+
+        // Excel serial number (numeric only)
+        if (is_numeric($raw)) {
+            $ts = ($raw - 25569) * 86400; // Excel epoch to Unix
+            return date('Y-m-d H:i:s', (int)$ts);
+        }
+
+        // Short formats: 9/12/25, 10/12/2025, 12-12-25
+        $raw = str_replace('-', '/', $raw);
+        if (preg_match('#^(\d{1,2})/(\d{1,2})/(\d{2,4})$#', $raw, $m)) {
+            $year = strlen($m[3]) === 2 ? '20' . $m[3] : $m[3];
+            $ts   = mktime(0, 0, 0, (int)$m[2], (int)$m[1], (int)$year); // DD/MM/YYYY
+            return $ts ? date('Y-m-d H:i:s', $ts) : null;
+        }
+
+        // Try PHP strtotime as last resort
+        $ts = strtotime($raw);
+        return $ts ? date('Y-m-d H:i:s', $ts) : null;
     }
 
     private function importInvoices(string $filepath): array
