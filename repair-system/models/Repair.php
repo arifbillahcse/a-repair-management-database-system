@@ -22,7 +22,7 @@ class Repair extends BaseModel
                     CONCAT(u.first_name,' ',u.last_name)  AS created_by_name,
                     DATEDIFF(COALESCE(r.date_out, NOW()), r.date_in) AS days_in_lab
              FROM repairs r
-             JOIN customers c ON c.customer_id = r.customer_id
+             LEFT JOIN customers c ON c.customer_id = r.customer_id
              LEFT JOIN staff s ON s.staff_id = r.staff_id
              LEFT JOIN staff u ON u.staff_id = (
                  SELECT staff_id FROM users WHERE user_id = r.created_by LIMIT 1
@@ -46,7 +46,7 @@ class Repair extends BaseModel
 
         $total = (int)$this->db->fetchScalar(
             "SELECT COUNT(*) FROM repairs r
-             JOIN customers c ON c.customer_id = r.customer_id
+             LEFT JOIN customers c ON c.customer_id = r.customer_id
              {$where}",
             $params
         );
@@ -61,7 +61,7 @@ class Repair extends BaseModel
                     CONCAT(s.first_name,' ',s.last_name) AS technician_name,
                     DATEDIFF(COALESCE(r.date_out, NOW()), r.date_in) AS days_in_lab
              FROM repairs r
-             JOIN customers c ON c.customer_id = r.customer_id
+             LEFT JOIN customers c ON c.customer_id = r.customer_id
              LEFT JOIN staff s ON s.staff_id = r.staff_id
              {$where}
              ORDER BY {$orderBy}
@@ -156,7 +156,7 @@ class Repair extends BaseModel
             "SELECT r.repair_id, r.qr_code, r.device_model, r.collection_date,
                     c.full_name AS customer_name, c.phone_mobile
              FROM repairs r
-             JOIN customers c ON c.customer_id = r.customer_id
+             LEFT JOIN customers c ON c.customer_id = r.customer_id
              WHERE r.status = 'ready_for_pickup'
              ORDER BY r.collection_date"
         );
@@ -169,7 +169,7 @@ class Repair extends BaseModel
                     c.full_name AS customer_name, c.phone_mobile,
                     DATEDIFF(NOW(), r.date_out) AS days_waiting
              FROM repairs r
-             JOIN customers c ON c.customer_id = r.customer_id
+             LEFT JOIN customers c ON c.customer_id = r.customer_id
              WHERE r.status = 'ready_for_pickup'
                AND r.date_out IS NOT NULL
                AND DATEDIFF(NOW(), r.date_out) > ?
@@ -184,7 +184,7 @@ class Repair extends BaseModel
             "SELECT r.repair_id, r.device_model, r.status, r.date_in,
                     c.full_name AS customer_name
              FROM repairs r
-             JOIN customers c ON c.customer_id = r.customer_id
+             LEFT JOIN customers c ON c.customer_id = r.customer_id
              ORDER BY r.created_at DESC LIMIT ?",
             [$limit]
         );

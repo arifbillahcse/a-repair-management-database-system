@@ -63,10 +63,10 @@ class RepairController
     {
         Auth::requireAuth();
 
-        $staffList  = $this->staffModel->getTechnicians();
-        $csrfToken  = Auth::generateCSRFToken();
-        $formErrors = $_SESSION['_form_errors'] ?? [];
-        $formData   = $_SESSION['_form_data']   ?? [];
+        $staffList = $this->staffModel->getTechnicians();
+        $csrfToken = Auth::generateCSRFToken();
+        $errors    = $_SESSION['_form_errors'] ?? [];
+        $formData  = $_SESSION['_form_data']   ?? [];
         unset($_SESSION['_form_errors'], $_SESSION['_form_data']);
 
         // Pre-fill customer if coming from customer profile
@@ -117,10 +117,10 @@ class RepairController
         $repair    = $this->model->findById($id);
         if (!$repair) { $this->notFound(); }
 
-        $staffList  = $this->staffModel->getTechnicians();
-        $csrfToken  = Auth::generateCSRFToken();
-        $formErrors = $_SESSION['_form_errors'] ?? [];
-        $formData   = $_SESSION['_form_data']   ?? $repair;
+        $staffList = $this->staffModel->getTechnicians();
+        $csrfToken = Auth::generateCSRFToken();
+        $errors    = $_SESSION['_form_errors'] ?? [];
+        $formData  = $_SESSION['_form_data']   ?? $repair;
         unset($_SESSION['_form_errors'], $_SESSION['_form_data']);
 
         // Always load the linked customer for the card

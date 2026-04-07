@@ -16,6 +16,18 @@
 
 declare(strict_types=1);
 
+// ── 0. Early error capture (logs to file before exception handler is ready) ───
+$_earlyLogPath = dirname(__DIR__) . '/logs/app.log';
+set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) use ($_earlyLogPath): bool {
+    if ($errno === E_ERROR || $errno === E_PARSE || $errno === E_CORE_ERROR || $errno === E_COMPILE_ERROR) {
+        @file_put_contents($_earlyLogPath,
+            '[' . date('Y-m-d H:i:s') . '] [PHP_ERROR] ' . $errstr . ' in ' . $errfile . ':' . $errline . "\n",
+            FILE_APPEND | LOCK_EX
+        );
+    }
+    return false; // let PHP's own handler also run
+});
+
 // ── 1. App root ───────────────────────────────────────────────────────────────
 define('APP_ROOT', dirname(__DIR__));
 
