@@ -108,6 +108,7 @@ define('CLIENT_TYPES', [
     'individual'  => 'Individual',
     'company'     => 'Company',
     'freelancer'  => 'Freelancer',
+    'colleague'   => 'Colleague',
 ]);
 
 // ── Date / locale ─────────────────────────────────────────────────────────────

@@ -52,9 +52,13 @@ require VIEWS_PATH . '/layouts/header.php';
                 <?= $customer['status'] === 'active'
                     ? '<span class="badge badge-green">Active</span>'
                     : '<span class="badge badge-gray">Inactive</span>' ?>
+                <?php if ($customer['client_type'] === 'colleague'): ?>
+                <span class="badge badge-purple">Colleague</span>
+                <?php else: ?>
                 <span class="badge badge-gray" style="text-transform:capitalize">
                     <?= Utils::e(CLIENT_TYPES[$customer['client_type']] ?? $customer['client_type']) ?>
                 </span>
+                <?php endif; ?>
                 <span class="profile-id">#<?= $customer['customer_id'] ?></span>
                 <?php if ($customer['customer_since']): ?>
                 <span class="profile-id">

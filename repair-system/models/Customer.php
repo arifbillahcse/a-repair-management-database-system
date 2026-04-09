@@ -35,15 +35,16 @@ class Customer extends BaseModel
         int    $page    = 1,
         string $status  = '',
         string $sort    = 'full_name',
-        string $dir     = 'ASC'
+        string $dir     = 'ASC',
+        string $type    = ''
     ): array {
-        $where  = '';
-        $params = [];
+        $clauses = [];
+        $params  = [];
 
-        if ($status !== '') {
-            $where   = 'WHERE status = ?';
-            $params[] = $status;
-        }
+        if ($status !== '') { $clauses[] = 'status = ?';      $params[] = $status; }
+        if ($type   !== '') { $clauses[] = 'client_type = ?'; $params[] = $type;   }
+
+        $where = $clauses ? 'WHERE ' . implode(' AND ', $clauses) : '';
 
         $col     = in_array($sort, self::SORTABLE, true) ? $sort : 'full_name';
         $dir     = strtoupper($dir) === 'DESC' ? 'DESC' : 'ASC';
@@ -67,7 +68,8 @@ class Customer extends BaseModel
         int    $page   = 1,
         string $status = '',
         string $sort   = 'full_name',
-        string $dir    = 'ASC'
+        string $dir    = 'ASC',
+        string $type   = ''
     ): array {
         $like   = '%' . $query . '%';
         $params = [$like, $like, $like, $like, $like, $like, $like];
@@ -76,10 +78,8 @@ class Customer extends BaseModel
                    OR email LIKE ? OR phone_mobile LIKE ? OR city LIKE ?
                    OR vat_number LIKE ?)";
 
-        if ($status !== '') {
-            $where   .= " AND status = ?";
-            $params[] = $status;
-        }
+        if ($status !== '') { $where .= " AND status = ?";      $params[] = $status; }
+        if ($type   !== '') { $where .= " AND client_type = ?"; $params[] = $type;   }
 
         $total = (int)$this->db->fetchScalar(
             "SELECT COUNT(*) FROM customers WHERE {$where}", $params
@@ -226,10 +226,11 @@ class Customer extends BaseModel
         return $this->db->fetchOne(
             "SELECT
                 COUNT(*) AS total,
-                SUM(status = 'active')   AS active,
-                SUM(status = 'inactive') AS inactive
+                SUM(status = 'active')              AS active,
+                SUM(status = 'inactive')             AS inactive,
+                SUM(client_type = 'colleague')       AS colleagues
              FROM customers"
-        ) ?? ['total' => 0, 'active' => 0, 'inactive' => 0];
+        ) ?? ['total' => 0, 'active' => 0, 'inactive' => 0, 'colleagues' => 0];
     }
 
     // ── Batch import (used by import script) ──────────────────────────────────

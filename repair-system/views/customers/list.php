@@ -4,17 +4,18 @@ require VIEWS_PATH . '/layouts/header.php';
 
 $search = Utils::e($_GET['search'] ?? '');
 $status = $_GET['status'] ?? '';
+$type   = $_GET['type']   ?? '';
 $sort   = $_GET['sort']   ?? 'full_name';
 $dir    = $_GET['dir']    ?? 'ASC';
 $pg     = $pagination;
 
 function cust_sortUrl(string $col): string
 {
-    global $search, $status, $sort, $dir;
+    global $search, $status, $type, $sort, $dir;
     $d = ($sort === $col && $dir === 'ASC') ? 'DESC' : 'ASC';
     return Utils::url('/customers', array_filter([
         'search' => htmlspecialchars_decode($search),
-        'status' => $status, 'sort' => $col, 'dir' => $d, 'page' => 1,
+        'status' => $status, 'type' => $type, 'sort' => $col, 'dir' => $d, 'page' => 1,
     ]));
 }
 function cust_sortIcon(string $col): string
@@ -64,6 +65,9 @@ function cust_sortIcon(string $col): string
             <?php if ($counts['inactive'] > 0): ?>
             &nbsp;·&nbsp; <span style="color:var(--text-muted)"><?= number_format($counts['inactive']) ?> inactive</span>
             <?php endif; ?>
+            <?php if ($counts['colleagues'] > 0): ?>
+            &nbsp;·&nbsp; <span style="color:#7c3aed"><?= number_format($counts['colleagues']) ?> colleagues</span>
+            <?php endif; ?>
         </p>
     </div>
     <div class="header-actions">
@@ -93,6 +97,30 @@ function cust_sortIcon(string $col): string
     </div>
 </div>
 
+<!-- Quick-filter tabs -->
+<div style="display:flex;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap">
+    <?php
+    $tabBase = array_filter(['search' => htmlspecialchars_decode($search), 'sort' => $sort, 'dir' => $dir]);
+    $tabs = [
+        ''           => 'All',
+        'active'     => 'Active',
+        'inactive'   => 'Inactive',
+    ];
+    foreach ($tabs as $tabVal => $tabLabel):
+        $isActive = ($type === '' && $status === $tabVal) || ($tabVal === '' && $type === '' && $status === '');
+        // "All" tab is active only when both status and type are empty
+        if ($tabVal === '') $isActive = ($type === '' && $status === '');
+        $href = Utils::url('/customers', array_filter(array_merge($tabBase, ['status' => $tabVal])));
+    ?>
+    <a href="<?= $href ?>" class="btn btn-sm <?= $isActive ? 'btn-primary' : 'btn-secondary' ?>"><?= $tabLabel ?></a>
+    <?php endforeach; ?>
+    <?php
+    $colleagueActive = ($type === 'colleague');
+    $colleagueHref   = Utils::url('/customers', array_filter(array_merge($tabBase, ['type' => 'colleague'])));
+    ?>
+    <a href="<?= $colleagueHref ?>" class="btn btn-sm" style="<?= $colleagueActive ? 'background:#7c3aed;color:#fff;border-color:#7c3aed' : 'border-color:#c4b5fd;color:#7c3aed' ?>">Colleagues<?php if ($counts['colleagues'] > 0): ?> <span style="opacity:.8">(<?= (int)$counts['colleagues'] ?>)</span><?php endif; ?></a>
+</div>
+
 <!-- Search bar -->
 <div class="card" style="margin-bottom:1rem">
     <form method="GET" action="<?= BASE_URL ?>/customers" class="filter-bar" role="search">
@@ -111,8 +139,9 @@ function cust_sortIcon(string $col): string
         </select>
         <input type="hidden" name="sort" value="<?= Utils::e($sort) ?>">
         <input type="hidden" name="dir"  value="<?= Utils::e($dir) ?>">
+        <?php if ($type !== ''): ?><input type="hidden" name="type" value="<?= Utils::e($type) ?>"><?php endif; ?>
         <button type="submit" class="btn btn-primary">Search</button>
-        <?php if ($search!==''||$status!==''): ?>
+        <?php if ($search!==''||$status!==''||$type!==''): ?>
         <a href="<?= BASE_URL ?>/customers" class="btn btn-secondary">Clear</a>
         <?php endif; ?>
     </form>
@@ -149,7 +178,7 @@ function cust_sortIcon(string $col): string
                 </td></tr>
             <?php else: ?>
                 <?php foreach ($customers as $c): ?>
-                <tr>
+                <tr<?= $c['client_type'] === 'colleague' ? ' style="border-left:3px solid #7c3aed"' : '' ?>>
                     <td style="color:var(--text-muted);font-size:.78rem"><?= $c['customer_id'] ?></td>
                     <td>
                         <a href="<?= BASE_URL ?>/customers/<?= $c['customer_id'] ?>" class="cust-name-link"><?= Utils::e($c['full_name']) ?></a>
@@ -165,8 +194,12 @@ function cust_sortIcon(string $col): string
                     <td class="hide-mobile">
                         <?= $c['email'] ? '<a href="mailto:'.Utils::e($c['email']).'" class="em-lnk">'.Utils::e(Utils::truncate($c['email'],28)).'</a>' : '<span style="color:var(--text-muted)">—</span>' ?>
                     </td>
-                    <td class="hide-t" style="font-size:.78rem;color:var(--text-secondary);text-transform:capitalize">
-                        <?= Utils::e(CLIENT_TYPES[$c['client_type']] ?? $c['client_type']) ?>
+                    <td class="hide-t">
+                        <?php if ($c['client_type'] === 'colleague'): ?>
+                        <span class="badge badge-purple">Colleague</span>
+                        <?php else: ?>
+                        <span style="font-size:.78rem;color:var(--text-secondary);text-transform:capitalize"><?= Utils::e(CLIENT_TYPES[$c['client_type']] ?? $c['client_type']) ?></span>
+                        <?php endif; ?>
                     </td>
                     <td>
                         <?= $c['status']==='active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>' ?>
@@ -202,7 +235,7 @@ function cust_sortIcon(string $col): string
 
     <!-- Pagination -->
     <?php if ($pg['totalPages'] > 1):
-        $bp = array_filter(['search' => htmlspecialchars_decode($search), 'status' => $status, 'sort' => $sort, 'dir' => $dir]);
+        $bp = array_filter(['search' => htmlspecialchars_decode($search), 'status' => $status, 'type' => $type, 'sort' => $sort, 'dir' => $dir]);
     ?>
     <div class="tbl-footer">
         <span class="tbl-footer-info">

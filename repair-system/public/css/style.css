@@ -512,6 +512,7 @@ img { max-width: 100%; height: auto; }
 .badge-green     { background: var(--success-bg); color: var(--success); }
 .badge-green-dim { background: #d1fae5; color: #059669; }
 .badge-dark      { background: #e8e8e8; color: #666666; }
+.badge-purple    { background: #ede9fe; color: #7c3aed; }
 
 /* ── Buttons ───────────────────────────────────────────────────────────────── */
 .btn {

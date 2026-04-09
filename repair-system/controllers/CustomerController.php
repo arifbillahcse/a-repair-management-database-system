@@ -16,14 +16,15 @@ class CustomerController
 
         $search = trim($_GET['search'] ?? '');
         $status = $_GET['status'] ?? '';
+        $type   = $_GET['type']   ?? '';
         $sort   = $_GET['sort']   ?? 'full_name';
         $dir    = $_GET['dir']    ?? 'ASC';
         $page   = Utils::currentPage();
 
         if ($search !== '') {
-            $data = $this->model->search($search, $page, $status, $sort, $dir);
+            $data = $this->model->search($search, $page, $status, $sort, $dir, $type);
         } else {
-            $data = $this->model->getAll($page, $status, $sort, $dir);
+            $data = $this->model->getAll($page, $status, $sort, $dir, $type);
         }
 
         $customers  = $data['rows'];
@@ -318,7 +319,7 @@ class CustomerController
     {
         return [
             'full_name'      => Utils::sanitize($post['full_name'] ?? ''),
-            'client_type'    => in_array($post['client_type'] ?? '', ['individual','company','freelancer'])
+            'client_type'    => in_array($post['client_type'] ?? '', ['individual','company','freelancer','colleague'])
                                     ? $post['client_type']
                                     : 'individual',
             'address'        => Utils::sanitize($post['address']        ?? ''),
