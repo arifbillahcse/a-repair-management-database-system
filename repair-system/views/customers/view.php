@@ -76,6 +76,15 @@ require VIEWS_PATH . '/layouts/header.php';
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>Edit
         </a>
+        <?php if (Auth::isAdmin()): ?>
+        <button type="button" class="btn btn-danger" id="deleteCustomerBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6"/><path d="M14 11v6"/>
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>Delete
+        </button>
+        <?php endif; ?>
         <a href="<?= BASE_URL ?>/customers" class="btn btn-secondary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
@@ -83,6 +92,38 @@ require VIEWS_PATH . '/layouts/header.php';
         </a>
     </div>
 </div>
+
+<?php if (Auth::isAdmin()): ?>
+<!-- ── Delete confirmation modal ──────────────────────────────────────────── -->
+<div id="deleteModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);align-items:center;justify-content:center">
+    <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+        <h2 style="margin:0 0 .75rem;font-size:1.1rem;color:var(--error)">Delete Customer?</h2>
+        <p style="margin:0 0 .5rem;font-size:.9rem;color:var(--text-primary)">
+            You are about to permanently delete <strong><?= Utils::e($customer['full_name']) ?></strong>.
+        </p>
+        <p style="margin:0 0 1.5rem;font-size:.85rem;color:var(--text-muted)">
+            This will also delete all <strong><?= (int)$stats['total_repairs'] ?> repair(s)</strong> linked to this customer. This action cannot be undone.
+        </p>
+        <form method="POST" action="<?= BASE_URL ?>/customers/<?= $customer['customer_id'] ?>/delete">
+            <input type="hidden" name="csrf_token" value="<?= Utils::e(Auth::generateCSRFToken()) ?>">
+            <div style="display:flex;gap:.75rem;justify-content:flex-end">
+                <button type="button" id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-danger">Yes, Delete Everything</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+(function () {
+    const modal  = document.getElementById('deleteModal');
+    const openBtn  = document.getElementById('deleteCustomerBtn');
+    const closeBtn = document.getElementById('cancelDeleteBtn');
+    openBtn.addEventListener('click',  function () { modal.style.display = 'flex'; });
+    closeBtn.addEventListener('click', function () { modal.style.display = 'none'; });
+    modal.addEventListener('click', function (e) { if (e.target === modal) modal.style.display = 'none'; });
+})();
+</script>
+<?php endif; ?>
 
 <!-- ── Mini stat cards ───────────────────────────────────────────────────── -->
 <div class="mini-stats">

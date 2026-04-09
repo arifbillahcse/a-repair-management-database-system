@@ -152,7 +152,7 @@ class CustomerController
 
     public function destroy(int $id): void
     {
-        Auth::requireRole('manager');
+        Auth::requireRole('admin');
         Auth::checkCSRF();
 
         $customer = $this->model->findById($id);
@@ -160,11 +160,34 @@ class CustomerController
             $this->notFound();
         }
 
-        // Soft-delete: set status = 'inactive' instead of hard delete
-        Logger::log('deleted', 'customer', $id, $customer);
-        $this->model->update($id, ['status' => 'inactive']);
+        $db = Database::getInstance();
 
-        Utils::flashSuccess("Customer \"{$customer['full_name']}\" has been deactivated.");
+        // Get all repairs belonging to this customer
+        $repairs = $db->fetchAll(
+            "SELECT repair_id FROM repairs WHERE customer_id = ?", [$id]
+        );
+
+        // Delete repair photos from disk and then each repair
+        foreach ($repairs as $repair) {
+            $photoDir = UPLOAD_PATH . '/photos/repair_' . $repair['repair_id'];
+            if (is_dir($photoDir)) {
+                array_map('unlink', glob($photoDir . '/*') ?: []);
+                @rmdir($photoDir);
+            }
+        }
+
+        // Delete all repairs for this customer
+        if ($repairs) {
+            $db->execute(
+                "DELETE FROM repairs WHERE customer_id = ?", [$id]
+            );
+        }
+
+        // Hard-delete the customer
+        Logger::log('deleted', 'customer', $id, $customer);
+        $this->model->delete($id);
+
+        Utils::flashSuccess("Customer \"{$customer['full_name']}\" and all their repairs have been permanently deleted.");
         Utils::redirect('/customers');
     }
 
