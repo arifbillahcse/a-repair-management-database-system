@@ -71,11 +71,11 @@
         .sig-box { border-bottom: 1px solid #333; padding-bottom: 10mm; margin-bottom: 2mm; }
         .sig-label { font-size: 8pt; color: #555; text-align: center; }
 
-        /* ── QR code ──────────────────────────────────────────────────── */
-        .qr-block { display: flex; align-items: flex-start; gap: 4mm; }
+        /* ── QR code (disabled) ───────────────────────────────────────── */
+        /* .qr-block { display: flex; align-items: flex-start; gap: 4mm; }
         .qr-img { width: 28mm; height: 28mm; flex-shrink: 0; border: 1px solid #d4d4d4; border-radius: 2mm; padding: 1.5mm; background: #fff; }
         .qr-img img { width: 100%; height: auto; display: block; }
-        .qr-info { font-size: 8pt; color: #555; line-height: 1.5; }
+        .qr-info { font-size: 8pt; color: #555; line-height: 1.5; } */
 
         /* ── Footer ───────────────────────────────────────────────────── */
         .doc-footer { border-top: 1px solid #d4d4d4; padding-top: 3mm; margin-top: 6mm; font-size: 7.5pt; color: #999; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2mm; }
@@ -262,46 +262,44 @@
         </div>
     </div>
 
-    <!-- ── QR + Terms ───────────────────────────────────────────────── -->
-    <div class="grid-2">
-
-        <div class="card">
-            <div class="card-header">Repair Reference</div>
-            <div class="card-body">
-                <div class="qr-block">
-                    <?php if (!empty($qrCode)): ?>
-                    <div class="qr-img">
-                        <img src="<?= Utils::e($qrCode) ?>" alt="QR Code">
-                    </div>
-                    <?php endif; ?>
-                    <div class="qr-info">
-                        <strong>Repair #<?= $repair['repair_id'] ?></strong><br>
-                        <?php if (!empty($repair['qr_code'])): ?>
-                        Code: <span style="font-family:monospace"><?= Utils::e($repair['qr_code']) ?></span><br>
-                        <?php endif; ?>
-                        <?php if (!empty($company['phone'])): ?>
-                        Call us: <?= Utils::e($company['phone']) ?>
-                        <?php endif; ?>
-                    </div>
+    <!-- ── Terms ─────────────────────────────────────────────────────── -->
+    <?php /* QR Repair Reference card disabled
+    <div class="card">
+        <div class="card-header">Repair Reference</div>
+        <div class="card-body">
+            <div class="qr-block">
+                <?php if (!empty($qrCode)): ?>
+                <div class="qr-img">
+                    <img src="<?= Utils::e($qrCode) ?>" alt="QR Code">
                 </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">Terms & Conditions</div>
-            <div class="card-body">
-                <div style="font-size:7.5pt;color:#555;line-height:1.6">
-                    <?php if (!empty($company['terms'])): ?>
-                    <?= nl2br(Utils::e($company['terms'])) ?>
-                    <?php else: ?>
-                    By leaving this device for repair, the client accepts our service terms.
-                    Uncollected devices after 90 days may be disposed of.
-                    No responsibility is accepted for pre-existing damage or data loss.
+                <?php endif; ?>
+                <div class="qr-info">
+                    <strong>Repair #<?= $repair['repair_id'] ?></strong><br>
+                    <?php if (!empty($repair['qr_code'])): ?>
+                    Code: <span style="font-family:monospace"><?= Utils::e($repair['qr_code']) ?></span><br>
+                    <?php endif; ?>
+                    <?php if (!empty($company['phone'])): ?>
+                    Call us: <?= Utils::e($company['phone']) ?>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
+    </div>
+    */ ?>
 
+    <div class="card">
+        <div class="card-header">Terms & Conditions</div>
+        <div class="card-body">
+            <div style="font-size:7.5pt;color:#555;line-height:1.6">
+                <?php if (!empty($company['terms'])): ?>
+                <?= nl2br(Utils::e($company['terms'])) ?>
+                <?php else: ?>
+                By leaving this device for repair, the client accepts our service terms.
+                Uncollected devices after 90 days may be disposed of.
+                No responsibility is accepted for pre-existing damage or data loss.
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 
     <!-- ── Signatures ───────────────────────────────────────────────── -->
