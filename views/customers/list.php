@@ -155,10 +155,10 @@ function cust_sortIcon(string $col): string
                 <tr>
                     <th style="width:46px">#</th>
                     <th><a href="<?= cust_sortUrl('full_name') ?>" class="sort-lnk">Name <?= cust_sortIcon('full_name') ?></a></th>
-                    <th class="hide-mobile"><a href="<?= cust_sortUrl('city') ?>" class="sort-lnk">City <?= cust_sortIcon('city') ?></a></th>
+                    <th class="hide-mobile">Type</th>
+                    <th class="hide-t"><a href="<?= cust_sortUrl('city') ?>" class="sort-lnk">City <?= cust_sortIcon('city') ?></a></th>
                     <th class="hide-mobile"><a href="<?= cust_sortUrl('phone_mobile') ?>" class="sort-lnk">Phone <?= cust_sortIcon('phone_mobile') ?></a></th>
-                    <th class="hide-mobile"><a href="<?= cust_sortUrl('email') ?>" class="sort-lnk">Email <?= cust_sortIcon('email') ?></a></th>
-                    <th class="hide-t">Type</th>
+                    <th class="hide-t"><a href="<?= cust_sortUrl('email') ?>" class="sort-lnk">Email <?= cust_sortIcon('email') ?></a></th>
                     <th><a href="<?= cust_sortUrl('status') ?>" class="sort-lnk">Status <?= cust_sortIcon('status') ?></a></th>
                     <th style="width:130px;text-align:right">Actions</th>
                 </tr>
@@ -184,17 +184,7 @@ function cust_sortIcon(string $col): string
                         <a href="<?= BASE_URL ?>/customers/<?= $c['customer_id'] ?>" class="cust-name-link"><?= Utils::e($c['full_name']) ?></a>
                         <?php if ($c['vat_number']): ?><span class="vat-sub"><?= Utils::e($c['vat_number']) ?></span><?php endif; ?>
                     </td>
-                    <td class="hide-mobile" style="color:var(--text-secondary)">
-                        <?= $c['city'] ? Utils::e($c['city']).($c['province']?' <small style="color:var(--text-muted)">('.Utils::e($c['province']).')</small>':'') : '<span style="color:var(--text-muted)">—</span>' ?>
-                    </td>
                     <td class="hide-mobile">
-                        <?php $ph = $c['phone_mobile'] ?: $c['phone_landline']; ?>
-                        <?= $ph ? '<a href="tel:'.Utils::e($ph).'" class="ph-lnk">'.Utils::e($ph).'</a>' : '<span style="color:var(--text-muted)">—</span>' ?>
-                    </td>
-                    <td class="hide-mobile">
-                        <?= $c['email'] ? '<a href="mailto:'.Utils::e($c['email']).'" class="em-lnk">'.Utils::e(Utils::truncate($c['email'],28)).'</a>' : '<span style="color:var(--text-muted)">—</span>' ?>
-                    </td>
-                    <td class="hide-t">
                         <?php if ($c['client_type'] === 'individual'): ?>
                         <span class="badge badge-gray" style="display:inline-flex;align-items:center;gap:.25rem">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Individual
@@ -208,6 +198,16 @@ function cust_sortIcon(string $col): string
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Colleague
                         </span>
                         <?php endif; ?>
+                    </td>
+                    <td class="hide-t" style="color:var(--text-secondary)">
+                        <?= $c['city'] ? Utils::e($c['city']).($c['province']?' <small style="color:var(--text-muted)">('.Utils::e($c['province']).')</small>':'') : '<span style="color:var(--text-muted)">—</span>' ?>
+                    </td>
+                    <td class="hide-mobile">
+                        <?php $ph = $c['phone_mobile'] ?: $c['phone_landline']; ?>
+                        <?= $ph ? '<a href="tel:'.Utils::e($ph).'" class="ph-lnk">'.Utils::e($ph).'</a>' : '<span style="color:var(--text-muted)">—</span>' ?>
+                    </td>
+                    <td class="hide-t">
+                        <?= $c['email'] ? '<a href="mailto:'.Utils::e($c['email']).'" class="em-lnk">'.Utils::e(Utils::truncate($c['email'],28)).'</a>' : '<span style="color:var(--text-muted)">—</span>' ?>
                     </td>
                     <td>
                         <?= $c['status']==='active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>' ?>
