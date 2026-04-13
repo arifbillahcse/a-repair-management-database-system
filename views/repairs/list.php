@@ -133,7 +133,9 @@ function rep_sortIcon(string $col): string
             </svg>
             <input type="search" name="search" class="form-input"
                    placeholder="Search ID, customer, device, serial…"
-                   value="<?= $search ?>" autocomplete="off" aria-label="Search repairs">
+                   value="<?= $search ?>" autocomplete="off" aria-label="Search repairs"
+                   data-ac-url="<?= BASE_URL ?>/api/customers/autocomplete"
+                   data-ac-href="<?= BASE_URL ?>/repairs?customer_id={id}">
         </div>
         <?php if ($custFilter): ?>
         <input type="hidden" name="customer_id" value="<?= $custFilter ?>">

@@ -130,7 +130,9 @@ function cust_sortIcon(string $col): string
             </svg>
             <input type="search" name="search" class="form-input"
                    placeholder="Search name, phone, email, city, VAT…"
-                   value="<?= $search ?>" autocomplete="off" aria-label="Search customers">
+                   value="<?= $search ?>" autocomplete="off" aria-label="Search customers"
+                   data-ac-url="<?= BASE_URL ?>/api/customers/autocomplete"
+                   data-ac-href="<?= BASE_URL ?>/customers/{id}">
         </div>
         <select name="status" class="form-select filter-select" aria-label="Filter by status" onchange="this.form.submit()">
             <option value=""         <?= $status===''         ?'selected':'' ?>>All Statuses</option>
