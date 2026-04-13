@@ -34,6 +34,7 @@ $currentId  = Auth::id();
 <div class="settings-nav">
     <a href="<?= BASE_URL ?>/admin/settings" class="snav-btn">Company</a>
     <a href="<?= BASE_URL ?>/admin/users"    class="snav-btn active">User Accounts</a>
+    <a href="<?= BASE_URL ?>/admin/sysinfo"  class="snav-btn">System Information</a>
 </div>
 
 <div class="card">

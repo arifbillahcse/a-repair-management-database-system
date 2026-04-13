@@ -165,6 +165,7 @@ $router->get(  '/import/template/:type',             'ImportController@downloadT
 // Admin
 $router->get(  '/admin/settings',                    'AdminController@settings');
 $router->post( '/admin/settings',                    'AdminController@settings');
+$router->get(  '/admin/sysinfo',                     'AdminController@sysinfo');
 $router->get(  '/admin/users',                       'AdminController@users');
 $router->post( '/admin/users/:id/toggle',            'AdminController@toggleUser');
 $router->post( '/admin/users/:id/reset-password',    'AdminController@resetPassword');
