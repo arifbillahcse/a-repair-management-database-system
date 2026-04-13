@@ -195,10 +195,18 @@ function cust_sortIcon(string $col): string
                         <?= $c['email'] ? '<a href="mailto:'.Utils::e($c['email']).'" class="em-lnk">'.Utils::e(Utils::truncate($c['email'],28)).'</a>' : '<span style="color:var(--text-muted)">—</span>' ?>
                     </td>
                     <td class="hide-t">
-                        <?php if ($c['client_type'] === 'colleague'): ?>
-                        <span class="badge badge-purple">Colleague</span>
-                        <?php else: ?>
-                        <span style="font-size:.78rem;color:var(--text-secondary);text-transform:capitalize"><?= Utils::e(CLIENT_TYPES[$c['client_type']] ?? $c['client_type']) ?></span>
+                        <?php if ($c['client_type'] === 'individual'): ?>
+                        <span class="badge badge-gray" style="display:inline-flex;align-items:center;gap:.25rem">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Individual
+                        </span>
+                        <?php elseif ($c['client_type'] === 'company'): ?>
+                        <span class="badge badge-red" style="display:inline-flex;align-items:center;gap:.25rem">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 21h18M3 7v14M21 7v14M3 7l9-4 9 4M9 21V12h6v9"/></svg>Company
+                        </span>
+                        <?php elseif ($c['client_type'] === 'colleague'): ?>
+                        <span class="badge badge-purple" style="display:inline-flex;align-items:center;gap:.25rem">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Colleague
+                        </span>
                         <?php endif; ?>
                     </td>
                     <td>
