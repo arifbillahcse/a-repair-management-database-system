@@ -179,7 +179,7 @@ function rep_sortIcon(string $col): string
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input type="search" name="search" class="form-input"
-                   placeholder="Search ID, customer, device, serial…"
+                   placeholder="Search ID, client, device, serial…"
                    value="<?= $search ?>" autocomplete="off" aria-label="Search repairs"
                    data-ac-url="<?= BASE_URL ?>/api/customers/autocomplete"
                    data-ac-href="<?= BASE_URL ?>/customers/{id}">
@@ -216,7 +216,7 @@ function rep_sortIcon(string $col): string
                 <tr>
                     <th style="width:52px"><a href="<?= rep_sortUrl('repair_id') ?>" class="sort-lnk"># <?= rep_sortIcon('repair_id') ?></a></th>
                     <th><a href="<?= rep_sortUrl('device_model') ?>" class="sort-lnk">Device <?= rep_sortIcon('device_model') ?></a></th>
-                    <th class="hide-mobile"><a href="<?= rep_sortUrl('customer_name') ?>" class="sort-lnk">Customer <?= rep_sortIcon('customer_name') ?></a></th>
+                    <th class="hide-mobile"><a href="<?= rep_sortUrl('customer_name') ?>" class="sort-lnk">Client <?= rep_sortIcon('customer_name') ?></a></th>
                     <th class="hide-mobile">Type</th>
                     <th><a href="<?= rep_sortUrl('status') ?>" class="sort-lnk">Status <?= rep_sortIcon('status') ?></a></th>
                     <th class="hide-t"><a href="<?= rep_sortUrl('date_in') ?>" class="sort-lnk">Date In <?= rep_sortIcon('date_in') ?></a></th>

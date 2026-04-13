@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Edit Customer — ' . Utils::e($customer['full_name']);
+$pageTitle = 'Edit Client — ' . Utils::e($customer['full_name']);
 require VIEWS_PATH . '/layouts/header.php';
 
 $e = $formErrors ?? [];
@@ -29,7 +29,7 @@ function efv(array $v, string $field, string $default = ''): string {
 <!-- Page header -->
 <div class="page-header">
     <div>
-        <h1 class="page-title">Edit Customer</h1>
+        <h1 class="page-title">Edit Client</h1>
         <p class="page-subtitle" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
             <span><?= Utils::e($customer['full_name']) ?></span>
             <span class="meta-chip">
@@ -251,7 +251,7 @@ function efv(array $v, string $field, string $default = ''): string {
             <form method="POST"
                   action="<?= BASE_URL ?>/customers/<?= $customer['customer_id'] ?>/delete"
                   style="display:inline"
-                  data-confirm="Deactivate this customer?">
+                  data-confirm="Deactivate this client?">
                 <input type="hidden" name="csrf_token" value="<?= Utils::e($csrfToken) ?>">
                 <button type="submit" class="btn btn-danger">Deactivate</button>
             </form>

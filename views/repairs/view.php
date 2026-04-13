@@ -182,7 +182,7 @@ $currentIdx  = array_search($repair['status'], $allStatuses, true);
         <!-- Customer -->
         <div class="section-card">
             <div class="section-header">
-                <h2 class="section-title">Customer</h2>
+                <h2 class="section-title">Client</h2>
                 <?php if (!empty($repair['customer_id'])): ?>
                 <a href="<?= BASE_URL ?>/customers/<?= $repair['customer_id'] ?>" class="btn btn-xs btn-secondary">Profile</a>
                 <?php endif; ?>

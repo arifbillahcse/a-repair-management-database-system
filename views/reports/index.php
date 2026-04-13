@@ -221,12 +221,12 @@ $avg  = $avgTime      ?? [];
 
 </div>
 
-<!-- ── Top customers ────────────────────────────────────────────────────── -->
+<!-- ── Top clients ───────────────────────────────────────────────────────── -->
 <?php if (!empty($topCustomers)): ?>
 <div class="chart-card" style="margin-bottom:1.5rem">
     <div class="chart-header">
-        <h2 class="chart-title">Top Customers by Revenue</h2>
-        <a href="<?= BASE_URL ?>/customers" class="btn btn-xs btn-secondary">All Customers</a>
+        <h2 class="chart-title">Top Clients by Revenue</h2>
+        <a href="<?= BASE_URL ?>/customers" class="btn btn-xs btn-secondary">All Clients</a>
     </div>
     <?php $maxBilled = max(array_column($topCustomers, 'total_billed')); ?>
     <div class="table-responsive">
@@ -234,7 +234,7 @@ $avg  = $avgTime      ?? [];
             <thead>
                 <tr>
                     <th style="width:32px">#</th>
-                    <th>Customer</th>
+                    <th>Client</th>
                     <th style="width:80px;text-align:center">Repairs</th>
                     <th style="width:130px;text-align:right">Billed</th>
                     <th style="width:130px;text-align:right">Collected</th>
@@ -284,7 +284,7 @@ $avg  = $avgTime      ?? [];
             <thead>
                 <tr>
                     <th>Invoice</th>
-                    <th>Customer</th>
+                    <th>Client</th>
                     <th>Due Date</th>
                     <th style="text-align:right">Days Over</th>
                     <th style="text-align:right">Balance</th>

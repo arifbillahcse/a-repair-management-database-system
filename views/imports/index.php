@@ -54,7 +54,7 @@ require VIEWS_PATH . '/layouts/header.php';
 <div class="page-header">
     <div>
         <h1 class="page-title">Import Data</h1>
-        <p class="page-subtitle">Bulk import customers, repairs, invoices, or staff via CSV</p>
+        <p class="page-subtitle">Bulk import clients, repairs, invoices, or staff via CSV</p>
     </div>
 </div>
 
@@ -67,7 +67,7 @@ require VIEWS_PATH . '/layouts/header.php';
             <div class="import-type-grid" id="typeGrid">
                 <div class="import-type-card <?= $preType==='customers'?'selected':'' ?>" data-type="customers">
                     <div class="import-type-icon">👥</div>
-                    <p class="import-type-label">Customers</p>
+                    <p class="import-type-label">Clients</p>
                     <p class="import-type-desc">Name, email, phone, address</p>
                 </div>
                 <div class="import-type-card <?= $preType==='repairs'?'selected':'' ?>" data-type="repairs">

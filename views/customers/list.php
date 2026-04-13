@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Customers';
+$pageTitle = 'Clients';
 require VIEWS_PATH . '/layouts/header.php';
 
 $search = Utils::e($_GET['search'] ?? '');
@@ -92,7 +92,7 @@ function cust_sortIcon(string $col): string
         <a href="<?= BASE_URL ?>/customers/create" class="btn btn-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>New Customer
+            </svg>New Client
         </a>
     </div>
 </div>
@@ -130,7 +130,7 @@ function cust_sortIcon(string $col): string
             </svg>
             <input type="search" name="search" class="form-input"
                    placeholder="Search name, phone, email, city, VAT…"
-                   value="<?= $search ?>" autocomplete="off" aria-label="Search customers"
+                   value="<?= $search ?>" autocomplete="off" aria-label="Search clients"
                    data-ac-url="<?= BASE_URL ?>/api/customers/autocomplete"
                    data-ac-href="<?= BASE_URL ?>/customers/{id}">
         </div>
@@ -174,8 +174,8 @@ function cust_sortIcon(string $col): string
                             <circle cx="9" cy="7" r="4"/>
                             <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
                         </svg>
-                        <p><?= $search!=='' ? "No customers match \"<strong>".Utils::e(htmlspecialchars_decode($search))."</strong>\"." : 'No customers found.' ?></p>
-                        <a href="<?= BASE_URL ?>/customers/create" class="btn btn-primary btn-sm">Add First Customer</a>
+                        <p><?= $search!=='' ? "No clients match \"<strong>".Utils::e(htmlspecialchars_decode($search))."</strong>\"." : 'No clients found.' ?></p>
+                        <a href="<?= BASE_URL ?>/customers/create" class="btn btn-primary btn-sm">Add First Client</a>
                     </div>
                 </td></tr>
             <?php else: ?>

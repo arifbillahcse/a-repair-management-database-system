@@ -1,5 +1,5 @@
 <?php
-$pageTitle = Utils::e($customer['full_name']) . ' — Customer Profile';
+$pageTitle = Utils::e($customer['full_name']) . ' — Client Profile';
 require VIEWS_PATH . '/layouts/header.php';
 ?>
 
@@ -107,12 +107,12 @@ require VIEWS_PATH . '/layouts/header.php';
 <!-- ── Delete confirmation modal ──────────────────────────────────────────── -->
 <div id="deleteModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);align-items:center;justify-content:center">
     <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4)">
-        <h2 style="margin:0 0 .75rem;font-size:1.1rem;color:var(--error)">Delete Customer?</h2>
+        <h2 style="margin:0 0 .75rem;font-size:1.1rem;color:var(--error)">Delete Client?</h2>
         <p style="margin:0 0 .5rem;font-size:.9rem;color:var(--text-primary)">
             You are about to permanently delete <strong><?= Utils::e($customer['full_name']) ?></strong>.
         </p>
         <p style="margin:0 0 1.5rem;font-size:.85rem;color:var(--text-muted)">
-            This will also delete all <strong><?= (int)$stats['total_repairs'] ?> repair(s)</strong> linked to this customer. This action cannot be undone.
+            This will also delete all <strong><?= (int)$stats['total_repairs'] ?> repair(s)</strong> linked to this client. This action cannot be undone.
         </p>
         <form method="POST" action="<?= BASE_URL ?>/customers/<?= $customer['customer_id'] ?>/delete">
             <input type="hidden" name="csrf_token" value="<?= Utils::e(Auth::generateCSRFToken()) ?>">

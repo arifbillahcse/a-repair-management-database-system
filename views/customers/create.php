@@ -1,5 +1,5 @@
 <?php
-$pageTitle  = 'New Customer';
+$pageTitle  = 'New Client';
 require VIEWS_PATH . '/layouts/header.php';
 
 // Pull any server-side validation errors / repopulated data
@@ -39,7 +39,7 @@ function fv(array $v, string $field, string $default = ''): string {
     <a href="<?= BASE_URL ?>/customers" class="btn btn-secondary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-        </svg>Back to Customers
+        </svg>Back to Clients
     </a>
 </div>
 
@@ -267,7 +267,7 @@ function fv(array $v, string $field, string $default = ''): string {
                           class="form-textarea<?= ec($e,'notes') ?>"
                           rows="4"
                           maxlength="2000"
-                          placeholder="Any notes about this customer (not visible to the customer)…"><?= fv($v,'notes') ?></textarea>
+                          placeholder="Any notes about this client (not visible to the client)…"><?= fv($v,'notes') ?></textarea>
                 <?= fe($e,'notes') ?>
             </div>
         </div>
@@ -285,7 +285,7 @@ function fv(array $v, string $field, string $default = ''): string {
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
                     <polyline points="17 21 17 13 7 13 7 21"/>
                     <polyline points="7 3 7 8 15 8"/>
-                </svg>Save Customer
+                </svg>Save Client
             </button>
         </div>
     </div>

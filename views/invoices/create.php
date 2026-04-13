@@ -156,7 +156,7 @@ if (!empty($repair['deposit_paid']) && (float)$repair['deposit_paid'] > 0) {
         <!-- ── Right: totals + notes ────────────────────────────────── -->
         <div style="display:flex;flex-direction:column;gap:1.25rem">
 
-            <!-- Customer (read-only) -->
+            <!-- Client (read-only) -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Bill To</h2>

@@ -16,15 +16,15 @@ No frameworks. Dark theme. PDO prepared statements throughout.
 - QR code lookup (`/api/repairs/qr`) — scan to open ticket
 - Overdue day highlighting (>7 days warning, >14 days red)
 
-### Customer Management
+### Client Management
 - Three client types with distinct icon badges:
   - **Individual** — person icon, gray badge
   - **Company** — building icon, red badge
   - **Colleague** — star icon, purple badge
 - Live autocomplete search — start typing a name and a dropdown appears instantly (debounced, keyboard navigable)
 - Filter tabs by client type on the list page
-- CSV export of the full customer list
-- Full repair history per customer profile
+- CSV export of the full client list
+- Full repair history per client profile
 
 ### Invoicing
 - Generate invoices directly from repair tickets
@@ -47,7 +47,7 @@ No frameworks. Dark theme. PDO prepared statements throughout.
 - Summary report dashboard with key metrics
 
 ### Data Import
-- Upload CSV files to bulk-import customers or repairs
+- Upload CSV files to bulk-import clients or repairs
 - Import summary page with row-level result feedback
 - Downloadable CSV templates
 
@@ -252,10 +252,10 @@ UPDATE users SET password_hash = '<output>' WHERE username = 'admin';
 | `company_settings` | Business info, invoice prefix, tax rate |
 | `staff` | Technician / staff profiles |
 | `users` | Login accounts linked to staff (bcrypt) |
-| `customers` | Customer records (Individual / Company / Colleague) |
+| `customers` | Client records (Individual / Company / Colleague) |
 | `products` | Parts and service items for invoice line items |
 | `repairs` | Repair tickets with status, device info, photos |
-| `invoices` | Invoices linked to repairs or customers |
+| `invoices` | Invoices linked to repairs or clients |
 | `invoice_items` | Line items with qty, unit price, tax |
 | `activity_log` | Audit trail for all actions |
 
@@ -289,8 +289,8 @@ ready_for_pickup  ──► collected
 |---|---|---|
 | Admin | 4 | Full access including settings, users, system info |
 | Manager | 3 | All modules except admin settings |
-| Technician | 1 | Repairs and customers |
-| Staff | 2 | Repairs, customers, invoices |
+| Technician | 1 | Repairs and clients |
+| Staff | 2 | Repairs, clients, invoices |
 
 ---
 
@@ -320,16 +320,16 @@ See [CI-CD-Setup.md](CI-CD-Setup.md) for full setup instructions including GitHu
 ## Changelog
 
 ### v1.2.0
-- Live autocomplete customer search on both the Customers and Repairs list pages
-- Customer type icon badges: Individual (person/gray), Company (building/red), Colleague (star/purple)
-- Type column moved adjacent to Name/Customer in both list pages
+- Live autocomplete client search on both the Customers and Repairs list pages
+- Client type icon badges: Individual (person/gray), Company (building/red), Colleague (star/purple)
+- Type column moved adjacent to Name/Client in both list pages
 - Colleague client type added; Freelancer type removed
 - System Information page under Settings (PHP runtime, DB stats, disk usage)
 - GitHub Actions CI/CD pipeline (`deploy.yml`)
 - Autocomplete dropdown uses `position: fixed` + body injection to avoid z-index conflicts with sticky table headers
 
 ### v1.0.0
-- Initial release: repairs, customers, invoices, staff, reports, import, admin, RBAC, dark theme
+- Initial release: repairs, clients, invoices, staff, reports, import, admin, RBAC, dark theme
 
 ---
 

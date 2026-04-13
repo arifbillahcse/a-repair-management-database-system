@@ -207,10 +207,10 @@ $isOverdue = ($invoice['status'] === 'overdue')
     <!-- Right: customer info + meta -->
     <div style="display:flex;flex-direction:column;gap:1.25rem">
 
-        <!-- Customer -->
+        <!-- Client -->
         <div class="section-card">
             <div class="section-header">
-                <h2 class="section-title">Customer</h2>
+                <h2 class="section-title">Client</h2>
                 <a href="<?= BASE_URL ?>/customers/<?= $invoice['customer_id'] ?>" class="btn btn-xs btn-secondary">Profile</a>
             </div>
             <ul class="info-list">

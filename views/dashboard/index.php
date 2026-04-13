@@ -97,7 +97,7 @@ $monthlyStats = $monthlyStats ?? [];
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Customer</th>
+                        <th>Client</th>
                         <th>Device</th>
                         <th>Status</th>
                         <th>Date In</th>
