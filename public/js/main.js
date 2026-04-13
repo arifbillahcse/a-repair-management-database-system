@@ -18,6 +18,7 @@
         initDeleteConfirm();
         initSubNavs();
         initStatusBadgeColors();
+        initCustomerAutocomplete();
     });
 
     // ── Sidebar toggle (mobile) ───────────────────────────────────────────────
@@ -158,6 +159,133 @@
             } else if (days > 7) {
                 el.style.color = 'var(--warning)';
             }
+        });
+    }
+
+    // ── Customer autocomplete (live search dropdown) ──────────────────────────
+    function initCustomerAutocomplete() {
+        var inputs = document.querySelectorAll('[data-ac-url]');
+        if (!inputs.length) return;
+
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        inputs.forEach(function (input) {
+            var wrap = input.closest('.search-input-wrap');
+            if (!wrap) return;
+
+            // Inject dropdown inside the search wrapper
+            var dropdown = document.createElement('div');
+            dropdown.className = 'ac-dropdown';
+            dropdown.style.display = 'none';
+            wrap.appendChild(dropdown);
+
+            var debounceTimer = null;
+            var activeIndex   = -1;
+            var results       = [];
+            var hrefTpl       = input.getAttribute('data-ac-href') || '';
+
+            function close() {
+                dropdown.style.display = 'none';
+                activeIndex = -1;
+            }
+
+            function navigate(row) {
+                window.location = hrefTpl.replace('{id}', row.customer_id);
+            }
+
+            function setActive(idx) {
+                var items = dropdown.querySelectorAll('.ac-item');
+                items.forEach(function (el, i) {
+                    el.classList.toggle('ac-active', i === idx);
+                });
+                activeIndex = idx;
+            }
+
+            function render(rows) {
+                results     = rows;
+                activeIndex = -1;
+
+                if (!rows.length) {
+                    dropdown.innerHTML    = '<div class="ac-empty">No customers found.</div>';
+                    dropdown.style.display = 'block';
+                    return;
+                }
+
+                dropdown.innerHTML = rows.map(function (row, i) {
+                    var meta = [row.phone_mobile, row.city].filter(Boolean).join(' · ');
+                    return '<div class="ac-item" data-idx="' + i + '">' +
+                        '<span class="ac-name">' + escHtml(row.full_name) + '</span>' +
+                        (meta ? '<span class="ac-meta">' + escHtml(meta) + '</span>' : '') +
+                        '</div>';
+                }).join('') +
+                '<div class="ac-footer">↑ ↓ to navigate &nbsp;·&nbsp; Enter to open &nbsp;·&nbsp; Esc to close</div>';
+
+                dropdown.style.display = 'block';
+
+                dropdown.querySelectorAll('.ac-item').forEach(function (item) {
+                    item.addEventListener('mousedown', function (e) {
+                        e.preventDefault(); // keep focus on input
+                        navigate(results[parseInt(item.dataset.idx, 10)]);
+                    });
+                    item.addEventListener('mouseover', function () {
+                        setActive(parseInt(item.dataset.idx, 10));
+                    });
+                });
+            }
+
+            function fetchResults(q) {
+                dropdown.innerHTML    = '<div class="ac-loading">Searching…</div>';
+                dropdown.style.display = 'block';
+                fetch(input.getAttribute('data-ac-url') + '?q=' + encodeURIComponent(q), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (data) { render(data); })
+                .catch(function () { close(); });
+            }
+
+            // Trigger on typing
+            input.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                var q = input.value.trim();
+                if (q.length < 2) { close(); return; }
+                debounceTimer = setTimeout(function () { fetchResults(q); }, 280);
+            });
+
+            // Keyboard navigation
+            input.addEventListener('keydown', function (e) {
+                var items = dropdown.querySelectorAll('.ac-item');
+                if (dropdown.style.display === 'none') return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setActive(Math.min(activeIndex + 1, items.length - 1));
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setActive(Math.max(activeIndex - 1, 0));
+                } else if (e.key === 'Enter' && activeIndex >= 0) {
+                    e.preventDefault();
+                    navigate(results[activeIndex]);
+                } else if (e.key === 'Escape') {
+                    close();
+                }
+            });
+
+            // Close when input loses focus (delay allows mousedown to fire first)
+            input.addEventListener('blur', function () {
+                setTimeout(close, 160);
+            });
+
+            // Reopen if user focuses and already has a query
+            input.addEventListener('focus', function () {
+                if (input.value.trim().length >= 2 && results.length) {
+                    dropdown.style.display = 'block';
+                }
+            });
         });
     }
 
