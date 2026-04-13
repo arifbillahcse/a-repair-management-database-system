@@ -35,5 +35,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            git config --global --add safe.directory /home/arifs.work/repair.arifs.work
             cd /home/arifs.work/repair.arifs.work
             git pull origin main
+            chown -R arifs6965:arifs6965 /home/arifs.work/repair.arifs.work
