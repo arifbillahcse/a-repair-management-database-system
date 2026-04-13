@@ -234,7 +234,8 @@
             positionDropdown();
 
             dropdown.querySelectorAll('.ac-item').forEach(function (item) {
-                item.addEventListener('click', function () {
+                item.addEventListener('mousedown', function (e) {
+                    e.preventDefault(); // keep input focused → blur never fires → no race with close()
                     navigate(results[parseInt(item.dataset.idx, 10)]);
                 });
                 item.addEventListener('mouseover', function () {
