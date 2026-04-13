@@ -167,9 +167,9 @@ function rep_sortIcon(string $col): string
                     <th style="width:52px"><a href="<?= rep_sortUrl('repair_id') ?>" class="sort-lnk"># <?= rep_sortIcon('repair_id') ?></a></th>
                     <th><a href="<?= rep_sortUrl('device_model') ?>" class="sort-lnk">Device <?= rep_sortIcon('device_model') ?></a></th>
                     <th class="hide-mobile"><a href="<?= rep_sortUrl('customer_name') ?>" class="sort-lnk">Customer <?= rep_sortIcon('customer_name') ?></a></th>
+                    <th class="hide-mobile">Type</th>
                     <th><a href="<?= rep_sortUrl('status') ?>" class="sort-lnk">Status <?= rep_sortIcon('status') ?></a></th>
-                    <th class="hide-mobile"><a href="<?= rep_sortUrl('date_in') ?>" class="sort-lnk">Date In <?= rep_sortIcon('date_in') ?></a></th>
-                    <th class="hide-t">Type</th>
+                    <th class="hide-t"><a href="<?= rep_sortUrl('date_in') ?>" class="sort-lnk">Date In <?= rep_sortIcon('date_in') ?></a></th>
                     <th class="hide-t"><a href="<?= rep_sortUrl('days_in_lab') ?>" class="sort-lnk">Days <?= rep_sortIcon('days_in_lab') ?></a></th>
                     <th class="hide-t" style="text-align:right"><a href="<?= rep_sortUrl('actual_amount') ?>" class="sort-lnk">Amount <?= rep_sortIcon('actual_amount') ?></a></th>
                     <th style="width:100px;text-align:right">Actions</th>
@@ -221,15 +221,7 @@ function rep_sortIcon(string $col): string
                         <span style="color:var(--text-muted)">—</span>
                         <?php endif; ?>
                     </td>
-                    <td>
-                        <span class="badge <?= REPAIR_STATUS_CLASS[$r['status']] ?? 'badge-gray' ?>">
-                            <?= Utils::e(REPAIR_STATUS[$r['status']] ?? $r['status']) ?>
-                        </span>
-                    </td>
-                    <td class="hide-mobile" style="font-size:.82rem;color:var(--text-secondary);white-space:nowrap">
-                        <?= Utils::formatDate($r['date_in']) ?>
-                    </td>
-                    <td class="hide-t">
+                    <td class="hide-mobile">
                         <?php $ct = $r['customer_type'] ?? ''; ?>
                         <?php if ($ct === 'individual'): ?>
                         <span class="badge badge-gray" style="display:inline-flex;align-items:center;gap:.25rem">
@@ -246,6 +238,14 @@ function rep_sortIcon(string $col): string
                         <?php else: ?>
                         <span style="color:var(--text-muted)">—</span>
                         <?php endif; ?>
+                    </td>
+                    <td>
+                        <span class="badge <?= REPAIR_STATUS_CLASS[$r['status']] ?? 'badge-gray' ?>">
+                            <?= Utils::e(REPAIR_STATUS[$r['status']] ?? $r['status']) ?>
+                        </span>
+                    </td>
+                    <td class="hide-t" style="font-size:.82rem;color:var(--text-secondary);white-space:nowrap">
+                        <?= Utils::formatDate($r['date_in']) ?>
                     </td>
                     <td class="hide-t">
                         <?php $days = (int)($r['days_in_lab'] ?? 0); ?>
