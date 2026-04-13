@@ -53,12 +53,20 @@ function cust_sortIcon(string $col): string
 .hide-t{display:none}
 @media(min-width:900px){.hide-t{display:table-cell}}
 .vat-sub{display:block;font-size:.72rem;color:var(--text-muted)}
+.status-filters{display:flex;gap:.35rem;flex-wrap:wrap;padding:.75rem 1rem;border-bottom:1px solid var(--border)}
+.sf-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .75rem;border-radius:var(--radius-full);border:1px solid var(--border);background:none;color:var(--text-secondary);font-size:.78rem;font-weight:500;cursor:pointer;text-decoration:none;transition:all var(--transition);white-space:nowrap}
+.sf-btn:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+.sf-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.sf-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 4px;border-radius:var(--radius-full);background:var(--bg-tertiary);font-size:.7rem;font-weight:700}
+.sf-btn.active .sf-count{background:var(--accent);color:#fff}
+.sf-btn-purple{color:#a855f7;border-color:#a855f7}
+.sf-btn-purple:hover,.sf-btn-purple.active{background:rgba(168,85,247,.12);border-color:#a855f7;color:#a855f7}
 </style>
 
 <!-- Page header -->
 <div class="page-header">
     <div>
-        <h1 class="page-title">Customers</h1>
+        <h1 class="page-title">Clients</h1>
         <p class="page-subtitle">
             <?= number_format($counts['total']) ?> total &nbsp;·&nbsp;
             <span style="color:var(--success)"><?= number_format($counts['active']) ?> active</span>
@@ -97,32 +105,42 @@ function cust_sortIcon(string $col): string
     </div>
 </div>
 
-<!-- Quick-filter tabs -->
-<div style="display:flex;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap">
-    <?php
-    $tabBase = array_filter(['search' => htmlspecialchars_decode($search), 'sort' => $sort, 'dir' => $dir]);
-    $tabs = [
-        ''           => 'All',
-        'active'     => 'Active',
-        'inactive'   => 'Inactive',
-    ];
-    foreach ($tabs as $tabVal => $tabLabel):
-        $isActive = ($type === '' && $status === $tabVal) || ($tabVal === '' && $type === '' && $status === '');
-        // "All" tab is active only when both status and type are empty
-        if ($tabVal === '') $isActive = ($type === '' && $status === '');
-        $href = Utils::url('/customers', array_filter(array_merge($tabBase, ['status' => $tabVal])));
-    ?>
-    <a href="<?= $href ?>" class="btn btn-sm <?= $isActive ? 'btn-primary' : 'btn-secondary' ?>"><?= $tabLabel ?></a>
-    <?php endforeach; ?>
-    <?php
-    $colleagueActive = ($type === 'colleague');
-    $colleagueHref   = Utils::url('/customers', array_filter(array_merge($tabBase, ['type' => 'colleague'])));
-    ?>
-    <a href="<?= $colleagueHref ?>" class="btn btn-sm" style="<?= $colleagueActive ? 'background:#7c3aed;color:#fff;border-color:#7c3aed' : 'border-color:#c4b5fd;color:#7c3aed' ?>">Colleagues<?php if ($counts['colleagues'] > 0): ?> <span style="opacity:.8">(<?= (int)$counts['colleagues'] ?>)</span><?php endif; ?></a>
-</div>
+<div class="card" style="margin-bottom:0">
 
-<!-- Search bar -->
-<div class="card" style="margin-bottom:1rem">
+    <!-- Status pills -->
+    <div class="status-filters">
+        <?php $stBase = array_filter(['search' => htmlspecialchars_decode($search), 'type' => $type, 'sort' => $sort, 'dir' => $dir]); ?>
+        <a href="<?= Utils::url('/customers', $stBase) ?>" class="sf-btn <?= $status === '' ? 'active' : '' ?>">
+            All <span class="sf-count"><?= number_format($counts['total']) ?></span>
+        </a>
+        <a href="<?= Utils::url('/customers', array_filter(array_merge($stBase, ['status' => 'active',   'page' => 1]))) ?>" class="sf-btn <?= $status === 'active'   ? 'active' : '' ?>">
+            Active <span class="sf-count"><?= number_format($counts['active']) ?></span>
+        </a>
+        <a href="<?= Utils::url('/customers', array_filter(array_merge($stBase, ['status' => 'inactive', 'page' => 1]))) ?>" class="sf-btn <?= $status === 'inactive' ? 'active' : '' ?>">
+            Inactive <span class="sf-count"><?= number_format($counts['inactive']) ?></span>
+        </a>
+    </div>
+
+    <!-- Type pills -->
+    <div class="status-filters" style="border-top:none;padding-top:.4rem">
+        <?php
+        $tyBase = array_filter(['search' => htmlspecialchars_decode($search), 'status' => $status, 'sort' => $sort, 'dir' => $dir]);
+        $clientTypes = [
+            'individual' => ['label' => 'Individual', 'icon' => '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>', 'class' => ''],
+            'company'    => ['label' => 'Company',    'icon' => '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 21h18M3 7v14M21 7v14M3 7l9-4 9 4M9 21V12h6v9"/></svg>',               'class' => ''],
+            'colleague'  => ['label' => 'Colleague',  'icon' => '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', 'class' => 'sf-btn-purple'],
+        ];
+        ?>
+        <a href="<?= Utils::url('/customers', $tyBase) ?>" class="sf-btn <?= $type === '' ? 'active' : '' ?>">All Types</a>
+        <?php foreach ($clientTypes as $key => $t): ?>
+        <a href="<?= Utils::url('/customers', array_filter(array_merge($tyBase, ['type' => $key, 'page' => 1]))) ?>"
+           class="sf-btn <?= $type === $key ? 'active' : '' ?> <?= $t['class'] ?>">
+            <?= $t['icon'] ?> <?= $t['label'] ?>
+        </a>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- Search bar -->
     <form method="GET" action="<?= BASE_URL ?>/customers" class="filter-bar" role="search">
         <div class="search-input-wrap">
             <svg class="search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -134,23 +152,16 @@ function cust_sortIcon(string $col): string
                    data-ac-url="<?= BASE_URL ?>/api/customers/autocomplete"
                    data-ac-href="<?= BASE_URL ?>/customers/{id}">
         </div>
-        <select name="status" class="form-select filter-select" aria-label="Filter by status" onchange="this.form.submit()">
-            <option value=""         <?= $status===''         ?'selected':'' ?>>All Statuses</option>
-            <option value="active"   <?= $status==='active'   ?'selected':'' ?>>Active</option>
-            <option value="inactive" <?= $status==='inactive' ?'selected':'' ?>>Inactive</option>
-        </select>
-        <input type="hidden" name="sort" value="<?= Utils::e($sort) ?>">
-        <input type="hidden" name="dir"  value="<?= Utils::e($dir) ?>">
-        <?php if ($type !== ''): ?><input type="hidden" name="type" value="<?= Utils::e($type) ?>"><?php endif; ?>
+        <input type="hidden" name="status" value="<?= Utils::e($status) ?>">
+        <input type="hidden" name="type"   value="<?= Utils::e($type) ?>">
+        <input type="hidden" name="sort"   value="<?= Utils::e($sort) ?>">
+        <input type="hidden" name="dir"    value="<?= Utils::e($dir) ?>">
         <button type="submit" class="btn btn-primary">Search</button>
-        <?php if ($search!==''||$status!==''||$type!==''): ?>
+        <?php if ($search !== '' || $status !== '' || $type !== ''): ?>
         <a href="<?= BASE_URL ?>/customers" class="btn btn-secondary">Clear</a>
         <?php endif; ?>
     </form>
-</div>
 
-<!-- Table -->
-<div class="card" style="margin-bottom:0">
     <div class="table-responsive">
         <table class="data-table">
             <thead>
