@@ -113,12 +113,12 @@
         </div>
     </div>
 
-    <!-- ── Customer + Device ────────────────────────────────────────── -->
+    <!-- ── Client + Device ──────────────────────────────────────────── -->
     <div class="grid-2">
 
-        <!-- Customer -->
+        <!-- Client -->
         <div class="card">
-            <div class="card-header">Customer</div>
+            <div class="card-header">Client</div>
             <div class="card-body">
                 <div class="field">
                     <div class="field-label">Name</div>
@@ -248,7 +248,7 @@
 
     <!-- ── Problem Description ──────────────────────────────────────── -->
     <div class="card">
-        <div class="card-header">Problem Description (reported by customer)</div>
+        <div class="card-header">Problem Description (reported by client)</div>
         <div class="card-body">
             <div class="notes-box"><?= Utils::e($repair['problem_description'] ?? '') ?></div>
         </div>
@@ -294,7 +294,7 @@
                     <?php if (!empty($company['terms'])): ?>
                     <?= nl2br(Utils::e($company['terms'])) ?>
                     <?php else: ?>
-                    By leaving this device for repair, the customer accepts our service terms.
+                    By leaving this device for repair, the client accepts our service terms.
                     Uncollected devices after 90 days may be disposed of.
                     No responsibility is accepted for pre-existing damage or data loss.
                     <?php endif; ?>
@@ -308,7 +308,7 @@
     <div class="sig-area">
         <div>
             <div class="sig-box"></div>
-            <div class="sig-label">Customer Signature &amp; Date</div>
+            <div class="sig-label">Client Signature &amp; Date</div>
         </div>
         <div>
             <div class="sig-box"></div>

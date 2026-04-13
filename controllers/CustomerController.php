@@ -90,7 +90,7 @@ class CustomerController
             'email'     => $data['email'],
         ]);
 
-        Utils::flashSuccess("Customer \"{$data['full_name']}\" created successfully.");
+        Utils::flashSuccess("Client \"{$data['full_name']}\" created successfully.");
 
         // "Save & Add Another" button
         if (($_POST['action'] ?? '') === 'save_and_new') {
@@ -145,7 +145,7 @@ class CustomerController
         Logger::log('updated', 'customer', $id, $customer, $data);
         $this->model->update($id, $data);
 
-        Utils::flashSuccess("Customer \"{$data['full_name']}\" updated.");
+        Utils::flashSuccess("Client \"{$data['full_name']}\" updated.");
         Utils::redirect('/customers/' . $id);
     }
 
@@ -188,7 +188,7 @@ class CustomerController
         Logger::log('deleted', 'customer', $id, $customer);
         $this->model->delete($id);
 
-        Utils::flashSuccess("Customer \"{$customer['full_name']}\" and all their repairs have been permanently deleted.");
+        Utils::flashSuccess("Client \"{$customer['full_name']}\" and all their repairs have been permanently deleted.");
         Utils::redirect('/customers');
     }
 
@@ -306,7 +306,7 @@ class CustomerController
         if (!empty($data['email'])) {
             $emailClean = strtolower(trim($data['email']));
             if ($this->model->emailExists($emailClean, $excludeId)) {
-                $errors['email'] = 'This email address is already registered to another customer.';
+                $errors['email'] = 'This email address is already registered to another client.';
             }
         }
 

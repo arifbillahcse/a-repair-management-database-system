@@ -102,7 +102,7 @@ foreach ($invoices as $inv) {
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input type="search" name="search" class="form-input"
-                   placeholder="Invoice number or customer name…"
+                   placeholder="Invoice number or client name…"
                    value="<?= $search ?>" autocomplete="off">
         </div>
         <input type="date" name="date_from" class="form-input" style="width:auto" value="<?= $dateFrom ?>" title="From date">
@@ -123,7 +123,7 @@ foreach ($invoices as $inv) {
             <thead>
                 <tr>
                     <th style="width:150px">Invoice #</th>
-                    <th>Customer</th>
+                    <th>Client</th>
                     <th class="hide-mobile">Date</th>
                     <th class="hide-mobile">Due Date</th>
                     <th>Status</th>

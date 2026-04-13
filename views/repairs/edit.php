@@ -82,10 +82,10 @@ $statusFlow  = REPAIR_STATUS_FLOW[$repair['status']] ?? [];
         <!-- ── LEFT COLUMN ─────────────────────────────────────────────── -->
         <div style="display:flex;flex-direction:column;gap:1.5rem">
 
-            <!-- Customer (read-only reference) -->
+            <!-- Client (read-only reference) -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">Customer</h2>
+                    <h2 class="card-title">Client</h2>
                     <?php if (!empty($repair['customer_id'])): ?>
                     <a href="<?= BASE_URL ?>/customers/<?= $repair['customer_id'] ?>" class="btn btn-xs btn-secondary">View Profile</a>
                     <?php endif; ?>

@@ -2,20 +2,22 @@
 $pageTitle = 'Repairs';
 require VIEWS_PATH . '/layouts/header.php';
 
-$search     = Utils::e($_GET['search'] ?? '');
-$filterSt   = $_GET['status']      ?? '';
-$sort       = $_GET['sort']        ?? 'date_in';
-$dir        = $_GET['dir']         ?? 'DESC';
-$custFilter = (int)($_GET['customer_id'] ?? 0);
-$pg         = $pagination;
+$search       = Utils::e($_GET['search'] ?? '');
+$filterSt     = $_GET['status']      ?? '';
+$filterType   = $_GET['client_type'] ?? '';
+$sort         = $_GET['sort']        ?? 'date_in';
+$dir          = $_GET['dir']         ?? 'DESC';
+$custFilter   = (int)($_GET['customer_id'] ?? 0);
+$pg           = $pagination;
 
 function rep_sortUrl(string $col): string
 {
-    global $search, $filterSt, $sort, $dir, $custFilter;
+    global $search, $filterSt, $filterType, $sort, $dir, $custFilter;
     $d = ($sort === $col && $dir === 'ASC') ? 'DESC' : 'ASC';
     return Utils::url('/repairs', array_filter([
         'search'      => htmlspecialchars_decode($search),
         'status'      => $filterSt,
+        'client_type' => $filterType,
         'sort'        => $col,
         'dir'         => $d,
         'page'        => 1,
@@ -39,6 +41,8 @@ function rep_sortIcon(string $col): string
 .sf-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
 .sf-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 4px;border-radius:var(--radius-full);background:var(--bg-tertiary);font-size:.7rem;font-weight:700}
 .sf-btn.active .sf-count{background:var(--accent);color:#fff}
+.sf-btn-purple{color:#a855f7;border-color:#a855f7}
+.sf-btn-purple:hover,.sf-btn-purple.active{background:rgba(168,85,247,.12);border-color:#a855f7;color:#a855f7}
 .filter-bar{display:flex;gap:.5rem;padding:.75rem 1rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border)}
 .filter-bar .search-input-wrap{flex:1;min-width:200px}
 .qr-wrap{display:flex;gap:.35rem;align-items:center}
@@ -134,16 +138,36 @@ function rep_sortIcon(string $col): string
     <!-- Status filter pills -->
     <div class="status-filters">
         <?php
-        $allUrl = Utils::url('/repairs', array_filter(['search' => htmlspecialchars_decode($search), 'sort' => $sort, 'dir' => $dir, 'customer_id' => $custFilter ?: null]));
+        $base = array_filter(['search' => htmlspecialchars_decode($search), 'client_type' => $filterType, 'sort' => $sort, 'dir' => $dir, 'customer_id' => $custFilter ?: null]);
         ?>
-        <a href="<?= $allUrl ?>" class="sf-btn <?= $filterSt === '' ? 'active' : '' ?>">
+        <a href="<?= Utils::url('/repairs', $base) ?>" class="sf-btn <?= $filterSt === '' ? 'active' : '' ?>">
             All <span class="sf-count"><?= number_format(array_sum($statusCounts)) ?></span>
         </a>
         <?php foreach (REPAIR_STATUS as $key => $label): ?>
         <?php $cnt = $statusCounts[$key] ?? 0; ?>
-        <a href="<?= Utils::url('/repairs', array_filter(['search' => htmlspecialchars_decode($search), 'status' => $key, 'sort' => $sort, 'dir' => $dir, 'customer_id' => $custFilter ?: null, 'page' => 1])) ?>"
+        <a href="<?= Utils::url('/repairs', array_filter(array_merge($base, ['status' => $key, 'page' => 1]))) ?>"
            class="sf-btn <?= $filterSt === $key ? 'active' : '' ?>">
             <?= Utils::e($label) ?> <span class="sf-count"><?= $cnt ?></span>
+        </a>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- Customer type filter pills -->
+    <div class="status-filters" style="border-top:none;padding-top:.4rem">
+        <?php
+        $typeBase = array_filter(['search' => htmlspecialchars_decode($search), 'status' => $filterSt, 'sort' => $sort, 'dir' => $dir, 'customer_id' => $custFilter ?: null]);
+        $types = [
+            'individual' => ['label' => 'Individual', 'icon' => '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>', 'class' => ''],
+            'company'    => ['label' => 'Company',    'icon' => '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 21h18M3 7v14M21 7v14M3 7l9-4 9 4M9 21V12h6v9"/></svg>',               'class' => ''],
+            'colleague'  => ['label' => 'Colleague',  'icon' => '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', 'class' => 'sf-btn-purple'],
+        ];
+        ?>
+        <a href="<?= Utils::url('/repairs', $typeBase) ?>"
+           class="sf-btn <?= $filterType === '' ? 'active' : '' ?>">All Types</a>
+        <?php foreach ($types as $key => $t): ?>
+        <a href="<?= Utils::url('/repairs', array_filter(array_merge($typeBase, ['client_type' => $key, 'page' => 1]))) ?>"
+           class="sf-btn <?= $filterType === $key ? 'active' : '' ?> <?= $t['class'] ?>">
+            <?= $t['icon'] ?> <?= $t['label'] ?>
         </a>
         <?php endforeach; ?>
     </div>
@@ -155,19 +179,20 @@ function rep_sortIcon(string $col): string
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input type="search" name="search" class="form-input"
-                   placeholder="Search ID, customer, device, serial…"
+                   placeholder="Search ID, client, device, serial…"
                    value="<?= $search ?>" autocomplete="off" aria-label="Search repairs"
                    data-ac-url="<?= BASE_URL ?>/api/customers/autocomplete"
-                   data-ac-href="<?= BASE_URL ?>/repairs?customer_id={id}">
+                   data-ac-href="<?= BASE_URL ?>/customers/{id}">
         </div>
         <?php if ($custFilter): ?>
         <input type="hidden" name="customer_id" value="<?= $custFilter ?>">
         <?php endif; ?>
-        <input type="hidden" name="status" value="<?= Utils::e($filterSt) ?>">
-        <input type="hidden" name="sort"   value="<?= Utils::e($sort) ?>">
-        <input type="hidden" name="dir"    value="<?= Utils::e($dir) ?>">
+        <input type="hidden" name="status"      value="<?= Utils::e($filterSt) ?>">
+        <input type="hidden" name="client_type" value="<?= Utils::e($filterType) ?>">
+        <input type="hidden" name="sort"        value="<?= Utils::e($sort) ?>">
+        <input type="hidden" name="dir"         value="<?= Utils::e($dir) ?>">
         <button type="submit" class="btn btn-primary">Search</button>
-        <?php if ($search !== '' || $filterSt !== '' || $custFilter): ?>
+        <?php if ($search !== '' || $filterSt !== '' || $filterType !== '' || $custFilter): ?>
         <a href="<?= BASE_URL ?>/repairs" class="btn btn-secondary">Clear</a>
         <?php endif; ?>
 
@@ -191,7 +216,7 @@ function rep_sortIcon(string $col): string
                 <tr>
                     <th style="width:52px"><a href="<?= rep_sortUrl('repair_id') ?>" class="sort-lnk"># <?= rep_sortIcon('repair_id') ?></a></th>
                     <th><a href="<?= rep_sortUrl('device_model') ?>" class="sort-lnk">Device <?= rep_sortIcon('device_model') ?></a></th>
-                    <th class="hide-mobile"><a href="<?= rep_sortUrl('customer_name') ?>" class="sort-lnk">Customer <?= rep_sortIcon('customer_name') ?></a></th>
+                    <th class="hide-mobile"><a href="<?= rep_sortUrl('customer_name') ?>" class="sort-lnk">Client <?= rep_sortIcon('customer_name') ?></a></th>
                     <th class="hide-mobile">Type</th>
                     <th><a href="<?= rep_sortUrl('status') ?>" class="sort-lnk">Status <?= rep_sortIcon('status') ?></a></th>
                     <th class="hide-t"><a href="<?= rep_sortUrl('date_in') ?>" class="sort-lnk">Date In <?= rep_sortIcon('date_in') ?></a></th>
@@ -318,7 +343,7 @@ function rep_sortIcon(string $col): string
 
     <!-- Pagination -->
     <?php if ($pg['totalPages'] > 1):
-        $bp = array_filter(['search' => htmlspecialchars_decode($search), 'status' => $filterSt, 'sort' => $sort, 'dir' => $dir, 'customer_id' => $custFilter ?: null]);
+        $bp = array_filter(['search' => htmlspecialchars_decode($search), 'status' => $filterSt, 'client_type' => $filterType, 'sort' => $sort, 'dir' => $dir, 'customer_id' => $custFilter ?: null]);
     ?>
     <div class="tbl-footer">
         <span class="tbl-footer-info">

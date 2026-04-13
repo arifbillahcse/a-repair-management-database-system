@@ -65,13 +65,13 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
         <!-- ── LEFT COLUMN ─────────────────────────────────────────────── -->
         <div style="display:flex;flex-direction:column;gap:1.5rem">
 
-            <!-- Customer -->
+            <!-- Client -->
             <div class="card">
-                <div class="card-header"><h2 class="card-title">Customer</h2></div>
+                <div class="card-header"><h2 class="card-title">Client</h2></div>
                 <div class="card-body">
                     <div class="form-group">
                         <label class="form-label" for="custSearch">
-                            Customer <span style="font-size:.75rem;color:var(--text-muted)">(optional)</span>
+                            Client <span style="font-size:.75rem;color:var(--text-muted)">(optional)</span>
                         </label>
 
                         <input type="hidden" name="customer_id" id="customerId" value="<?= $custId ?: '' ?>">
@@ -85,7 +85,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                                 </svg>
                                 <input type="text" id="custSearch" class="form-input <?= isset($err['customer_id']) ? 'is-invalid' : '' ?>"
                                        placeholder="Type name, phone or email…" autocomplete="off"
-                                       aria-label="Search customer">
+                                       aria-label="Search client">
                             </div>
                             <div id="custDropdown" role="listbox" aria-label="Customer suggestions"></div>
                         </div>
@@ -112,7 +112,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                         <div style="margin-top:.5rem">
                             <a href="<?= BASE_URL ?>/customers/create" target="_blank"
                                style="font-size:.78rem;color:var(--accent);text-decoration:none">
-                                + Create new customer
+                                + Create new client
                             </a>
                         </div>
                     </div>
@@ -200,7 +200,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                         </label>
                         <textarea id="problemDesc" name="problem_description" class="form-input <?= isset($err['problem_description'])?'is-invalid':'' ?>"
                                   rows="3" maxlength="2000"
-                                  placeholder="Describe the issue reported by the customer…"
+                                  placeholder="Describe the issue reported by the client…"
                                   data-validate="required" required><?= Utils::e($fd['problem_description'] ?? '') ?></textarea>
                         <span class="char-count"><span id="pdCount">0</span>/2000</span>
                         <?php if (isset($err['problem_description'])): ?><div class="invalid-feedback"><?= Utils::e($err['problem_description']) ?></div><?php endif; ?>

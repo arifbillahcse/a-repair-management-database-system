@@ -54,7 +54,7 @@ function navActive(string $pattern): string
             </ul>
         </li>
 
-        <!-- Customers -->
+        <!-- Clients -->
         <li class="nav-item has-sub <?= navActive('/customers') ?>">
             <button class="nav-link nav-group-toggle" aria-expanded="<?= navActive('/customers') ? 'true' : 'false' ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -64,14 +64,14 @@ function navActive(string $pattern): string
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
-                <span>Customers</span>
+                <span>Clients</span>
                 <svg class="sub-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="6 9 12 15 18 9"/>
                 </svg>
             </button>
             <ul class="sub-nav <?= navActive('/customers') ? 'open' : '' ?>">
-                <li><a href="<?= BASE_URL ?>/customers/create" class="sub-nav-link <?= navActive('/customers/create') ?>">+ New Customer</a></li>
-                <li><a href="<?= BASE_URL ?>/customers" class="sub-nav-link <?= navActive('^.*/customers/?$') ?>">All Customers</a></li>
+                <li><a href="<?= BASE_URL ?>/customers/create" class="sub-nav-link <?= navActive('/customers/create') ?>">+ New Client</a></li>
+                <li><a href="<?= BASE_URL ?>/customers" class="sub-nav-link <?= navActive('^.*/customers/?$') ?>">All Clients</a></li>
             </ul>
         </li>
 
