@@ -22,3 +22,5 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+CI-CD-Setup.md
+schema.sql
