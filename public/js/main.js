@@ -173,89 +173,109 @@
                 .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        inputs.forEach(function (input) {
-            var wrap = input.closest('.search-input-wrap');
-            if (!wrap) return;
+        // One shared dropdown injected into <body> — avoids all stacking
+        // context / overflow:hidden / sticky-header z-index conflicts
+        var dropdown = document.createElement('div');
+        dropdown.className = 'ac-dropdown';
+        dropdown.style.cssText = 'display:none;position:fixed;z-index:9999';
+        document.body.appendChild(dropdown);
 
-            // Inject dropdown inside the search wrapper
-            var dropdown = document.createElement('div');
-            dropdown.className = 'ac-dropdown';
+        var activeInput  = null;
+        var activeHref   = '';
+        var activeUrl    = '';
+        var debounceTimer = null;
+        var activeIndex  = -1;
+        var results      = [];
+
+        function positionDropdown() {
+            if (!activeInput) return;
+            var r = activeInput.getBoundingClientRect();
+            dropdown.style.top   = (r.bottom + 4) + 'px';
+            dropdown.style.left  = r.left + 'px';
+            dropdown.style.width = r.width + 'px';
+        }
+
+        function close() {
             dropdown.style.display = 'none';
-            wrap.appendChild(dropdown);
+            activeIndex = -1;
+        }
 
-            var debounceTimer = null;
-            var activeIndex   = -1;
-            var results       = [];
-            var hrefTpl       = input.getAttribute('data-ac-href') || '';
+        function navigate(row) {
+            window.location.href = activeHref.replace('{id}', row.customer_id);
+        }
 
-            function close() {
-                dropdown.style.display = 'none';
-                activeIndex = -1;
+        function setActive(idx) {
+            dropdown.querySelectorAll('.ac-item').forEach(function (el, i) {
+                el.classList.toggle('ac-active', i === idx);
+            });
+            activeIndex = idx;
+        }
+
+        function render(rows) {
+            results     = rows;
+            activeIndex = -1;
+
+            if (!rows.length) {
+                dropdown.innerHTML    = '<div class="ac-empty">No customers found.</div>';
+                dropdown.style.display = 'block';
+                return;
             }
 
-            function navigate(row) {
-                window.location = hrefTpl.replace('{id}', row.customer_id);
-            }
+            dropdown.innerHTML = rows.map(function (row, i) {
+                var meta = [row.phone_mobile, row.city].filter(Boolean).join(' · ');
+                return '<div class="ac-item" data-idx="' + i + '">' +
+                    '<span class="ac-name">' + escHtml(row.full_name) + '</span>' +
+                    (meta ? '<span class="ac-meta">' + escHtml(meta) + '</span>' : '') +
+                    '</div>';
+            }).join('') +
+            '<div class="ac-footer">↑ ↓ navigate &nbsp;·&nbsp; Enter open &nbsp;·&nbsp; Esc close</div>';
 
-            function setActive(idx) {
-                var items = dropdown.querySelectorAll('.ac-item');
-                items.forEach(function (el, i) {
-                    el.classList.toggle('ac-active', i === idx);
+            dropdown.style.display = 'block';
+            positionDropdown();
+
+            dropdown.querySelectorAll('.ac-item').forEach(function (item) {
+                item.addEventListener('click', function () {
+                    navigate(results[parseInt(item.dataset.idx, 10)]);
                 });
-                activeIndex = idx;
-            }
+                item.addEventListener('mouseover', function () {
+                    setActive(parseInt(item.dataset.idx, 10));
+                });
+            });
+        }
 
-            function render(rows) {
-                results     = rows;
-                activeIndex = -1;
+        function fetchResults(q) {
+            dropdown.innerHTML    = '<div class="ac-loading">Searching…</div>';
+            dropdown.style.display = 'block';
+            positionDropdown();
+            fetch(activeUrl + '?q=' + encodeURIComponent(q), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) { render(data); })
+            .catch(function () { close(); });
+        }
 
-                if (!rows.length) {
-                    dropdown.innerHTML    = '<div class="ac-empty">No customers found.</div>';
+        inputs.forEach(function (input) {
+            input.addEventListener('focus', function () {
+                activeInput = input;
+                activeHref  = input.getAttribute('data-ac-href') || '';
+                activeUrl   = input.getAttribute('data-ac-url')  || '';
+                if (input.value.trim().length >= 2 && results.length) {
+                    positionDropdown();
                     dropdown.style.display = 'block';
-                    return;
                 }
+            });
 
-                dropdown.innerHTML = rows.map(function (row, i) {
-                    var meta = [row.phone_mobile, row.city].filter(Boolean).join(' · ');
-                    return '<div class="ac-item" data-idx="' + i + '">' +
-                        '<span class="ac-name">' + escHtml(row.full_name) + '</span>' +
-                        (meta ? '<span class="ac-meta">' + escHtml(meta) + '</span>' : '') +
-                        '</div>';
-                }).join('') +
-                '<div class="ac-footer">↑ ↓ to navigate &nbsp;·&nbsp; Enter to open &nbsp;·&nbsp; Esc to close</div>';
-
-                dropdown.style.display = 'block';
-
-                dropdown.querySelectorAll('.ac-item').forEach(function (item) {
-                    item.addEventListener('click', function () {
-                        navigate(results[parseInt(item.dataset.idx, 10)]);
-                    });
-                    item.addEventListener('mouseover', function () {
-                        setActive(parseInt(item.dataset.idx, 10));
-                    });
-                });
-            }
-
-            function fetchResults(q) {
-                dropdown.innerHTML    = '<div class="ac-loading">Searching…</div>';
-                dropdown.style.display = 'block';
-                fetch(input.getAttribute('data-ac-url') + '?q=' + encodeURIComponent(q), {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(function (r) { return r.json(); })
-                .then(function (data) { render(data); })
-                .catch(function () { close(); });
-            }
-
-            // Trigger on typing
             input.addEventListener('input', function () {
+                activeInput = input;
+                activeHref  = input.getAttribute('data-ac-href') || '';
+                activeUrl   = input.getAttribute('data-ac-url')  || '';
                 clearTimeout(debounceTimer);
                 var q = input.value.trim();
                 if (q.length < 2) { close(); return; }
                 debounceTimer = setTimeout(function () { fetchResults(q); }, 280);
             });
 
-            // Keyboard navigation
             input.addEventListener('keydown', function (e) {
                 var items = dropdown.querySelectorAll('.ac-item');
                 if (dropdown.style.display === 'none') return;
@@ -274,17 +294,22 @@
                 }
             });
 
-            // Close when input loses focus — 300ms gives click event time to fire first
+            // 300ms delay lets the click on the dropdown fire before close()
             input.addEventListener('blur', function () {
                 setTimeout(close, 300);
             });
+        });
 
-            // Reopen if user focuses and already has a query
-            input.addEventListener('focus', function () {
-                if (input.value.trim().length >= 2 && results.length) {
-                    dropdown.style.display = 'block';
-                }
-            });
+        // Reposition on scroll or resize
+        window.addEventListener('scroll', positionDropdown, true);
+        window.addEventListener('resize', positionDropdown);
+
+        // Close on outside click
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.ac-dropdown') &&
+                !e.target.closest('[data-ac-url]')) {
+                close();
+            }
         });
     }
 
