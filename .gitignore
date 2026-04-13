@@ -1,20 +1,20 @@
 # Environment — never commit the real .env
-repair-system/config/.env
+config/.env
 
 # Composer vendor
-repair-system/vendor/
+vendor/
 
 # Sessions
-repair-system/sessions/
+sessions/
 
 # Logs
-repair-system/logs/*.log
+logs/*.log
 
 # Uploaded files
-repair-system/public/uploads/photos/*
-repair-system/public/uploads/documents/*
-!repair-system/public/uploads/photos/.gitkeep
-!repair-system/public/uploads/documents/.gitkeep
+public/uploads/photos/*
+public/uploads/documents/*
+!public/uploads/photos/.gitkeep
+!public/uploads/documents/.gitkeep
 
 # OS / IDE
 .DS_Store
