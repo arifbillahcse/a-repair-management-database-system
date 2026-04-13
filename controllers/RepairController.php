@@ -25,6 +25,7 @@ class RepairController
             'status'      => $_GET['status']      ?? '',
             'staff_id'    => $_GET['staff_id']    ?? '',
             'customer_id' => $_GET['customer_id'] ?? '',
+            'client_type' => $_GET['client_type'] ?? '',
             'search'      => $_GET['search']      ?? '',
             'date_from'   => $_GET['date_from']   ?? '',
             'date_to'     => $_GET['date_to']     ?? '',

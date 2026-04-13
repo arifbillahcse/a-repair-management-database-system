@@ -256,6 +256,10 @@ class Repair extends BaseModel
             $clauses[] = 'DATE(r.date_in) <= ?';
             $params[]  = $filters['date_to'];
         }
+        if (!empty($filters['client_type']) && in_array($filters['client_type'], ['individual','company','colleague'], true)) {
+            $clauses[] = 'c.client_type = ?';
+            $params[]  = $filters['client_type'];
+        }
         if (!empty($filters['search'])) {
             $like      = '%' . $filters['search'] . '%';
             $clauses[] = '(c.full_name LIKE ? OR r.device_model LIKE ? OR r.device_serial_number LIKE ? OR r.qr_code LIKE ? OR r.problem_description LIKE ?)';
