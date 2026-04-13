@@ -227,8 +227,7 @@
                 dropdown.style.display = 'block';
 
                 dropdown.querySelectorAll('.ac-item').forEach(function (item) {
-                    item.addEventListener('mousedown', function (e) {
-                        e.preventDefault(); // keep focus on input
+                    item.addEventListener('click', function () {
                         navigate(results[parseInt(item.dataset.idx, 10)]);
                     });
                     item.addEventListener('mouseover', function () {
@@ -275,9 +274,9 @@
                 }
             });
 
-            // Close when input loses focus (delay allows mousedown to fire first)
+            // Close when input loses focus — 300ms gives click event time to fire first
             input.addEventListener('blur', function () {
-                setTimeout(close, 160);
+                setTimeout(close, 300);
             });
 
             // Reopen if user focuses and already has a query
