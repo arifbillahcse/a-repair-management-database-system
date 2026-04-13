@@ -37,5 +37,7 @@ jobs:
           script: |
             git config --global --add safe.directory /home/arifs.work/repair.arifs.work
             cd /home/arifs.work/repair.arifs.work
+            git checkout -- .
             git pull origin main
             chown -R arifs6965:arifs6965 /home/arifs.work/repair.arifs.work
+            killall -9 lsphp
