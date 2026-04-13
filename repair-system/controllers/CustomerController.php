@@ -319,7 +319,7 @@ class CustomerController
     {
         return [
             'full_name'      => Utils::sanitize($post['full_name'] ?? ''),
-            'client_type'    => in_array($post['client_type'] ?? '', ['individual','company','freelancer','colleague'])
+            'client_type'    => in_array($post['client_type'] ?? '', ['individual','company','colleague'])
                                     ? $post['client_type']
                                     : 'individual',
             'address'        => Utils::sanitize($post['address']        ?? ''),

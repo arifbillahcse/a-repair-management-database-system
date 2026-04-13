@@ -107,7 +107,6 @@ define('ROLE_HIERARCHY', [
 define('CLIENT_TYPES', [
     'individual'  => 'Individual',
     'company'     => 'Company',
-    'freelancer'  => 'Freelancer',
     'colleague'   => 'Colleague',
 ]);
 
