@@ -58,6 +58,7 @@ class Repair extends BaseModel
             "SELECT r.*,
                     c.full_name    AS customer_name,
                     c.phone_mobile AS customer_phone,
+                    c.client_type  AS customer_type,
                     CONCAT(s.first_name,' ',s.last_name) AS technician_name,
                     DATEDIFF(COALESCE(r.date_out, NOW()), r.date_in) AS days_in_lab
              FROM repairs r

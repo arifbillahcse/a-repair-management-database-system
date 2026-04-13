@@ -169,6 +169,7 @@ function rep_sortIcon(string $col): string
                     <th class="hide-mobile"><a href="<?= rep_sortUrl('customer_name') ?>" class="sort-lnk">Customer <?= rep_sortIcon('customer_name') ?></a></th>
                     <th><a href="<?= rep_sortUrl('status') ?>" class="sort-lnk">Status <?= rep_sortIcon('status') ?></a></th>
                     <th class="hide-mobile"><a href="<?= rep_sortUrl('date_in') ?>" class="sort-lnk">Date In <?= rep_sortIcon('date_in') ?></a></th>
+                    <th class="hide-t">Type</th>
                     <th class="hide-t"><a href="<?= rep_sortUrl('days_in_lab') ?>" class="sort-lnk">Days <?= rep_sortIcon('days_in_lab') ?></a></th>
                     <th class="hide-t" style="text-align:right"><a href="<?= rep_sortUrl('actual_amount') ?>" class="sort-lnk">Amount <?= rep_sortIcon('actual_amount') ?></a></th>
                     <th style="width:100px;text-align:right">Actions</th>
@@ -176,7 +177,7 @@ function rep_sortIcon(string $col): string
             </thead>
             <tbody>
             <?php if (empty($repairs)): ?>
-                <tr><td colspan="8">
+                <tr><td colspan="9">
                     <div class="empty-big">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
@@ -227,6 +228,16 @@ function rep_sortIcon(string $col): string
                     </td>
                     <td class="hide-mobile" style="font-size:.82rem;color:var(--text-secondary);white-space:nowrap">
                         <?= Utils::formatDate($r['date_in']) ?>
+                    </td>
+                    <td class="hide-t">
+                        <?php $ct = $r['customer_type'] ?? ''; ?>
+                        <?php if ($ct === 'colleague'): ?>
+                        <span class="badge badge-purple">Colleague</span>
+                        <?php elseif ($ct !== ''): ?>
+                        <span style="font-size:.78rem;color:var(--text-secondary);text-transform:capitalize"><?= Utils::e(CLIENT_TYPES[$ct] ?? $ct) ?></span>
+                        <?php else: ?>
+                        <span style="color:var(--text-muted)">—</span>
+                        <?php endif; ?>
                     </td>
                     <td class="hide-t">
                         <?php $days = (int)($r['days_in_lab'] ?? 0); ?>
