@@ -106,6 +106,29 @@ function rep_sortIcon(string $col): string
     </div>
 </div>
 
+<?php if ($custFilter && !empty($customerFilter)): ?>
+<div class="card" style="margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.6rem 1rem;flex-wrap:wrap">
+    <span style="font-size:.85rem;color:var(--text-secondary)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             style="width:14px;height:14px;vertical-align:-2px;margin-right:.3rem" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Showing repairs for
+        <a href="<?= BASE_URL ?>/customers/<?= $custFilter ?>"
+           style="font-weight:600;color:var(--text-primary);text-decoration:none"
+           onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-primary)'">
+            <?= Utils::e($customerFilter['full_name']) ?>
+        </a>
+    </span>
+    <a href="<?= BASE_URL ?>/repairs" class="btn btn-secondary" style="padding:.25rem .75rem;font-size:.78rem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             style="width:12px;height:12px" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>Clear filter
+    </a>
+</div>
+<?php endif; ?>
+
 <div class="card" style="margin-bottom:0">
 
     <!-- Status filter pills -->

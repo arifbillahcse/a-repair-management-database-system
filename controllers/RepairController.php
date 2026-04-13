@@ -22,12 +22,13 @@ class RepairController
         Auth::requireAuth();
 
         $filters = [
-            'status'    => $_GET['status']    ?? '',
-            'staff_id'  => $_GET['staff_id']  ?? '',
-            'search'    => $_GET['search']    ?? '',
-            'date_from' => $_GET['date_from'] ?? '',
-            'date_to'   => $_GET['date_to']   ?? '',
-            'order_by'  => $_GET['order_by']  ?? 'r.date_in DESC',
+            'status'      => $_GET['status']      ?? '',
+            'staff_id'    => $_GET['staff_id']    ?? '',
+            'customer_id' => $_GET['customer_id'] ?? '',
+            'search'      => $_GET['search']      ?? '',
+            'date_from'   => $_GET['date_from']   ?? '',
+            'date_to'     => $_GET['date_to']     ?? '',
+            'order_by'    => $_GET['order_by']    ?? 'r.date_in DESC',
         ];
 
         $page        = Utils::currentPage();
@@ -36,6 +37,11 @@ class RepairController
         $pagination  = $data['pagination'];
         $staffList   = $this->staffModel->getTechnicians();
         $statusCounts = $this->model->getStatusCounts();
+
+        $customerFilter = null;
+        if (!empty($filters['customer_id'])) {
+            $customerFilter = $this->customerModel->findById((int)$filters['customer_id']);
+        }
 
         require VIEWS_PATH . '/repairs/list.php';
     }
