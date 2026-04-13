@@ -19,7 +19,7 @@ define('BASE_URL', rtrim($_ENV['APP_URL'] ?? 'http://localhost/repair-system/pub
 
 // ── Application meta ──────────────────────────────────────────────────────────
 define('APP_NAME',    $_ENV['APP_NAME']  ?? 'Repair Management System');
-define('APP_VERSION', '1.0.0');
+define('APP_VERSION', '1.2.0');
 define('APP_ENV',     $_ENV['APP_ENV']   ?? 'production');
 define('APP_DEBUG',   filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN));
 
