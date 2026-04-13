@@ -52,11 +52,17 @@ require VIEWS_PATH . '/layouts/header.php';
                 <?= $customer['status'] === 'active'
                     ? '<span class="badge badge-green">Active</span>'
                     : '<span class="badge badge-gray">Inactive</span>' ?>
-                <?php if ($customer['client_type'] === 'colleague'): ?>
-                <span class="badge badge-purple">Colleague</span>
-                <?php else: ?>
-                <span class="badge badge-gray" style="text-transform:capitalize">
-                    <?= Utils::e(CLIENT_TYPES[$customer['client_type']] ?? $customer['client_type']) ?>
+                <?php if ($customer['client_type'] === 'individual'): ?>
+                <span class="badge badge-gray" style="display:inline-flex;align-items:center;gap:.25rem">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Individual
+                </span>
+                <?php elseif ($customer['client_type'] === 'company'): ?>
+                <span class="badge badge-red" style="display:inline-flex;align-items:center;gap:.25rem">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 21h18M3 7v14M21 7v14M3 7l9-4 9 4M9 21V12h6v9"/></svg>Company
+                </span>
+                <?php elseif ($customer['client_type'] === 'colleague'): ?>
+                <span class="badge badge-purple" style="display:inline-flex;align-items:center;gap:.25rem">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Colleague
                 </span>
                 <?php endif; ?>
                 <span class="profile-id">#<?= $customer['customer_id'] ?></span>
