@@ -206,8 +206,8 @@ class Repair extends BaseModel
         $like = '%' . $q . '%';
         return $this->db->fetchAll(
             "SELECT r.repair_id,
-                    CONCAT('#', r.repair_id, ' — ', COALESCE(r.device_model, '?')) AS label,
-                    CONCAT(COALESCE(c.full_name, 'No client'), ' · ', r.status)    AS meta
+                    CONCAT(COALESCE(c.full_name, 'No client'), ' · ', r.status)    AS label,
+                    CONCAT('#', r.repair_id, ' — ', COALESCE(r.device_model, '?')) AS meta
              FROM repairs r
              LEFT JOIN customers c ON c.customer_id = r.customer_id
              WHERE c.full_name LIKE ?
