@@ -60,11 +60,11 @@ $currentIdx  = array_search($repair['status'], $allStatuses, true);
 #lightboxClose{position:absolute;top:1rem;right:1.25rem;color:#fff;font-size:2rem;cursor:pointer;line-height:1;background:none;border:none;opacity:.8}
 #lightboxClose:hover{opacity:1}
 
-/* QR code */
+/* QR code disabled
 .qr-wrap{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1rem 1.25rem}
 .qr-code{width:140px;height:140px;border-radius:var(--radius);background:#fff;padding:6px;display:flex;align-items:center;justify-content:center}
 .qr-code img{width:100%;height:auto;display:block}
-.qr-value{font-size:.7rem;color:var(--text-muted);font-family:var(--font-mono)}
+.qr-value{font-size:.7rem;color:var(--text-muted);font-family:var(--font-mono)} */
 
 /* Amount summary */
 .amount-row{display:flex;justify-content:space-between;align-items:baseline;padding:.5rem 1.25rem;border-bottom:1px solid var(--border);font-size:.86rem}
@@ -281,7 +281,7 @@ $currentIdx  = array_search($repair['status'], $allStatuses, true);
             </ul>
         </div>
 
-        <!-- QR Code -->
+        <?php /* QR Code section disabled
         <div class="section-card">
             <div class="section-header"><h2 class="section-title">QR Code</h2></div>
             <div class="qr-wrap">
@@ -304,6 +304,7 @@ $currentIdx  = array_search($repair['status'], $allStatuses, true);
                 </p>
             </div>
         </div>
+        */ ?>
 
         <!-- Amounts -->
         <div class="section-card">

@@ -121,7 +121,8 @@ $router->post('/repairs/:id/photo',        'RepairController@uploadPhoto');
 $router->post('/repairs/:id/photo/delete', 'RepairController@deletePhoto');
 $router->get( '/repairs/:id/print',        'RepairController@printRepair');
 $router->get( '/api/customers/search',     'RepairController@customerSearch');
-$router->get( '/api/repairs/qr',           'RepairController@qrLookup');
+$router->get( '/api/repairs/search',       'RepairController@repairSearch');
+// $router->get( '/api/repairs/qr',           'RepairController@qrLookup'); // QR disabled
 
 // Customers
 $router->get( '/customers',                'CustomerController@index');

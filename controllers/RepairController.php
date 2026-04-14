@@ -103,9 +103,11 @@ class RepairController
         $data = $this->prepareData($_POST);
         $id   = $this->model->create($data);
 
+        /* QR code generation disabled
         // Generate and persist QR code
         $qrCode = $this->model->generateQRCode($id);
         $this->model->update($id, ['qr_code' => $qrCode]);
+        */
 
         // Handle photo upload if submitted with creation
         $this->handlePhotoUploads($id);
@@ -292,6 +294,19 @@ class RepairController
         exit;
     }
 
+    // ── AJAX: repair autocomplete (repairs list page search) ─────────────────
+
+    public function repairSearch(): void
+    {
+        Auth::requireAuth();
+        $q    = trim($_GET['q'] ?? '');
+        $rows = $this->model->autocomplete($q, 12);
+        header('Content-Type: application/json');
+        echo json_encode($rows);
+        exit;
+    }
+
+    /* QR code scan lookup disabled
     // ── AJAX: QR code scan lookup ─────────────────────────────────────────────
 
     public function qrLookup(): void
@@ -308,6 +323,7 @@ class RepairController
         }
         exit;
     }
+    */
 
     // ── Private helpers ───────────────────────────────────────────────────────
 

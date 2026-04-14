@@ -45,8 +45,8 @@ function rep_sortIcon(string $col): string
 .sf-btn-purple:hover,.sf-btn-purple.active{background:rgba(168,85,247,.12);border-color:#a855f7;color:#a855f7}
 .filter-bar{display:flex;gap:.5rem;padding:.75rem 1rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border)}
 .filter-bar .search-input-wrap{flex:1;min-width:200px}
-.qr-wrap{display:flex;gap:.35rem;align-items:center}
-.qr-input{width:180px;font-size:.82rem;padding:.35rem .6rem}
+/* .qr-wrap{display:flex;gap:.35rem;align-items:center}
+.qr-input{width:180px;font-size:.82rem;padding:.35rem .6rem} */
 .sort-lnk{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:1px;white-space:nowrap}
 .sort-lnk:hover{color:var(--accent)}
 .rep-id-link{font-weight:700;color:var(--text-primary);text-decoration:none}
@@ -72,7 +72,7 @@ function rep_sortIcon(string $col): string
 @media(min-width:700px){.hide-mobile{display:table-cell}}
 .hide-t{display:none}
 @media(min-width:1000px){.hide-t{display:table-cell}}
-#qrResult{font-size:.78rem;color:var(--text-muted);margin-left:.25rem}
+/* #qrResult{font-size:.78rem;color:var(--text-muted);margin-left:.25rem} */
 </style>
 
 <!-- Page header -->
@@ -181,8 +181,9 @@ function rep_sortIcon(string $col): string
             <input type="search" name="search" class="form-input"
                    placeholder="Search ID, client, device, serial…"
                    value="<?= $search ?>" autocomplete="off" aria-label="Search repairs"
-                   data-ac-url="<?= BASE_URL ?>/api/customers/autocomplete"
-                   data-ac-href="<?= BASE_URL ?>/customers/{id}">
+                   data-ac-url="<?= BASE_URL ?>/api/repairs/search"
+                   data-ac-href="<?= BASE_URL ?>/repairs/{id}/edit"
+                   data-ac-id-field="repair_id">
         </div>
         <?php if ($custFilter): ?>
         <input type="hidden" name="customer_id" value="<?= $custFilter ?>">
@@ -196,7 +197,7 @@ function rep_sortIcon(string $col): string
         <a href="<?= BASE_URL ?>/repairs" class="btn btn-secondary">Clear</a>
         <?php endif; ?>
 
-        <!-- QR scan -->
+        <?php /* QR scan disabled
         <div class="qr-wrap" style="margin-left:auto">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                  style="width:16px;height:16px;color:var(--text-muted)" aria-hidden="true">
@@ -207,6 +208,7 @@ function rep_sortIcon(string $col): string
                    placeholder="Scan QR code…" autocomplete="off" aria-label="QR code scan">
             <span id="qrResult"></span>
         </div>
+        */ ?>
     </form>
 
     <!-- Table -->
@@ -371,7 +373,7 @@ function rep_sortIcon(string $col): string
 </div>
 
 <script>
-// QR code scan → redirect to repair
+/* QR code scan disabled
 (function () {
     const inp = document.getElementById('qrInput');
     const res = document.getElementById('qrResult');
@@ -397,6 +399,7 @@ function rep_sortIcon(string $col): string
             .catch(() => { res.style.color = 'var(--error)'; res.textContent = 'Error'; });
     });
 })();
+*/
 
 // Confirm dangerous actions
 document.querySelectorAll('[data-confirm]').forEach(function (el) {

@@ -201,7 +201,8 @@
         }
 
         function navigate(row) {
-            window.location.href = activeHref.replace('{id}', row.customer_id);
+            var idField = (activeInput && activeInput.getAttribute('data-ac-id-field')) || 'customer_id';
+            window.location.href = activeHref.replace('{id}', row[idField]);
         }
 
         function setActive(idx) {
@@ -216,15 +217,24 @@
             activeIndex = -1;
 
             if (!rows.length) {
-                dropdown.innerHTML    = '<div class="ac-empty">No customers found.</div>';
+                dropdown.innerHTML    = '<div class="ac-empty">No results found.</div>';
                 dropdown.style.display = 'block';
                 return;
             }
 
             dropdown.innerHTML = rows.map(function (row, i) {
-                var meta = [row.phone_mobile, row.city].filter(Boolean).join(' · ');
+                var name, meta;
+                if (row.label !== undefined) {
+                    // Repair search mode: fields are label + meta
+                    name = row.label;
+                    meta = row.meta || '';
+                } else {
+                    // Customer search mode: fields are full_name + phone/city
+                    name = row.full_name;
+                    meta = [row.phone_mobile, row.city].filter(Boolean).join(' · ');
+                }
                 return '<div class="ac-item" data-idx="' + i + '">' +
-                    '<span class="ac-name">' + escHtml(row.full_name) + '</span>' +
+                    '<span class="ac-name">' + escHtml(name) + '</span>' +
                     (meta ? '<span class="ac-meta">' + escHtml(meta) + '</span>' : '') +
                     '</div>';
             }).join('') +
