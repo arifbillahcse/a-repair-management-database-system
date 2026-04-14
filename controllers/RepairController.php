@@ -294,6 +294,18 @@ class RepairController
         exit;
     }
 
+    // ── AJAX: repair autocomplete (repairs list page search) ─────────────────
+
+    public function repairSearch(): void
+    {
+        Auth::requireAuth();
+        $q    = trim($_GET['q'] ?? '');
+        $rows = $this->model->autocomplete($q, 12);
+        header('Content-Type: application/json');
+        echo json_encode($rows);
+        exit;
+    }
+
     /* QR code scan lookup disabled
     // ── AJAX: QR code scan lookup ─────────────────────────────────────────────
 

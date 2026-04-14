@@ -181,8 +181,9 @@ function rep_sortIcon(string $col): string
             <input type="search" name="search" class="form-input"
                    placeholder="Search ID, client, device, serial…"
                    value="<?= $search ?>" autocomplete="off" aria-label="Search repairs"
-                   data-ac-url="<?= BASE_URL ?>/api/customers/autocomplete"
-                   data-ac-href="<?= BASE_URL ?>/customers/{id}">
+                   data-ac-url="<?= BASE_URL ?>/api/repairs/search"
+                   data-ac-href="<?= BASE_URL ?>/repairs/{id}/edit"
+                   data-ac-id-field="repair_id">
         </div>
         <?php if ($custFilter): ?>
         <input type="hidden" name="customer_id" value="<?= $custFilter ?>">

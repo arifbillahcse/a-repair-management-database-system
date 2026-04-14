@@ -199,6 +199,27 @@ class Repair extends BaseModel
         );
     }
 
+    // ── Autocomplete search (repairs page live search) ────────────────────────
+
+    public function autocomplete(string $q, int $limit = 12): array
+    {
+        $like = '%' . $q . '%';
+        return $this->db->fetchAll(
+            "SELECT r.repair_id,
+                    CONCAT('#', r.repair_id, ' — ', COALESCE(r.device_model, '?')) AS label,
+                    CONCAT(COALESCE(c.full_name, 'No client'), ' · ', r.status)    AS meta
+             FROM repairs r
+             LEFT JOIN customers c ON c.customer_id = r.customer_id
+             WHERE c.full_name LIKE ?
+                OR r.device_model LIKE ?
+                OR r.device_serial_number LIKE ?
+                OR CAST(r.repair_id AS CHAR) LIKE ?
+             ORDER BY r.date_in DESC
+             LIMIT ?",
+            [$like, $like, $like, $like, $limit]
+        );
+    }
+
     // ── QR / numbering ────────────────────────────────────────────────────────
 
     public function generateQRCode(int $repairId): string
