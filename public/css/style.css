@@ -426,6 +426,8 @@ img { max-width: 100%; height: auto; }
 .stat-icon-green  { background: #d1fae5; color: var(--success); }
 .stat-icon-orange { background: #fef3c7; color: var(--warning); }
 .stat-icon-accent { background: #d1fae5; color: var(--accent); }
+.stat-icon-purple { background: #f3e8ff; color: #a855f7; }
+.stat-icon-cyan   { background: #cffafe; color: #0891b2; }
 
 .stat-body { flex: 1; min-width: 0; }
 .stat-value { font-size: 1.6rem; font-weight: 700; line-height: 1; margin-bottom: .2rem; }
