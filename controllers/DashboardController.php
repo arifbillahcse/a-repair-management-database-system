@@ -28,6 +28,9 @@ class DashboardController
         $staffStats    = $this->staffModel->getRepairStats();
         $monthlyRev    = $this->repairModel->getMonthlyRevenue(12);
 
+        $totalCustomers = $this->customerModel->count();
+        $totalInvoices  = $this->invoiceModel->count();
+
         require VIEWS_PATH . '/dashboard/index.php';
     }
 }
