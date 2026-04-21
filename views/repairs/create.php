@@ -165,6 +165,17 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                 </div>
             </div>
 
+            <!-- Note -->
+            <div class="card">
+                <div class="card-header"><h2 class="card-title">Note</h2></div>
+                <div class="card-body">
+                    <div class="form-group" style="margin-bottom:0">
+                        <textarea id="repairNote" name="notes" class="form-input" rows="3" maxlength="2000"
+                                  placeholder="Add a note about this repair…"><?= Utils::e($fd['notes'] ?? '') ?></textarea>
+                    </div>
+                </div>
+            </div>
+
             <!-- Photos -->
             <div class="card">
                 <div class="card-header"><h2 class="card-title">Photos</h2></div>
@@ -182,17 +193,6 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                         <input type="file" id="photoInput" name="photos[]" accept="image/*" multiple>
                     </div>
                     <div class="photo-preview-grid" id="photoPreview"></div>
-                </div>
-            </div>
-
-            <!-- Note -->
-            <div class="card">
-                <div class="card-header"><h2 class="card-title">Note</h2></div>
-                <div class="card-body">
-                    <div class="form-group" style="margin-bottom:0">
-                        <textarea id="repairNote" name="notes" class="form-input" rows="3" maxlength="2000"
-                                  placeholder="Add a note about this repair…"><?= Utils::e($fd['notes'] ?? '') ?></textarea>
-                    </div>
                 </div>
             </div>
 
