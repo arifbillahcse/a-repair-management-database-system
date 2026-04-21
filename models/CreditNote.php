@@ -4,6 +4,47 @@ class CreditNote extends BaseModel
     protected string $table      = 'credit_notes';
     protected string $primaryKey = 'cn_id';
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->ensureTables();
+    }
+
+    private function ensureTables(): void
+    {
+        $pdo = $this->db->getPdo();
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `credit_notes` (
+            `cn_id`            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+            `cn_number`        INT UNSIGNED    NOT NULL,
+            `cn_date`          DATE            NOT NULL,
+            `customer_name`    VARCHAR(200)    NOT NULL DEFAULT '',
+            `customer_address` VARCHAR(500)    NOT NULL DEFAULT '',
+            `customer_vat`     VARCHAR(50)     NOT NULL DEFAULT '',
+            `note`             TEXT                     DEFAULT NULL,
+            `created_by`       INT UNSIGNED             DEFAULT NULL,
+            `created_at`       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated_at`       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (`cn_id`),
+            UNIQUE KEY `uk_cn_number` (`cn_number`),
+            KEY `idx_cn_date` (`cn_date`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `credit_note_items` (
+            `item_id`      INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+            `cn_id`        INT UNSIGNED    NOT NULL,
+            `description`  TEXT            NOT NULL,
+            `basic_amount` DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+            `vat_amount`   DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+            `net_amount`   DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+            `created_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`item_id`),
+            KEY `idx_cni_cn_id` (`cn_id`),
+            CONSTRAINT `fk_cni_cn`
+                FOREIGN KEY (`cn_id`) REFERENCES `credit_notes` (`cn_id`)
+                ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+
     public function findById(int $id): ?array
     {
         $cn = $this->db->fetchOne(
