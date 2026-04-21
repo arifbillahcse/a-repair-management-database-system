@@ -294,12 +294,13 @@ class Repair extends BaseModel
     private function sanitizeOrderBy(string $raw): string
     {
         $allowed = [
+            'r.repair_id DESC', 'r.repair_id ASC',
             'r.date_in DESC', 'r.date_in ASC',
             'r.created_at DESC', 'r.created_at ASC',
             'days_in_lab DESC', 'days_in_lab ASC',
             'c.full_name ASC', 'c.full_name DESC',
             'r.status ASC',
         ];
-        return in_array($raw, $allowed, true) ? $raw : 'r.date_in DESC';
+        return in_array($raw, $allowed, true) ? $raw : 'r.repair_id DESC';
     }
 }
