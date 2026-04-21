@@ -259,7 +259,7 @@ $statusFlow  = REPAIR_STATUS_FLOW[$repair['status']] ?? [];
                                    data-validate="required" required>
                         </div>
                         <div class="form-group" style="margin-bottom:0">
-                            <label class="form-label" for="dateExpected">Expected Out</label>
+                            <label class="form-label" for="dateExpected">Out Date/Delivery</label>
                             <input type="date" id="dateExpected" name="date_expected_out" class="form-input"
                                    value="<?= Utils::e(substr($fd['date_expected_out'] ?? '', 0, 10)) ?>">
                         </div>

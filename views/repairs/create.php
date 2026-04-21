@@ -248,7 +248,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                             <?php if (isset($err['date_in'])): ?><div class="invalid-feedback"><?= Utils::e($err['date_in']) ?></div><?php endif; ?>
                         </div>
                         <div class="form-group" style="margin-bottom:0">
-                            <label class="form-label" for="dateExpected">Expected Completion</label>
+                            <label class="form-label" for="dateExpected">Out Date/Delivery</label>
                             <input type="date" id="dateExpected" name="date_expected_out" class="form-input"
                                    value="<?= Utils::e($fd['date_expected_out'] ?? '') ?>">
                         </div>
