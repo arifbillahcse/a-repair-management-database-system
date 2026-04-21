@@ -12,7 +12,7 @@ class AdminController
 
     public function settings(): void
     {
-        Auth::requireRole('admin');
+        Auth::requireRole('manager');
 
         $db      = Database::getInstance();
         $company = $db->fetchOne("SELECT * FROM company_settings LIMIT 1") ?? [];
