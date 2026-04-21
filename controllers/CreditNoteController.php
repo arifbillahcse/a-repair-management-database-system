@@ -60,6 +60,11 @@ class CreditNoteController
         $id = $this->model->create([
             'cn_number'        => (int)$_POST['cn_number'],
             'cn_date'          => $_POST['cn_date'],
+            'company_name'     => Utils::sanitize($_POST['company_name']     ?? ''),
+            'company_address'  => Utils::sanitize($_POST['company_address']  ?? ''),
+            'company_phone'    => Utils::sanitize($_POST['company_phone']    ?? ''),
+            'company_email'    => Utils::sanitize($_POST['company_email']    ?? ''),
+            'company_vat'      => Utils::sanitize($_POST['company_vat']      ?? ''),
             'customer_name'    => Utils::sanitize($_POST['customer_name']    ?? ''),
             'customer_address' => Utils::sanitize($_POST['customer_address'] ?? ''),
             'customer_vat'     => Utils::sanitize($_POST['customer_vat']     ?? ''),
@@ -123,6 +128,11 @@ class CreditNoteController
         $this->model->update($id, [
             'cn_number'        => (int)$_POST['cn_number'],
             'cn_date'          => $_POST['cn_date'],
+            'company_name'     => Utils::sanitize($_POST['company_name']     ?? ''),
+            'company_address'  => Utils::sanitize($_POST['company_address']  ?? ''),
+            'company_phone'    => Utils::sanitize($_POST['company_phone']    ?? ''),
+            'company_email'    => Utils::sanitize($_POST['company_email']    ?? ''),
+            'company_vat'      => Utils::sanitize($_POST['company_vat']      ?? ''),
             'customer_name'    => Utils::sanitize($_POST['customer_name']    ?? ''),
             'customer_address' => Utils::sanitize($_POST['customer_address'] ?? ''),
             'customer_vat'     => Utils::sanitize($_POST['customer_vat']     ?? ''),
@@ -162,9 +172,8 @@ class CreditNoteController
     public function printCN(int $id): void
     {
         Auth::requireAuth();
-        $cn      = $this->model->findById($id);
+        $cn = $this->model->findById($id);
         if (!$cn) { $this->notFound(); }
-        $company = Database::getInstance()->fetchOne("SELECT * FROM company_settings LIMIT 1") ?? [];
         require VIEWS_PATH . '/credit-notes/print.php';
     }
 
@@ -178,6 +187,9 @@ class CreditNoteController
         }
         if (empty($data['cn_date'])) {
             $errors['cn_date'] = 'Date is required.';
+        }
+        if (empty(trim($data['company_name'] ?? ''))) {
+            $errors['company_name'] = 'Company name is required.';
         }
         if (empty(trim($data['customer_name'] ?? ''))) {
             $errors['customer_name'] = 'Customer name is required.';

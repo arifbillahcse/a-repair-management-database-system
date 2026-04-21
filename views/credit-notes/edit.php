@@ -68,6 +68,39 @@ $items = $cn['items'] ?? [['description'=>'','basic_amount'=>'','vat_amount'=>''
             </div>
 
             <div class="card">
+                <div class="card-header"><h2 class="card-title">Company / Issuer</h2></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label" for="company_name">Company Name <span class="required">*</span></label>
+                        <input type="text" id="company_name" name="company_name" class="form-input <?= isset($errors['company_name']) ? 'is-invalid' : '' ?>"
+                               value="<?= Utils::e($fd['company_name'] ?? $cn['company_name'] ?? '') ?>" maxlength="200" placeholder="Your company or shop name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="company_address">Address</label>
+                        <textarea id="company_address" name="company_address" class="form-input" rows="2"
+                                  placeholder="Street, City, Country"><?= Utils::e($fd['company_address'] ?? $cn['company_address'] ?? '') ?></textarea>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label" for="company_phone">Phone</label>
+                            <input type="text" id="company_phone" name="company_phone" class="form-input"
+                                   value="<?= Utils::e($fd['company_phone'] ?? $cn['company_phone'] ?? '') ?>" maxlength="50" placeholder="+1 234 567 8900">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="company_email">Email</label>
+                            <input type="text" id="company_email" name="company_email" class="form-input"
+                                   value="<?= Utils::e($fd['company_email'] ?? $cn['company_email'] ?? '') ?>" maxlength="150" placeholder="info@company.com">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label" for="company_vat">VAT N°</label>
+                        <input type="text" id="company_vat" name="company_vat" class="form-input"
+                               value="<?= Utils::e($fd['company_vat'] ?? $cn['company_vat'] ?? '') ?>" maxlength="50">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
                 <div class="card-header"><h2 class="card-title">Customer Details</h2></div>
                 <div class="card-body">
                     <div class="form-group">

@@ -3,8 +3,9 @@ $pageTitle = 'Credit Note #' . $cn['cn_number'];
 require VIEWS_PATH . '/layouts/header.php';
 ?>
 <style>
-.cn-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
-@media(max-width:900px){.cn-detail-grid{grid-template-columns:1fr}}
+.cn-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:1.5rem}
+@media(max-width:1100px){.cn-detail-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.cn-detail-grid{grid-template-columns:1fr}}
 .info-list{list-style:none;padding:0;margin:0}
 .info-item{display:flex;gap:.75rem;padding:.6rem 1.25rem;border-bottom:1px solid var(--border)}
 .info-item:last-child{border-bottom:none}
@@ -52,6 +53,34 @@ require VIEWS_PATH . '/layouts/header.php';
             <li class="info-item">
                 <div><span class="info-label">Date</span><span class="info-value"><?= Utils::formatDate($cn['cn_date']) ?></span></div>
             </li>
+        </ul>
+    </div>
+    <div class="card">
+        <div class="card-header"><h2 class="card-title">Company / Issuer</h2></div>
+        <ul class="info-list">
+            <li class="info-item">
+                <div><span class="info-label">Company Name</span><span class="info-value" style="font-weight:600"><?= Utils::e($cn['company_name'] ?: '—') ?></span></div>
+            </li>
+            <?php if (!empty($cn['company_address'])): ?>
+            <li class="info-item">
+                <div><span class="info-label">Address</span><span class="info-value" style="white-space:pre-wrap"><?= Utils::e($cn['company_address']) ?></span></div>
+            </li>
+            <?php endif; ?>
+            <?php if (!empty($cn['company_phone'])): ?>
+            <li class="info-item">
+                <div><span class="info-label">Phone</span><span class="info-value"><?= Utils::e($cn['company_phone']) ?></span></div>
+            </li>
+            <?php endif; ?>
+            <?php if (!empty($cn['company_email'])): ?>
+            <li class="info-item">
+                <div><span class="info-label">Email</span><span class="info-value"><?= Utils::e($cn['company_email']) ?></span></div>
+            </li>
+            <?php endif; ?>
+            <?php if (!empty($cn['company_vat'])): ?>
+            <li class="info-item">
+                <div><span class="info-label">VAT N°</span><span class="info-value" style="font-family:var(--font-mono)"><?= Utils::e($cn['company_vat']) ?></span></div>
+            </li>
+            <?php endif; ?>
         </ul>
     </div>
     <div class="card">
