@@ -103,8 +103,11 @@ function cnAmountToWords(float $amount): string
     <div class="doc-header">
         <div class="company-name"><?= Utils::e($company['company_name'] ?? APP_NAME) ?></div>
         <div class="company-sub">
-            <?php if (!empty($company['address'])): ?><?= Utils::e($company['address']) ?><br><?php endif; ?>
-            <?php if (!empty($company['vat_number'])): ?>VAT Number: <?= Utils::e($company['vat_number']) ?><?php endif; ?>
+            <?php if (!empty($company['company_address'])): ?><?= nl2br(Utils::e($company['company_address'])) ?><br><?php endif; ?>
+            <?php if (!empty($company['company_phone'])): ?>Tel: <?= Utils::e($company['company_phone']) ?><?php endif; ?>
+            <?php if (!empty($company['company_phone']) && !empty($company['company_email'])): ?> &nbsp;·&nbsp; <?php endif; ?>
+            <?php if (!empty($company['company_email'])): ?>Email: <?= Utils::e($company['company_email']) ?><?php endif; ?>
+            <?php if (!empty($company['vat_number'])): ?><br>VAT Number: <?= Utils::e($company['vat_number']) ?><?php endif; ?>
         </div>
     </div>
 
