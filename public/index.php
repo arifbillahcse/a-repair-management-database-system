@@ -145,6 +145,16 @@ $router->post('/credit-notes/:id',             'CreditNoteController@update');
 $router->post('/credit-notes/:id/delete',      'CreditNoteController@destroy');
 $router->get( '/credit-notes/:id/print',       'CreditNoteController@printCN');
 
+// Personal Notes
+$router->get( '/personal-notes',               'PersonalNoteController@index');
+$router->get( '/personal-notes/create',        'PersonalNoteController@create');
+$router->post('/personal-notes',               'PersonalNoteController@store');
+$router->get( '/personal-notes/:id',           'PersonalNoteController@show');
+$router->get( '/personal-notes/:id/edit',      'PersonalNoteController@edit');
+$router->post('/personal-notes/:id',           'PersonalNoteController@update');
+$router->post('/personal-notes/:id/delete',    'PersonalNoteController@destroy');
+$router->post('/personal-notes/:id/toggle',    'PersonalNoteController@toggle');
+
 // Invoices
 $router->get( '/invoices',                 'InvoiceController@index');
 $router->post('/invoices',                 'InvoiceController@store');
