@@ -101,13 +101,13 @@ function cnAmountToWords(float $amount): string
 
     <!-- Company header -->
     <div class="doc-header">
-        <div class="company-name"><?= Utils::e($company['company_name'] ?? APP_NAME) ?></div>
+        <div class="company-name"><?= Utils::e($cn['company_name'] ?: APP_NAME) ?></div>
         <div class="company-sub">
-            <?php if (!empty($company['company_address'])): ?><?= nl2br(Utils::e($company['company_address'])) ?><br><?php endif; ?>
-            <?php if (!empty($company['company_phone'])): ?>Tel: <?= Utils::e($company['company_phone']) ?><?php endif; ?>
-            <?php if (!empty($company['company_phone']) && !empty($company['company_email'])): ?> &nbsp;·&nbsp; <?php endif; ?>
-            <?php if (!empty($company['company_email'])): ?>Email: <?= Utils::e($company['company_email']) ?><?php endif; ?>
-            <?php if (!empty($company['vat_number'])): ?><br>VAT Number: <?= Utils::e($company['vat_number']) ?><?php endif; ?>
+            <?php if (!empty($cn['company_address'])): ?><?= nl2br(Utils::e($cn['company_address'])) ?><br><?php endif; ?>
+            <?php if (!empty($cn['company_phone'])): ?>Tel: <?= Utils::e($cn['company_phone']) ?><?php endif; ?>
+            <?php if (!empty($cn['company_phone']) && !empty($cn['company_email'])): ?> &nbsp;·&nbsp; <?php endif; ?>
+            <?php if (!empty($cn['company_email'])): ?>Email: <?= Utils::e($cn['company_email']) ?><?php endif; ?>
+            <?php if (!empty($cn['company_vat'])): ?><br>VAT: <?= Utils::e($cn['company_vat']) ?><?php endif; ?>
         </div>
     </div>
 
@@ -195,7 +195,7 @@ function cnAmountToWords(float $amount): string
 
     <!-- Page footer -->
     <div class="page-footer">
-        <span><?= Utils::e($company['company_name'] ?? APP_NAME) ?></span>
+        <span><?= Utils::e($cn['company_name'] ?: APP_NAME) ?></span>
         <span>Credit Note #<?= $cn['cn_number'] ?> &nbsp;·&nbsp; Printed <?= date('d/m/Y H:i') ?></span>
     </div>
 

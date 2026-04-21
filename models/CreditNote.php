@@ -17,6 +17,11 @@ class CreditNote extends BaseModel
             `cn_id`            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
             `cn_number`        INT UNSIGNED    NOT NULL,
             `cn_date`          DATE            NOT NULL,
+            `company_name`     VARCHAR(200)    NOT NULL DEFAULT '',
+            `company_address`  VARCHAR(500)    NOT NULL DEFAULT '',
+            `company_phone`    VARCHAR(50)     NOT NULL DEFAULT '',
+            `company_email`    VARCHAR(150)    NOT NULL DEFAULT '',
+            `company_vat`      VARCHAR(50)     NOT NULL DEFAULT '',
             `customer_name`    VARCHAR(200)    NOT NULL DEFAULT '',
             `customer_address` VARCHAR(500)    NOT NULL DEFAULT '',
             `customer_vat`     VARCHAR(50)     NOT NULL DEFAULT '',
@@ -43,6 +48,24 @@ class CreditNote extends BaseModel
                 FOREIGN KEY (`cn_id`) REFERENCES `credit_notes` (`cn_id`)
                 ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        // Add company columns to existing tables that predate this feature
+        $existing = array_column(
+            $pdo->query("SHOW COLUMNS FROM `credit_notes`")->fetchAll(PDO::FETCH_ASSOC),
+            'Field'
+        );
+        $newCols = [
+            'company_name'    => "VARCHAR(200) NOT NULL DEFAULT '' AFTER `cn_date`",
+            'company_address' => "VARCHAR(500) NOT NULL DEFAULT '' AFTER `company_name`",
+            'company_phone'   => "VARCHAR(50)  NOT NULL DEFAULT '' AFTER `company_address`",
+            'company_email'   => "VARCHAR(150) NOT NULL DEFAULT '' AFTER `company_phone`",
+            'company_vat'     => "VARCHAR(50)  NOT NULL DEFAULT '' AFTER `company_email`",
+        ];
+        foreach ($newCols as $col => $def) {
+            if (!in_array($col, $existing)) {
+                $pdo->exec("ALTER TABLE `credit_notes` ADD COLUMN `{$col}` {$def}");
+            }
+        }
     }
 
     public function findById(int $id): ?array
