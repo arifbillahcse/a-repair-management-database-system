@@ -222,7 +222,7 @@ function rep_sortIcon(string $col): string
                     <th class="hide-mobile">Type</th>
                     <th><a href="<?= rep_sortUrl('status') ?>" class="sort-lnk">Status <?= rep_sortIcon('status') ?></a></th>
                     <th class="hide-t"><a href="<?= rep_sortUrl('date_in') ?>" class="sort-lnk">Date In <?= rep_sortIcon('date_in') ?></a></th>
-                    <th class="hide-t"><a href="<?= rep_sortUrl('days_in_lab') ?>" class="sort-lnk">Days <?= rep_sortIcon('days_in_lab') ?></a></th>
+                    <th class="hide-t"><a href="<?= rep_sortUrl('date_out') ?>" class="sort-lnk">Out Date/Delivery <?= rep_sortIcon('date_out') ?></a></th>
                     <th class="hide-t" style="text-align:right"><a href="<?= rep_sortUrl('actual_amount') ?>" class="sort-lnk">Amount <?= rep_sortIcon('actual_amount') ?></a></th>
                     <th style="width:100px;text-align:right">Actions</th>
                 </tr>
@@ -299,11 +299,8 @@ function rep_sortIcon(string $col): string
                     <td class="hide-t" style="font-size:.82rem;color:var(--text-secondary);white-space:nowrap">
                         <?= Utils::formatDate($r['date_in']) ?>
                     </td>
-                    <td class="hide-t">
-                        <?php $days = (int)($r['days_in_lab'] ?? 0); ?>
-                        <span class="<?= $days > 14 ? 'days-over' : ($days > 7 ? 'days-warn' : 'days-ok') ?>" style="font-size:.83rem">
-                            <?= $days ?>d
-                        </span>
+                    <td class="hide-t" style="font-size:.82rem;color:var(--text-secondary);white-space:nowrap">
+                        <?= Utils::formatDate($r['date_out'] ?? $r['date_expected_out'] ?? '—') ?>
                     </td>
                     <td class="hide-t" style="text-align:right;font-size:.83rem">
                         <?php if (!empty($r['actual_amount'])): ?>
