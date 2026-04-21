@@ -185,6 +185,17 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                 </div>
             </div>
 
+            <!-- Note -->
+            <div class="card">
+                <div class="card-header"><h2 class="card-title">Note</h2></div>
+                <div class="card-body">
+                    <div class="form-group" style="margin-bottom:0">
+                        <textarea id="repairNote" name="notes" class="form-input" rows="3" maxlength="2000"
+                                  placeholder="Add a note about this repair…"><?= Utils::e($fd['notes'] ?? '') ?></textarea>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- ── RIGHT COLUMN ────────────────────────────────────────────── -->
@@ -237,7 +248,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                             <?php if (isset($err['date_in'])): ?><div class="invalid-feedback"><?= Utils::e($err['date_in']) ?></div><?php endif; ?>
                         </div>
                         <div class="form-group" style="margin-bottom:0">
-                            <label class="form-label" for="dateExpected">Expected Completion</label>
+                            <label class="form-label" for="dateExpected">Out Date/Delivery</label>
                             <input type="date" id="dateExpected" name="date_expected_out" class="form-input"
                                    value="<?= Utils::e($fd['date_expected_out'] ?? '') ?>">
                         </div>
