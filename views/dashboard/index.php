@@ -67,19 +67,6 @@ $monthlyStats = $monthlyStats ?? [];
         <a href="<?= BASE_URL ?>/repairs" class="stat-link" aria-label="View all repairs">→</a>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-icon stat-icon-accent">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <line x1="12" y1="1" x2="12" y2="23"/>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
-        </div>
-        <div class="stat-body">
-            <div class="stat-value"><?= Utils::formatCurrency($monthlyStats['total_revenue'] ?? 0) ?></div>
-            <div class="stat-label">Revenue This Month</div>
-        </div>
-        <a href="<?= BASE_URL ?>/invoices" class="stat-link" aria-label="View invoices">→</a>
-    </div>
 
 </div>
 
@@ -179,29 +166,6 @@ $monthlyStats = $monthlyStats ?? [];
         </div>
         <?php endif; ?>
 
-        <!-- Staff stats -->
-        <?php if (!empty($staffStats) && Auth::can('manager')): ?>
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Staff Performance</h2>
-            </div>
-            <ul class="staff-stat-list">
-                <?php foreach ($staffStats as $s): ?>
-                <li class="staff-stat-item">
-                    <div class="user-avatar user-avatar-sm">
-                        <?= strtoupper(substr($s['full_name'], 0, 1)) ?>
-                    </div>
-                    <div class="staff-stat-info">
-                        <span class="staff-stat-name"><?= Utils::e($s['full_name']) ?></span>
-                        <span class="staff-stat-count">
-                            <?= $s['total_repairs'] ?> total · <?= $s['completed'] ?> completed
-                        </span>
-                    </div>
-                </li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-        <?php endif; ?>
 
     </aside>
 
