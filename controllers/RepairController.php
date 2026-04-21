@@ -29,7 +29,7 @@ class RepairController
             'search'      => $_GET['search']      ?? '',
             'date_from'   => $_GET['date_from']   ?? '',
             'date_to'     => $_GET['date_to']     ?? '',
-            'order_by'    => $_GET['order_by']    ?? 'r.date_in DESC',
+            'order_by'    => $_GET['order_by']    ?? 'r.repair_id DESC',
         ];
 
         $page        = Utils::currentPage();

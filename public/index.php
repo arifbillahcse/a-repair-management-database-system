@@ -135,6 +135,16 @@ $router->post('/customers/:id',            'CustomerController@update');
 $router->post('/customers/:id/delete',     'CustomerController@destroy');
 $router->get( '/api/customers/autocomplete','CustomerController@autocomplete'); // AJAX
 
+// Credit Notes
+$router->get( '/credit-notes',                 'CreditNoteController@index');
+$router->get( '/credit-notes/create',          'CreditNoteController@create');
+$router->post('/credit-notes',                 'CreditNoteController@store');
+$router->get( '/credit-notes/:id',             'CreditNoteController@show');
+$router->get( '/credit-notes/:id/edit',        'CreditNoteController@edit');
+$router->post('/credit-notes/:id',             'CreditNoteController@update');
+$router->post('/credit-notes/:id/delete',      'CreditNoteController@destroy');
+$router->get( '/credit-notes/:id/print',       'CreditNoteController@printCN');
+
 // Invoices
 $router->get( '/invoices',                 'InvoiceController@index');
 $router->post('/invoices',                 'InvoiceController@store');
