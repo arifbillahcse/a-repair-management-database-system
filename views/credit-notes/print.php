@@ -1,4 +1,13 @@
 <?php
+$db = Database::getInstance();
+$settings = $db->fetchOne("SELECT signature1, signature2, signature3 FROM company_settings LIMIT 1") ?? [];
+
+$signatureText = '';
+if (!empty($cn['signature_id'])) {
+    $sigKey = 'signature' . $cn['signature_id'];
+    $signatureText = $settings[$sigKey] ?? '';
+}
+
 /**
  * Converts a positive float to uppercase English words (integer part only).
  * e.g.  280.00  →  "TWO HUNDRED AND EIGHTY"
@@ -188,7 +197,12 @@ function cnAmountToWords(float $amount): string
         </div>
         <div class="footer-card">
             <div class="footer-card-title">Signature / Date</div>
+            <?php if (!empty($signatureText)): ?>
+            <div style="font-size:9pt;font-weight:600;margin-bottom:6mm;padding-top:2mm"><?= Utils::e($signatureText) ?></div>
+            <div class="sig-line" style="margin-top:6mm"></div>
+            <?php else: ?>
             <div class="sig-line"></div>
+            <?php endif; ?>
             <div class="sig-label">Authorised Signature &amp; Date</div>
         </div>
     </div>

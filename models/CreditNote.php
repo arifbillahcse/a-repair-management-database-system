@@ -49,7 +49,7 @@ class CreditNote extends BaseModel
                 ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
-        // Add company columns to existing tables that predate this feature
+        // Add missing columns to existing tables
         $existing = array_column(
             $pdo->query("SHOW COLUMNS FROM `credit_notes`")->fetchAll(PDO::FETCH_ASSOC),
             'Field'
@@ -60,6 +60,7 @@ class CreditNote extends BaseModel
             'company_phone'   => "VARCHAR(50)  NOT NULL DEFAULT '' AFTER `company_address`",
             'company_email'   => "VARCHAR(150) NOT NULL DEFAULT '' AFTER `company_phone`",
             'company_vat'     => "VARCHAR(50)  NOT NULL DEFAULT '' AFTER `company_email`",
+            'signature_id'    => "TINYINT NOT NULL DEFAULT 0 AFTER `note`",
         ];
         foreach ($newCols as $col => $def) {
             if (!in_array($col, $existing)) {
