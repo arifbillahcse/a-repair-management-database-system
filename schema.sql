@@ -55,6 +55,9 @@ CREATE TABLE IF NOT EXISTS `company_settings` (
     `invoice_next_number` INT UNSIGNED    NOT NULL DEFAULT 1,
     `currency`            VARCHAR(3)      NOT NULL DEFAULT 'EUR',
     `tax_percentage`      DECIMAL(5,2)    NOT NULL DEFAULT 22.00, -- Italian IVA default
+    `signature1`          VARCHAR(300)    NOT NULL DEFAULT '',
+    `signature2`          VARCHAR(300)    NOT NULL DEFAULT '',
+    `signature3`          VARCHAR(300)    NOT NULL DEFAULT '',
     `created_at`          DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`          DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 

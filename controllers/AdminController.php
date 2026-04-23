@@ -14,7 +14,8 @@ class AdminController
     {
         Auth::requireRole('manager');
 
-        $db      = Database::getInstance();
+        $db = Database::getInstance();
+        $this->migrateCompanySettings($db);
         $company = $db->fetchOne("SELECT * FROM company_settings LIMIT 1") ?? [];
         $saved   = false;
 
@@ -155,6 +156,42 @@ class AdminController
         Logger::log('updated', 'user', $id, null, ['is_active' => $newState]);
         Utils::flashSuccess($newState ? 'User account enabled.' : 'User account disabled.');
         Utils::redirect('/admin/users');
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    private function migrateCompanySettings(Database $db): void
+    {
+        $pdo = $db->getPdo();
+
+        // Add signature columns if missing
+        $existing = array_column(
+            $pdo->query("SHOW COLUMNS FROM `company_settings`")->fetchAll(PDO::FETCH_ASSOC),
+            'Field'
+        );
+        $cols = [
+            'signature1' => "VARCHAR(300) NOT NULL DEFAULT ''",
+            'signature2' => "VARCHAR(300) NOT NULL DEFAULT ''",
+            'signature3' => "VARCHAR(300) NOT NULL DEFAULT ''",
+        ];
+        foreach ($cols as $col => $def) {
+            if (!in_array($col, $existing)) {
+                $pdo->exec("ALTER TABLE `company_settings` ADD COLUMN `{$col}` {$def}");
+            }
+        }
+
+        // Seed default signatures if no row or signatures are all empty
+        $row = $db->fetchOne("SELECT setting_id, signature1, signature2, signature3 FROM company_settings LIMIT 1");
+        $defaults = [
+            'signature1' => "Malta Spare Parts Ltd.\nApproved",
+            'signature2' => "ТРАКИЯ ИНВЕСТМЕНТ ЕООД\nTracia Investment Ltd.\nApproved",
+            'signature3' => "Electroclean di Meo Alessio\nAlessio Meo",
+        ];
+        if (!$row) {
+            $db->insert('company_settings', array_merge(['company_name' => ''], $defaults));
+        } elseif (empty($row['signature1']) && empty($row['signature2']) && empty($row['signature3'])) {
+            $db->update('company_settings', $defaults, 'setting_id = ?', [$row['setting_id']]);
+        }
     }
 
     // ── POST /admin/users/:id/reset-password ──────────────────────────────────
