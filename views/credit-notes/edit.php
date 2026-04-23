@@ -122,6 +122,24 @@ $items = $cn['items'] ?? [['description'=>'','basic_amount'=>'','vat_amount'=>''
             </div>
 
             <div class="card">
+                <div class="card-header"><h2 class="card-title">Invoice Reference</h2></div>
+                <div class="card-body">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label" for="invoice_number">Invoice Number</label>
+                            <input type="text" id="invoice_number" name="invoice_number" class="form-input"
+                                   value="<?= Utils::e($fd['invoice_number'] ?? $cn['invoice_number'] ?? '') ?>" maxlength="100" placeholder="Reference invoice number (optional)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="invoice_date">Invoice Date</label>
+                            <input type="date" id="invoice_date" name="invoice_date" class="form-input"
+                                   value="<?= Utils::e($fd['invoice_date'] ?? $cn['invoice_date'] ?? '') ?>" placeholder="(Optional)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
                 <div class="card-header"><h2 class="card-title">Note & Signature</h2></div>
                 <div class="card-body" style="display:flex;flex-direction:column;gap:1rem">
                     <div class="form-group" style="margin-bottom:0">

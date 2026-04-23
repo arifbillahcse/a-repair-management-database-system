@@ -60,6 +60,8 @@ class CreditNote extends BaseModel
             'company_phone'   => "VARCHAR(50)  NOT NULL DEFAULT '' AFTER `company_address`",
             'company_email'   => "VARCHAR(150) NOT NULL DEFAULT '' AFTER `company_phone`",
             'company_vat'     => "VARCHAR(50)  NOT NULL DEFAULT '' AFTER `company_email`",
+            'invoice_number'  => "VARCHAR(100) NOT NULL DEFAULT '' AFTER `customer_vat`",
+            'invoice_date'    => "DATE DEFAULT NULL AFTER `invoice_number`",
             'signature_id'    => "TINYINT NOT NULL DEFAULT 0 AFTER `note`",
         ];
         foreach ($newCols as $col => $def) {

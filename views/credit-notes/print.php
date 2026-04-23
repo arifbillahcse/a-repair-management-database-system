@@ -153,6 +153,24 @@ function cnAmountToWords(float $amount): string
         <?php endif; ?>
     </div>
 
+    <!-- Invoice reference -->
+    <?php if (!empty($cn['invoice_number']) || !empty($cn['invoice_date'])): ?>
+    <div class="cn-meta" style="margin-bottom:7mm">
+        <?php if (!empty($cn['invoice_number'])): ?>
+        <div class="cn-meta-row">
+            <div class="cn-meta-key">Inv. Number:</div>
+            <div class="cn-meta-val"><?= Utils::e($cn['invoice_number']) ?></div>
+        </div>
+        <?php endif; ?>
+        <?php if (!empty($cn['invoice_date'])): ?>
+        <div class="cn-meta-row">
+            <div class="cn-meta-key">Inv. Date:</div>
+            <div class="cn-meta-val"><?= Utils::formatDate($cn['invoice_date']) ?></div>
+        </div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
     <!-- Line items -->
     <table class="items-table">
         <thead>

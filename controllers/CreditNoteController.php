@@ -70,6 +70,8 @@ class CreditNoteController
             'customer_name'    => Utils::sanitize($_POST['customer_name']    ?? ''),
             'customer_address' => Utils::sanitize($_POST['customer_address'] ?? ''),
             'customer_vat'     => Utils::sanitize($_POST['customer_vat']     ?? ''),
+            'invoice_number'   => Utils::sanitize($_POST['invoice_number']   ?? ''),
+            'invoice_date'     => !empty($_POST['invoice_date']) ? $_POST['invoice_date'] : null,
             'note'             => Utils::sanitize($_POST['note']             ?? ''),
             'signature_id'     => (int)($_POST['signature_id'] ?? 0),
             'created_by'       => Auth::id(),
@@ -141,6 +143,8 @@ class CreditNoteController
             'customer_name'    => Utils::sanitize($_POST['customer_name']    ?? ''),
             'customer_address' => Utils::sanitize($_POST['customer_address'] ?? ''),
             'customer_vat'     => Utils::sanitize($_POST['customer_vat']     ?? ''),
+            'invoice_number'   => Utils::sanitize($_POST['invoice_number']   ?? ''),
+            'invoice_date'     => !empty($_POST['invoice_date']) ? $_POST['invoice_date'] : null,
             'note'             => Utils::sanitize($_POST['note']             ?? ''),
             'signature_id'     => (int)($_POST['signature_id'] ?? 0),
         ]);
