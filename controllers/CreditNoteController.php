@@ -34,10 +34,12 @@ class CreditNoteController
     {
         Auth::requireAuth();
 
+        $db = Database::getInstance();
         $nextNumber = $this->model->getNextNumber();
         $csrfToken  = Auth::generateCSRFToken();
         $errors     = $_SESSION['_form_errors'] ?? [];
         $fd         = $_SESSION['_form_data']   ?? [];
+        $signatures = $db->fetchOne("SELECT signature1, signature2, signature3 FROM company_settings LIMIT 1") ?? [];
         unset($_SESSION['_form_errors'], $_SESSION['_form_data']);
 
         require VIEWS_PATH . '/credit-notes/create.php';
@@ -68,7 +70,10 @@ class CreditNoteController
             'customer_name'    => Utils::sanitize($_POST['customer_name']    ?? ''),
             'customer_address' => Utils::sanitize($_POST['customer_address'] ?? ''),
             'customer_vat'     => Utils::sanitize($_POST['customer_vat']     ?? ''),
+            'invoice_number'   => Utils::sanitize($_POST['invoice_number']   ?? ''),
+            'invoice_date'     => !empty($_POST['invoice_date']) ? $_POST['invoice_date'] : null,
             'note'             => Utils::sanitize($_POST['note']             ?? ''),
+            'signature_id'     => (int)($_POST['signature_id'] ?? 0),
             'created_by'       => Auth::id(),
         ]);
 
@@ -100,9 +105,11 @@ class CreditNoteController
         $cn = $this->model->findById($id);
         if (!$cn) { $this->notFound(); }
 
+        $db = Database::getInstance();
         $csrfToken = Auth::generateCSRFToken();
         $errors    = $_SESSION['_form_errors'] ?? [];
         $fd        = $_SESSION['_form_data']   ?? $cn;
+        $signatures = $db->fetchOne("SELECT signature1, signature2, signature3 FROM company_settings LIMIT 1") ?? [];
         unset($_SESSION['_form_errors'], $_SESSION['_form_data']);
 
         require VIEWS_PATH . '/credit-notes/edit.php';
@@ -136,7 +143,10 @@ class CreditNoteController
             'customer_name'    => Utils::sanitize($_POST['customer_name']    ?? ''),
             'customer_address' => Utils::sanitize($_POST['customer_address'] ?? ''),
             'customer_vat'     => Utils::sanitize($_POST['customer_vat']     ?? ''),
+            'invoice_number'   => Utils::sanitize($_POST['invoice_number']   ?? ''),
+            'invoice_date'     => !empty($_POST['invoice_date']) ? $_POST['invoice_date'] : null,
             'note'             => Utils::sanitize($_POST['note']             ?? ''),
+            'signature_id'     => (int)($_POST['signature_id'] ?? 0),
         ]);
 
         $this->model->deleteItems($id);

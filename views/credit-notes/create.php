@@ -127,11 +127,51 @@ require VIEWS_PATH . '/layouts/header.php';
             </div>
 
             <div class="card">
-                <div class="card-header"><h2 class="card-title">Note</h2></div>
+                <div class="card-header"><h2 class="card-title">Invoice Reference</h2></div>
                 <div class="card-body">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label" for="invoice_number">Invoice Number</label>
+                            <input type="text" id="invoice_number" name="invoice_number" class="form-input"
+                                   value="<?= Utils::e($fd['invoice_number'] ?? '') ?>" maxlength="100" placeholder="Reference invoice number (optional)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="invoice_date">Invoice Date</label>
+                            <input type="date" id="invoice_date" name="invoice_date" class="form-input"
+                                   value="<?= Utils::e($fd['invoice_date'] ?? '') ?>" placeholder="(Optional)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h2 class="card-title">Note & Signature</h2></div>
+                <div class="card-body" style="display:flex;flex-direction:column;gap:1rem">
                     <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label" for="cn_note">Footer Note</label>
                         <textarea id="cn_note" name="note" class="form-input" rows="3" maxlength="2000"
-                                  placeholder="Footer note (optional)…"><?= Utils::e($fd['note'] ?? '') ?></textarea>
+                                  placeholder="(Optional)"><?= Utils::e($fd['note'] ?? '') ?></textarea>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label" for="signature_id">Authorized Signature</label>
+                        <select id="signature_id" name="signature_id" class="form-input">
+                            <option value="0">— No signature —</option>
+                            <?php if (!empty($signatures['signature1'])): ?>
+                            <option value="1" <?= ($fd['signature_id'] ?? 0) == 1 ? 'selected' : '' ?>>
+                                <?= Utils::e($signatures['signature1']) ?>
+                            </option>
+                            <?php endif; ?>
+                            <?php if (!empty($signatures['signature2'])): ?>
+                            <option value="2" <?= ($fd['signature_id'] ?? 0) == 2 ? 'selected' : '' ?>>
+                                <?= Utils::e($signatures['signature2']) ?>
+                            </option>
+                            <?php endif; ?>
+                            <?php if (!empty($signatures['signature3'])): ?>
+                            <option value="3" <?= ($fd['signature_id'] ?? 0) == 3 ? 'selected' : '' ?>>
+                                <?= Utils::e($signatures['signature3']) ?>
+                            </option>
+                            <?php endif; ?>
+                        </select>
                     </div>
                 </div>
             </div>

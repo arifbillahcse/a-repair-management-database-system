@@ -101,6 +101,23 @@ require VIEWS_PATH . '/layouts/header.php';
             <?php endif; ?>
         </ul>
     </div>
+    <?php if (!empty($cn['invoice_number']) || !empty($cn['invoice_date'])): ?>
+    <div class="card">
+        <div class="card-header"><h2 class="card-title">Invoice Reference</h2></div>
+        <ul class="info-list">
+            <?php if (!empty($cn['invoice_number'])): ?>
+            <li class="info-item">
+                <div><span class="info-label">Invoice Number</span><span class="info-value"><?= Utils::e($cn['invoice_number']) ?></span></div>
+            </li>
+            <?php endif; ?>
+            <?php if (!empty($cn['invoice_date'])): ?>
+            <li class="info-item">
+                <div><span class="info-label">Invoice Date</span><span class="info-value"><?= Utils::formatDate($cn['invoice_date']) ?></span></div>
+            </li>
+            <?php endif; ?>
+        </ul>
+    </div>
+    <?php endif; ?>
 </div>
 
 <!-- Line items -->

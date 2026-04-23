@@ -94,10 +94,11 @@ class ImportController
 
         $templates = [
             'customers' => [
-                'columns' => ['first_name', 'last_name', 'email', 'phone', 'client_type', 'address'],
+                'columns' => ['full_name', 'email', 'phone_landline', 'phone_mobile', 'client_type', 'address', 'city', 'postal_code', 'vat_number', 'notes'],
                 'sample'  => [
-                    ['John', 'Doe', 'john@example.com', '555-1234', 'individual', '123 Main St'],
-                    ['Tech Corp', 'Tech Corp', 'contact@techcorp.com', '555-5678', 'company', '456 Business Ave'],
+                    ['John Doe', 'john@example.com', '555-1234', '555-9999', 'individual', '123 Main St', 'Valletta', 'VLT1000', '', ''],
+                    ['Tech Corp Ltd', 'contact@techcorp.com', '555-5678', '', 'company', '456 Business Ave', 'Birkirkara', 'BKR2000', 'MT12345678', ''],
+                    ['Jane Smith', 'jane@example.com', '', '555-7777', 'colleague', '789 Work St', 'Sliema', 'SLM3000', '', 'Staff colleague'],
                 ]
             ],
             'repairs' => [
@@ -180,7 +181,6 @@ class ImportController
             $g = fn(string $key) => trim($data[$col[$key] ?? -1] ?? '');
 
             $full_name   = $g('full_name');
-            $legacy_id   = $g('ClientID');
             $client_type = $g('client_type') ?: 'individual';
             $address     = $g('address');
             $phone_land  = $g('phone_landline');
@@ -204,30 +204,17 @@ class ImportController
                 $email = '';
             }
 
-            // Skip duplicate legacy_id if already imported
-            if ($legacy_id) {
-                $exists = $this->db->fetchOne(
-                    'SELECT customer_id FROM customers WHERE legacy_id = ? LIMIT 1',
-                    [$legacy_id]
-                );
-                if ($exists) {
-                    $result['errors'][] = "Row {$row}: ClientID {$legacy_id} already imported — skipped";
-                    $result['skipped']++;
-                    continue;
-                }
-            }
-
             // Normalize client_type to our values
             $typeMap = [
-                'privato'  => 'individual', 'individual' => 'individual',
-                'azienda'  => 'company',    'company'    => 'company',
+                'privato'    => 'individual', 'individual' => 'individual',
+                'azienda'    => 'company',    'company'    => 'company',
                 'freelancer' => 'freelancer',
+                'colleague'  => 'colleague',  'collega'    => 'colleague',
             ];
             $client_type = $typeMap[strtolower($client_type)] ?? 'individual';
 
             try {
                 $this->db->insert('customers', [
-                    'legacy_id'      => $legacy_id ?: null,
                     'full_name'      => $full_name,
                     'client_type'    => $client_type,
                     'address'        => $address ?: null,

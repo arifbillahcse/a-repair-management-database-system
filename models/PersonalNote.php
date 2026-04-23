@@ -67,7 +67,7 @@ class PersonalNote extends BaseModel
         $total = $this->db->fetchOne($countQuery, $countParams)['cnt'] ?? 0;
 
         $query .= " ORDER BY is_completed ASC, created_at DESC LIMIT {$perPage} OFFSET {$offset}";
-        $notes = $this->db->fetch($query, $params);
+        $notes = $this->db->fetchAll($query, $params);
 
         return [
             'rows' => $notes,

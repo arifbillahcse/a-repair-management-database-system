@@ -105,6 +105,25 @@ $c = $company ?? [];
             </div>
         </div>
 
+        <!-- Credit Note Signatures -->
+        <div class="card">
+            <div class="card-header"><h2 class="card-title">Authorized Signatures</h2></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:1.5rem">
+                <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label" for="sig1">Signature 1</label>
+                    <textarea id="sig1" name="signature1" class="form-input" rows="2" placeholder="e.g. Anna Lisa Giannini, Malta Spare Parts Ltd."><?= Utils::e($c['signature1'] ?? '') ?></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label" for="sig2">Signature 2</label>
+                    <textarea id="sig2" name="signature2" class="form-input" rows="2" placeholder="e.g. Alessio Meo, Electroclean di Meo Alessio"><?= Utils::e($c['signature2'] ?? '') ?></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label" for="sig3">Signature 3</label>
+                    <textarea id="sig3" name="signature3" class="form-input" rows="2" placeholder="e.g. ТРАК ИЯ ИНВЕСТМЕНТ ЕООД, Tracia Investment Ltd"><?= Utils::e($c['signature3'] ?? '') ?></textarea>
+                </div>
+            </div>
+        </div>
+
         <!-- Save -->
         <div style="display:flex;gap:.75rem;justify-content:flex-end">
             <button type="submit" class="btn btn-primary">

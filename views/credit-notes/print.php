@@ -1,4 +1,13 @@
 <?php
+$db = Database::getInstance();
+$settings = $db->fetchOne("SELECT signature1, signature2, signature3 FROM company_settings LIMIT 1") ?? [];
+
+$signatureText = '';
+if (!empty($cn['signature_id'])) {
+    $sigKey = 'signature' . $cn['signature_id'];
+    $signatureText = $settings[$sigKey] ?? '';
+}
+
 /**
  * Converts a positive float to uppercase English words (integer part only).
  * e.g.  280.00  →  "TWO HUNDRED AND EIGHTY"
@@ -144,6 +153,24 @@ function cnAmountToWords(float $amount): string
         <?php endif; ?>
     </div>
 
+    <!-- Invoice reference -->
+    <?php if (!empty($cn['invoice_number']) || !empty($cn['invoice_date'])): ?>
+    <div class="cn-meta" style="margin-bottom:7mm">
+        <?php if (!empty($cn['invoice_number'])): ?>
+        <div class="cn-meta-row">
+            <div class="cn-meta-key">Inv. Number:</div>
+            <div class="cn-meta-val"><?= Utils::e($cn['invoice_number']) ?></div>
+        </div>
+        <?php endif; ?>
+        <?php if (!empty($cn['invoice_date'])): ?>
+        <div class="cn-meta-row">
+            <div class="cn-meta-key">Inv. Date:</div>
+            <div class="cn-meta-val"><?= Utils::formatDate($cn['invoice_date']) ?></div>
+        </div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
     <!-- Line items -->
     <table class="items-table">
         <thead>
@@ -188,7 +215,12 @@ function cnAmountToWords(float $amount): string
         </div>
         <div class="footer-card">
             <div class="footer-card-title">Signature / Date</div>
+            <?php if (!empty($signatureText)): ?>
+            <div style="font-size:9pt;font-weight:600;margin-bottom:6mm;padding-top:2mm"><?= Utils::e($signatureText) ?></div>
+            <div class="sig-line" style="margin-top:6mm"></div>
+            <?php else: ?>
             <div class="sig-line"></div>
+            <?php endif; ?>
             <div class="sig-label">Authorised Signature &amp; Date</div>
         </div>
     </div>

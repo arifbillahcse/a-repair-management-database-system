@@ -30,6 +30,9 @@ class AdminController
                 'tax_id'              => Utils::sanitize($_POST['tax_id']          ?? ''),
                 'invoice_prefix'      => Utils::sanitize($_POST['invoice_prefix']  ?? 'INV'),
                 'tax_percentage'      => (float)($_POST['tax_percentage'] ?? 22),
+                'signature1'          => Utils::sanitize($_POST['signature1']      ?? ''),
+                'signature2'          => Utils::sanitize($_POST['signature2']      ?? ''),
+                'signature3'          => Utils::sanitize($_POST['signature3']      ?? ''),
             ];
 
             if (!empty($company['setting_id'])) {
