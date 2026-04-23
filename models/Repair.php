@@ -211,12 +211,14 @@ class Repair extends BaseModel
              FROM repairs r
              LEFT JOIN customers c ON c.customer_id = r.customer_id
              WHERE c.full_name LIKE ?
+                OR c.first_name LIKE ?
+                OR c.last_name LIKE ?
                 OR r.device_model LIKE ?
                 OR r.device_serial_number LIKE ?
                 OR CAST(r.repair_id AS CHAR) LIKE ?
              ORDER BY r.date_in DESC
              LIMIT ?",
-            [$like, $like, $like, $like, $limit]
+            [$like, $like, $like, $like, $like, $like, $limit]
         );
     }
 
@@ -283,8 +285,8 @@ class Repair extends BaseModel
         }
         if (!empty($filters['search'])) {
             $like      = '%' . $filters['search'] . '%';
-            $clauses[] = '(c.full_name LIKE ? OR r.device_model LIKE ? OR r.device_serial_number LIKE ? OR r.qr_code LIKE ? OR r.problem_description LIKE ?)';
-            array_push($params, $like, $like, $like, $like, $like);
+            $clauses[] = '(c.full_name LIKE ? OR c.first_name LIKE ? OR c.last_name LIKE ? OR r.device_model LIKE ? OR r.device_serial_number LIKE ? OR r.qr_code LIKE ? OR r.problem_description LIKE ?)';
+            array_push($params, $like, $like, $like, $like, $like, $like, $like);
         }
 
         $where = $clauses ? 'WHERE ' . implode(' AND ', $clauses) : '';
