@@ -132,6 +132,10 @@ class RepairController
         $formData  = $_SESSION['_form_data']   ?? $repair;
         unset($_SESSION['_form_errors'], $_SESSION['_form_data']);
 
+        // Alias DB column names to the form field names used in the view
+        $formData['diagnosis_notes']  = $formData['diagnosis_notes']  ?? $formData['diagnosis']        ?? '';
+        $formData['date_expected_out'] = $formData['date_expected_out'] ?? substr($formData['collection_date'] ?? '', 0, 10);
+
         // Always load the linked customer for the card
         $preloadCustomer = $this->customerModel->findById((int)$repair['customer_id']);
 
@@ -348,14 +352,17 @@ class RepairController
         return [
             'customer_id'          => !empty($post['customer_id']) ? (int)$post['customer_id'] : null,
             'staff_id'             => !empty($post['staff_id']) ? (int)$post['staff_id'] : null,
+            'device_brand'         => Utils::sanitize($post['device_brand']         ?? ''),
             'device_model'         => Utils::sanitize($post['device_model']         ?? ''),
             'device_serial_number' => Utils::sanitize($post['device_serial_number'] ?? ''),
-            'date_in'              => $post['date_in']         ?: date('Y-m-d H:i:s'),
-            'date_out'             => !empty($post['date_out'])         ? $post['date_out']         : null,
-            'collection_date'      => !empty($post['collection_date'])  ? $post['collection_date']  : null,
-            'problem_description'  => Utils::sanitize($post['problem_description'] ?? ''),
-            'diagnosis'            => Utils::sanitize($post['diagnosis']  ?? ''),
-            'work_done'            => Utils::sanitize($post['work_done']  ?? ''),
+            'device_condition'     => Utils::sanitize($post['device_condition']     ?? ''),
+            'device_password'      => Utils::sanitize($post['device_password']      ?? ''),
+            'date_in'              => $post['date_in'] ?: date('Y-m-d H:i:s'),
+            'collection_date'      => !empty($post['date_expected_out']) ? $post['date_expected_out'] : null,
+            'problem_description'  => Utils::sanitize($post['problem_description']  ?? ''),
+            'diagnosis'            => Utils::sanitize($post['diagnosis_notes']      ?? ''),
+            'internal_notes'       => Utils::sanitize($post['internal_notes']       ?? ''),
+            'priority'             => in_array($post['priority'] ?? '', ['low','normal','high','urgent']) ? $post['priority'] : 'normal',
             'estimate_amount'      => is_numeric($post['estimate_amount'] ?? '') ? (float)$post['estimate_amount'] : null,
             'actual_amount'        => is_numeric($post['actual_amount']   ?? '') ? (float)$post['actual_amount']   : null,
             'status'               => $status,

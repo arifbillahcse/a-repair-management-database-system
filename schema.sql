@@ -229,8 +229,11 @@ CREATE TABLE IF NOT EXISTS `repairs` (
     `customer_id`        INT UNSIGNED    NOT NULL,
     `staff_id`           INT UNSIGNED             DEFAULT NULL, -- Assigned technician
     -- Device info supplied by customer
+    `device_brand`       VARCHAR(100)             DEFAULT NULL,
     `device_model`       VARCHAR(200)    NOT NULL,
     `device_serial_number` VARCHAR(100)           DEFAULT NULL,
+    `device_condition`   TEXT                     DEFAULT NULL,
+    `device_password`    VARCHAR(100)             DEFAULT NULL,
     -- Dates
     `date_in`            DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- Data entrata
     `date_out`           DATETIME                 DEFAULT NULL,               -- Data uscita (actual)
@@ -252,9 +255,11 @@ CREATE TABLE IF NOT EXISTS `repairs` (
                              'collected',
                              'cancelled'
                          )               NOT NULL DEFAULT 'in_progress',
+    `priority`           VARCHAR(10)     NOT NULL DEFAULT 'normal',
     `photo_path`         VARCHAR(500)             DEFAULT NULL, -- Path/URL to image(s)
     `qr_code`            VARCHAR(100)             DEFAULT NULL, -- Unique QR / barcode
     `notes`              TEXT                     DEFAULT NULL,
+    `internal_notes`     TEXT                     DEFAULT NULL,
     `created_by`         INT UNSIGNED             DEFAULT NULL, -- User who created the record
     `created_at`         DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`         DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

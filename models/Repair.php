@@ -4,6 +4,33 @@ class Repair extends BaseModel
     protected string $table      = 'repairs';
     protected string $primaryKey = 'repair_id';
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->ensureColumns();
+    }
+
+    private function ensureColumns(): void
+    {
+        $pdo = $this->db->getPdo();
+        $existing = array_column(
+            $pdo->query("SHOW COLUMNS FROM `repairs`")->fetchAll(PDO::FETCH_ASSOC),
+            'Field'
+        );
+        $cols = [
+            'device_brand'     => "VARCHAR(100) DEFAULT NULL AFTER `device_model`",
+            'device_condition' => "TEXT DEFAULT NULL AFTER `device_serial_number`",
+            'device_password'  => "VARCHAR(100) DEFAULT NULL AFTER `device_condition`",
+            'priority'         => "VARCHAR(10) NOT NULL DEFAULT 'normal' AFTER `status`",
+            'internal_notes'   => "TEXT DEFAULT NULL AFTER `notes`",
+        ];
+        foreach ($cols as $col => $def) {
+            if (!in_array($col, $existing)) {
+                $pdo->exec("ALTER TABLE `repairs` ADD COLUMN `{$col}` {$def}");
+            }
+        }
+    }
+
     // ── Full record with joins ────────────────────────────────────────────────
 
     public function findById(int $id): ?array
@@ -211,12 +238,14 @@ class Repair extends BaseModel
              FROM repairs r
              LEFT JOIN customers c ON c.customer_id = r.customer_id
              WHERE c.full_name LIKE ?
+                OR c.phone_mobile LIKE ?
+                OR c.phone_landline LIKE ?
                 OR r.device_model LIKE ?
                 OR r.device_serial_number LIKE ?
                 OR CAST(r.repair_id AS CHAR) LIKE ?
              ORDER BY r.date_in DESC
              LIMIT ?",
-            [$like, $like, $like, $like, $limit]
+            [$like, $like, $like, $like, $like, $like, $limit]
         );
     }
 
@@ -283,8 +312,8 @@ class Repair extends BaseModel
         }
         if (!empty($filters['search'])) {
             $like      = '%' . $filters['search'] . '%';
-            $clauses[] = '(c.full_name LIKE ? OR r.device_model LIKE ? OR r.device_serial_number LIKE ? OR r.qr_code LIKE ? OR r.problem_description LIKE ?)';
-            array_push($params, $like, $like, $like, $like, $like);
+            $clauses[] = '(c.full_name LIKE ? OR c.phone_mobile LIKE ? OR c.phone_landline LIKE ? OR r.device_model LIKE ? OR r.device_serial_number LIKE ? OR r.qr_code LIKE ? OR r.problem_description LIKE ?)';
+            array_push($params, $like, $like, $like, $like, $like, $like, $like);
         }
 
         $where = $clauses ? 'WHERE ' . implode(' AND ', $clauses) : '';
