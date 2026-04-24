@@ -308,8 +308,15 @@ $statusFlow  = REPAIR_STATUS_FLOW[$repair['status']] ?? [];
                 <div class="card-body">
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label" for="assignedTo">Assigned Technician</label>
-                        <input type="text" id="assignedTo" name="assigned_to" class="form-input"
-                               value="<?= Utils::e($fd['assigned_to'] ?? '') ?>" maxlength="100">
+                        <select id="assignedTo" name="staff_id" class="form-select">
+                            <option value="">— Unassigned —</option>
+                            <?php foreach ($staffList as $s): ?>
+                            <option value="<?= (int)$s['staff_id'] ?>"
+                                <?= ((int)($fd['staff_id'] ?? 0)) === (int)$s['staff_id'] ? 'selected' : '' ?>>
+                                <?= Utils::e(trim($s['first_name'] . ' ' . $s['last_name'])) ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                 </div>
             </div>

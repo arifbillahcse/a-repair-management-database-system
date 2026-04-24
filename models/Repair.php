@@ -23,6 +23,7 @@ class Repair extends BaseModel
             'device_password'  => "VARCHAR(100) DEFAULT NULL AFTER `device_condition`",
             'priority'         => "VARCHAR(10) NOT NULL DEFAULT 'normal' AFTER `status`",
             'internal_notes'   => "TEXT DEFAULT NULL AFTER `notes`",
+            'deposit_paid'     => "DECIMAL(10,2) DEFAULT NULL AFTER `actual_amount`",
         ];
         foreach ($cols as $col => $def) {
             if (!in_array($col, $existing)) {
