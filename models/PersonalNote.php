@@ -90,23 +90,15 @@ class PersonalNote extends BaseModel
         ]);
     }
 
-    public function update(int $id, array $data): bool
-    {
-        return $this->db->update('personal_notes', $data, ['note_id' => $id]);
-    }
-
     public function toggleCompletion(int $id): bool
     {
         $note = $this->findById($id);
         if (!$note) return false;
-        return $this->db->update('personal_notes',
+        return (bool)$this->db->update(
+            $this->table,
             ['is_completed' => $note['is_completed'] ? 0 : 1],
-            ['note_id' => $id]
+            "`{$this->primaryKey}` = ?",
+            [$id]
         );
-    }
-
-    public function delete(int $id): bool
-    {
-        return $this->db->delete('personal_notes', ['note_id' => $id]);
     }
 }
