@@ -90,8 +90,8 @@ if (!file_exists($csvFile)) {
 $COLUMN_MAP = [
     // tblClients field       => customers column
     'denominazione'           => 'full_name',
-    'nome'                    => 'first_name',
-    'cognome'                 => 'last_name',
+    'nome'                    => '_nome',          // temp — combined into full_name below
+    'cognome'                 => '_cognome',       // temp — combined into full_name below
     'ragione_sociale'         => 'full_name',     // alias
     'indirizzo'               => 'address',
     'cap'                     => 'postal_code',
@@ -113,8 +113,8 @@ $COLUMN_MAP = [
     'data_inserimento'        => 'customer_since',
     // Generic fallbacks
     'full_name'               => 'full_name',
-    'first_name'              => 'first_name',
-    'last_name'               => 'last_name',
+    'first_name'              => '_nome',
+    'last_name'               => '_cognome',
     'phone_mobile'            => 'phone_mobile',
     'phone_landline'          => 'phone_landline',
     'vat_number'              => 'vat_number',
@@ -232,11 +232,14 @@ while (($row = fgetcsv($fp, 0, $delimiter)) !== false) {
 
     // ── Normalise / clean values ──────────────────────────────────────────────
 
-    // full_name fallback
+    // full_name fallback: build from _cognome (surname) + _nome (first name)
     if (empty($data['full_name'])) {
-        $fn = trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? ''));
+        $fn = trim(($data['_cognome'] ?? '') . ' ' . ($data['_nome'] ?? ''));
         $data['full_name'] = $fn ?: null;
     }
+    // Remove internal temp keys — they are not DB columns
+    unset($data['_nome'], $data['_cognome']);
+
     if (empty($data['full_name'])) {
         logLine("Row {$rowNum}: SKIPPED — no name found.");
         $skipped++;
