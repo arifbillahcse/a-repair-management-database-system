@@ -97,28 +97,28 @@ class ImportController
             // ── Repairs ────────────────────────────────────────────────────────
             'repairs' => [
                 'columns' => [
-                    'customer_id', 'device_brand', 'device_model',
-                    'device_serial_number', 'problem_description',
-                    'diagnosis_notes', 'status', 'priority',
-                    'date_in', 'date_expected_out', 'actual_amount',
-                    'staff_id', 'notes',
+                    'customer_id', 'device_brand', 'device_model', 'device_serial_number',
+                    'device_condition', 'device_password', 'problem_description',
+                    'diagnosis_notes', 'internal_notes', 'status', 'priority',
+                    'date_in', 'date_expected_out', 'estimate_amount', 'actual_amount',
+                    'deposit_paid', 'staff_id', 'notes',
                 ],
                 'sample' => [
-                    [1, 'Apple',   'iPhone 13',       'SN123456789', 'Screen broken',          'Replaced LCD',          'completed',   'normal', '2026-01-10', '2026-01-15', '150.00', 1, ''],
-                    [2, 'Samsung', 'Galaxy S22',       '',            'Battery draining fast',  '',                      'in_progress', 'high',   '2026-01-20', '2026-01-25', '',       '', 'Customer called twice'],
-                    [3, 'Vorwerk', 'Folletto VK200',   '',            'Motore non funziona',    'Sostituito condensatore','completed',   'normal', '2026-02-01', '2026-02-05', '80.00',  2, ''],
+                    [1, 'Apple', 'iPhone 13', 'SN123456789', 'Missing back cover', '', 'Screen broken', 'Replaced LCD + digitizer', '', 'completed', 'normal', '2026-01-10', '2026-01-15', '120.00', '150.00', '50.00', 1, ''],
+                    [2, 'Samsung', 'Galaxy S22', '', 'Good condition', '1234', 'Battery draining fast', 'Replaced battery', 'Check for water damage', 'in_progress', 'high', '2026-01-20', '2026-01-25', '80.00', '', '', '', 'Customer called twice'],
+                    [3, 'Vorwerk', 'Folletto VK200', '', 'Dust in motor', '', 'Motore non funziona', 'Sostituito condensatore', 'Testing required', 'completed', 'normal', '2026-02-01', '2026-02-05', '', '80.00', '30.00', 2, ''],
                 ],
             ],
 
             // ── Invoices ───────────────────────────────────────────────────────
             'invoices' => [
                 'columns' => [
-                    'customer_id', 'repair_id', 'status',
-                    'total_amount', 'paid_amount', 'due_date', 'notes',
+                    'customer_id', 'repair_id', 'invoice_date', 'status',
+                    'total_amount', 'amount_paid', 'due_date', 'notes',
                 ],
                 'sample' => [
-                    [1, 1, 'paid',  '150.00', '150.00', '2026-01-20', ''],
-                    [2, 2, 'draft', '80.00',  '0.00',   '2026-02-10', 'Payment terms net 30'],
+                    [1, 1, '2026-01-15', 'paid',  '150.00', '150.00', '2026-01-20', ''],
+                    [2, 2, '2026-02-01', 'draft', '80.00',  '0.00',   '2026-02-10', 'Payment terms net 30'],
                 ],
             ],
 
@@ -176,10 +176,9 @@ class ImportController
         $g            = fn(array $data, string $key) => trim($data[$col[$key] ?? -1] ?? '');
 
         $typeMap = [
-            'individual' => 'individual', 'privato'    => 'individual',
-            'company'    => 'company',    'azienda'    => 'company',
-            'freelancer' => 'freelancer',
-            'colleague'  => 'colleague',  'collega'    => 'colleague',
+            'individual' => 'individual', 'privato'  => 'individual',
+            'company'    => 'company',    'azienda'  => 'company',
+            'colleague'  => 'colleague',  'collega'  => 'colleague',
         ];
 
         $row = 0;
@@ -292,6 +291,12 @@ class ImportController
             $dateIn  = $this->parseDate($g($data, 'date_in'))           ?: date('Y-m-d H:i:s');
             $dateOut = $this->parseDate($g($data, 'date_expected_out'));
 
+            $estimate = $g($data, 'estimate_amount');
+            $estimate = is_numeric($estimate) ? (float)$estimate : null;
+
+            $deposit = $g($data, 'deposit_paid');
+            $deposit = is_numeric($deposit) ? (float)$deposit : null;
+
             try {
                 $this->db->insert('repairs', [
                     'customer_id'          => $customerId,
@@ -299,12 +304,17 @@ class ImportController
                     'device_brand'         => $g($data, 'device_brand')         ?: null,
                     'device_model'         => $g($data, 'device_model')         ?: '',
                     'device_serial_number' => $g($data, 'device_serial_number') ?: null,
+                    'device_condition'     => $g($data, 'device_condition')     ?: null,
+                    'device_password'      => $g($data, 'device_password')      ?: null,
                     'problem_description'  => $problem,
                     'diagnosis'            => $g($data, 'diagnosis_notes')      ?: null,
+                    'internal_notes'       => $g($data, 'internal_notes')       ?: null,
                     'status'               => $status,
                     'priority'             => $priority,
                     'collection_date'      => $dateOut ? substr($dateOut, 0, 10) : null,
+                    'estimate_amount'      => $estimate,
                     'actual_amount'        => $amount,
+                    'deposit_paid'         => $deposit,
                     'notes'                => $g($data, 'notes')                ?: null,
                     'date_in'              => $dateIn,
                     'created_at'           => $dateIn,
@@ -356,11 +366,12 @@ class ImportController
                 continue;
             }
 
-            $repairId = (int)$g($data, 'repair_id') ?: null;
-            $status   = $g($data, 'status') ?: 'draft';
-            $paid     = (float)$g($data, 'paid_amount');
-            $dueDate  = $g($data, 'due_date') ?: null;
-            $notes    = $g($data, 'notes') ?: null;
+            $repairId    = (int)$g($data, 'repair_id') ?: null;
+            $status      = $g($data, 'status') ?: 'draft';
+            $amountPaid  = (float)$g($data, 'amount_paid');
+            $invoiceDate = $g($data, 'invoice_date') ?: date('Y-m-d');
+            $dueDate     = $g($data, 'due_date') ?: null;
+            $notes       = $g($data, 'notes') ?: null;
 
             try {
                 $invoiceNumber = $this->invoiceModel->generateInvoiceNumber();
@@ -368,9 +379,10 @@ class ImportController
                     'customer_id'    => $customerId,
                     'repair_id'      => $repairId,
                     'invoice_number' => $invoiceNumber,
+                    'invoice_date'   => $invoiceDate,
                     'status'         => $status,
                     'total_amount'   => $total,
-                    'paid_amount'    => $paid,
+                    'amount_paid'    => $amountPaid,
                     'due_date'       => $dueDate,
                     'notes'          => $notes,
                     'created_at'     => date('Y-m-d H:i:s'),
