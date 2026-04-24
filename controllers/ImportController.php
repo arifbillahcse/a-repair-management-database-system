@@ -113,12 +113,12 @@ class ImportController
             // ── Invoices ───────────────────────────────────────────────────────
             'invoices' => [
                 'columns' => [
-                    'customer_id', 'repair_id', 'status',
-                    'total_amount', 'paid_amount', 'due_date', 'notes',
+                    'customer_id', 'repair_id', 'invoice_date', 'status',
+                    'total_amount', 'amount_paid', 'due_date', 'notes',
                 ],
                 'sample' => [
-                    [1, 1, 'paid',  '150.00', '150.00', '2026-01-20', ''],
-                    [2, 2, 'draft', '80.00',  '0.00',   '2026-02-10', 'Payment terms net 30'],
+                    [1, 1, '2026-01-15', 'paid',  '150.00', '150.00', '2026-01-20', ''],
+                    [2, 2, '2026-02-01', 'draft', '80.00',  '0.00',   '2026-02-10', 'Payment terms net 30'],
                 ],
             ],
 
@@ -176,10 +176,9 @@ class ImportController
         $g            = fn(array $data, string $key) => trim($data[$col[$key] ?? -1] ?? '');
 
         $typeMap = [
-            'individual' => 'individual', 'privato'    => 'individual',
-            'company'    => 'company',    'azienda'    => 'company',
-            'freelancer' => 'freelancer',
-            'colleague'  => 'colleague',  'collega'    => 'colleague',
+            'individual' => 'individual', 'privato'  => 'individual',
+            'company'    => 'company',    'azienda'  => 'company',
+            'colleague'  => 'colleague',  'collega'  => 'colleague',
         ];
 
         $row = 0;
@@ -356,11 +355,12 @@ class ImportController
                 continue;
             }
 
-            $repairId = (int)$g($data, 'repair_id') ?: null;
-            $status   = $g($data, 'status') ?: 'draft';
-            $paid     = (float)$g($data, 'paid_amount');
-            $dueDate  = $g($data, 'due_date') ?: null;
-            $notes    = $g($data, 'notes') ?: null;
+            $repairId    = (int)$g($data, 'repair_id') ?: null;
+            $status      = $g($data, 'status') ?: 'draft';
+            $amountPaid  = (float)$g($data, 'amount_paid');
+            $invoiceDate = $g($data, 'invoice_date') ?: date('Y-m-d');
+            $dueDate     = $g($data, 'due_date') ?: null;
+            $notes       = $g($data, 'notes') ?: null;
 
             try {
                 $invoiceNumber = $this->invoiceModel->generateInvoiceNumber();
@@ -368,9 +368,10 @@ class ImportController
                     'customer_id'    => $customerId,
                     'repair_id'      => $repairId,
                     'invoice_number' => $invoiceNumber,
+                    'invoice_date'   => $invoiceDate,
                     'status'         => $status,
                     'total_amount'   => $total,
-                    'paid_amount'    => $paid,
+                    'amount_paid'    => $amountPaid,
                     'due_date'       => $dueDate,
                     'notes'          => $notes,
                     'created_at'     => date('Y-m-d H:i:s'),
