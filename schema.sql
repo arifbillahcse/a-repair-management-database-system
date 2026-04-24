@@ -147,8 +147,6 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 CREATE TABLE IF NOT EXISTS `customers` (
     `customer_id`     INT UNSIGNED    NOT NULL AUTO_INCREMENT,
-    `first_name`      VARCHAR(80)              DEFAULT NULL,
-    `last_name`       VARCHAR(80)              DEFAULT NULL,
     -- full_name stores company names or combined names (denominazione)
     `full_name`       VARCHAR(200)    NOT NULL,
     `client_type`     ENUM(
@@ -177,7 +175,6 @@ CREATE TABLE IF NOT EXISTS `customers` (
 
     PRIMARY KEY (`customer_id`),
     KEY `idx_customers_full_name`   (`full_name`(100)),
-    KEY `idx_customers_last_name`   (`last_name`),
     KEY `idx_customers_email`       (`email`),
     KEY `idx_customers_phone_mob`   (`phone_mobile`),
     KEY `idx_customers_status`      (`status`),

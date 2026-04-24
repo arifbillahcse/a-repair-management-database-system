@@ -214,7 +214,7 @@ class CustomerController
 
         // Header row
         fputcsv($fp, [
-            'ID', 'Full Name', 'First Name', 'Last Name', 'Type',
+            'ID', 'Full Name', 'Type',
             'Address', 'Postal Code', 'City', 'Province',
             'Landline', 'Mobile', 'Email',
             'VAT Number', 'Tax ID', 'Status', 'Customer Since', 'Created At',
@@ -224,8 +224,6 @@ class CustomerController
             fputcsv($fp, [
                 $row['customer_id'],
                 $row['full_name'],
-                $row['first_name']     ?? '',
-                $row['last_name']      ?? '',
                 $row['client_type'],
                 $row['address']        ?? '',
                 $row['postal_code']    ?? '',

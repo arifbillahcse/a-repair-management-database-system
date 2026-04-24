@@ -10,6 +10,29 @@ class Customer extends BaseModel
         'email', 'status', 'created_at', 'customer_since',
     ];
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->migrateDropLegacyNameCols();
+    }
+
+    // Backfill full_name from first_name/last_name then drop the old columns
+    private function migrateDropLegacyNameCols(): void
+    {
+        $pdo = $this->db->getPdo();
+        $existing = array_column(
+            $pdo->query("SHOW COLUMNS FROM `customers`")->fetchAll(PDO::FETCH_ASSOC),
+            'Field'
+        );
+        if (!in_array('first_name', $existing)) return;
+
+        $pdo->exec("UPDATE customers
+                    SET full_name = TRIM(CONCAT(COALESCE(first_name,''), ' ', COALESCE(last_name,'')))
+                    WHERE full_name IS NULL OR full_name = ''");
+
+        $pdo->exec("ALTER TABLE customers DROP COLUMN first_name, DROP COLUMN last_name");
+    }
+
     // ── Lookup ────────────────────────────────────────────────────────────────
 
     public function findByEmail(string $email): ?array
@@ -72,9 +95,9 @@ class Customer extends BaseModel
         string $type   = ''
     ): array {
         $like   = '%' . $query . '%';
-        $params = [$like, $like, $like, $like, $like, $like, $like];
+        $params = [$like, $like, $like, $like, $like];
 
-        $where = "(full_name LIKE ? OR first_name LIKE ? OR last_name LIKE ?
+        $where = "(full_name LIKE ?
                    OR email LIKE ? OR phone_mobile LIKE ? OR city LIKE ?
                    OR vat_number LIKE ?)";
 
@@ -210,7 +233,7 @@ class Customer extends BaseModel
     {
         $where  = $status ? "WHERE status = '{$status}'" : '';
         return $this->db->fetchAll(
-            "SELECT customer_id, full_name, first_name, last_name, client_type,
+            "SELECT customer_id, full_name, client_type,
                     address, postal_code, city, province,
                     phone_landline, phone_mobile, email,
                     vat_number, tax_id, status, customer_since, created_at
