@@ -1,24 +1,20 @@
 <?php
-/**
- * ImportController — CSV Data Import
- * Handles bulk import of customers, repairs, invoices, and staff
- */
 class ImportController
 {
     private Database $db;
     private Customer $customerModel;
-    private Repair $repairModel;
-    private Invoice $invoiceModel;
-    private Staff $staffModel;
+    private Repair   $repairModel;
+    private Invoice  $invoiceModel;
+    private Staff    $staffModel;
 
     public function __construct()
     {
         Auth::requireRole('admin');
-        $this->db = Database::getInstance();
+        $this->db            = Database::getInstance();
         $this->customerModel = new Customer();
-        $this->repairModel = new Repair();
-        $this->invoiceModel = new Invoice();
-        $this->staffModel = new Staff();
+        $this->repairModel   = new Repair();
+        $this->invoiceModel  = new Invoice();
+        $this->staffModel    = new Staff();
     }
 
     // ── GET /import ────────────────────────────────────────────────────────────
@@ -48,18 +44,11 @@ class ImportController
             Utils::redirect('/import');
         }
 
-        // Validate file
-        if ($file['size'] > 50 * 1024 * 1024) { // 50 MB max
+        if ($file['size'] > 50 * 1024 * 1024) {
             Utils::flash('error', 'File too large. Maximum 50 MB.');
             Utils::redirect('/import');
         }
 
-        if (!in_array($file['type'], ['text/csv', 'text/plain', 'application/vnd.ms-excel'])) {
-            Utils::flash('error', 'File must be CSV format.');
-            Utils::redirect('/import');
-        }
-
-        // Process CSV
         $result = match ($type) {
             'customers' => $this->importCustomers($file['tmp_name']),
             'repairs'   => $this->importRepairs($file['tmp_name']),
@@ -78,48 +67,70 @@ class ImportController
     {
         $result = $_SESSION['_import_result'] ?? null;
         unset($_SESSION['_import_result']);
-
-        if (!$result) {
-            Utils::redirect('/import');
-        }
-
+        if (!$result) Utils::redirect('/import');
         require VIEWS_PATH . '/imports/summary.php';
     }
 
-    // ── GET /import/template/:type ────────────────────────────────────────────
+    // ── GET /import/template/:type ─────────────────────────────────────────────
 
     public function downloadTemplate(string $type): void
     {
-        $type = basename($type); // Sanitize
+        $type = basename($type);
 
         $templates = [
+
+            // ── Customers ──────────────────────────────────────────────────────
             'customers' => [
-                'columns' => ['full_name', 'email', 'phone_landline', 'phone_mobile', 'client_type', 'address', 'city', 'postal_code', 'vat_number', 'notes'],
-                'sample'  => [
-                    ['John Doe', 'john@example.com', '555-1234', '555-9999', 'individual', '123 Main St', 'Valletta', 'VLT1000', '', ''],
-                    ['Tech Corp Ltd', 'contact@techcorp.com', '555-5678', '', 'company', '456 Business Ave', 'Birkirkara', 'BKR2000', 'MT12345678', ''],
-                    ['Jane Smith', 'jane@example.com', '', '555-7777', 'colleague', '789 Work St', 'Sliema', 'SLM3000', '', 'Staff colleague'],
-                ]
+                'columns' => [
+                    'full_name', 'client_type', 'email',
+                    'phone_mobile', 'phone_landline',
+                    'address', 'city', 'postal_code', 'province',
+                    'vat_number', 'tax_id', 'notes',
+                ],
+                'sample' => [
+                    ['Mario Rossi',      'individual', 'mario@email.com',   '+39 333 1111111', '+39 02 1234567',  'Via Roma 1',     'Roma',       '00100', 'RM', '',             'RSSMRA80A01H501Z', ''],
+                    ['Tech Solutions Srl','company',   'info@techsrl.it',   '+39 333 2222222', '+39 06 9876543',  'Via Milano 42',  'Milano',     '20100', 'MI', 'IT12345678901', '',                'VIP customer'],
+                    ['Anna Bianchi',     'colleague',  'anna@workshop.it',  '+39 333 3333333', '',                'Via Napoli 5',   'Napoli',     '80100', 'NA', '',             '',                'Colleague technician'],
+                ],
             ],
+
+            // ── Repairs ────────────────────────────────────────────────────────
             'repairs' => [
-                'columns' => ['customer_id', 'device_brand', 'device_model', 'device_issue', 'status', 'staff_id', 'actual_amount', 'notes'],
-                'sample'  => [
-                    [1, 'Apple', 'iPhone 13', 'Screen broken', 'in_progress', 1, '150.00', 'Customer notes here'],
-                ]
+                'columns' => [
+                    'customer_id', 'device_brand', 'device_model',
+                    'device_serial_number', 'problem_description',
+                    'diagnosis_notes', 'status', 'priority',
+                    'date_in', 'date_expected_out', 'actual_amount',
+                    'staff_id', 'notes',
+                ],
+                'sample' => [
+                    [1, 'Apple',   'iPhone 13',       'SN123456789', 'Screen broken',          'Replaced LCD',          'completed',   'normal', '2026-01-10', '2026-01-15', '150.00', 1, ''],
+                    [2, 'Samsung', 'Galaxy S22',       '',            'Battery draining fast',  '',                      'in_progress', 'high',   '2026-01-20', '2026-01-25', '',       '', 'Customer called twice'],
+                    [3, 'Vorwerk', 'Folletto VK200',   '',            'Motore non funziona',    'Sostituito condensatore','completed',   'normal', '2026-02-01', '2026-02-05', '80.00',  2, ''],
+                ],
             ],
+
+            // ── Invoices ───────────────────────────────────────────────────────
             'invoices' => [
-                'columns' => ['customer_id', 'repair_id', 'status', 'total_amount', 'paid_amount', 'due_date', 'notes'],
-                'sample'  => [
-                    [1, 1, 'draft', '150.00', '0.00', '2026-05-03', 'Payment terms net 30'],
-                ]
+                'columns' => [
+                    'customer_id', 'repair_id', 'status',
+                    'total_amount', 'paid_amount', 'due_date', 'notes',
+                ],
+                'sample' => [
+                    [1, 1, 'paid',  '150.00', '150.00', '2026-01-20', ''],
+                    [2, 2, 'draft', '80.00',  '0.00',   '2026-02-10', 'Payment terms net 30'],
+                ],
             ],
+
+            // ── Staff ──────────────────────────────────────────────────────────
             'staff' => [
                 'columns' => ['first_name', 'last_name', 'email', 'phone', 'role'],
                 'sample'  => [
-                    ['Alice', 'Smith', 'alice@example.com', '555-9999', 'technician'],
-                    ['Bob', 'Johnson', 'bob@example.com', '555-8888', 'staff'],
-                ]
-            ]
+                    ['Alice', 'Smith',   'alice@workshop.it', '+39 333 1111111', 'technician'],
+                    ['Bob',   'Johnson', 'bob@workshop.it',   '+39 333 2222222', 'staff'],
+                    ['Carol', 'Rossi',   'carol@workshop.it', '+39 333 3333333', 'manager'],
+                ],
+            ],
         ];
 
         if (!isset($templates[$type])) {
@@ -127,106 +138,85 @@ class ImportController
             die('Template not found');
         }
 
-        $template = $templates[$type];
+        $tpl      = $templates[$type];
         $filename = "import_{$type}_template.csv";
 
         header('Content-Type: text/csv; charset=utf-8');
         header("Content-Disposition: attachment; filename=\"{$filename}\"");
+        echo "\xEF\xBB\xBF"; // UTF-8 BOM for Excel
 
-        $output = fopen('php://output', 'w');
-        fputcsv($output, $template['columns']);
-
-        foreach ($template['sample'] as $row) {
-            fputcsv($output, $row);
+        $out = fopen('php://output', 'w');
+        fputcsv($out, $tpl['columns']);
+        foreach ($tpl['sample'] as $row) {
+            fputcsv($out, $row);
         }
-
-        fclose($output);
+        fclose($out);
         exit;
     }
 
-    // ── Private: Import Methods ────────────────────────────────────────────────
+    // ── IMPORT: Customers ──────────────────────────────────────────────────────
 
     private function importCustomers(string $filepath): array
     {
         $result = ['success' => 0, 'skipped' => 0, 'errors' => []];
-        $row = 0;
 
         if (!($handle = fopen($filepath, 'r'))) {
             $result['errors'][] = 'Could not open file';
             return $result;
         }
 
-        // Read header row and map column names to indexes
-        $rawHeader = fgetcsv($handle);
+        $rawHeader    = fgetcsv($handle);
         if (!$rawHeader) {
             $result['errors'][] = 'Empty file or missing header row';
             fclose($handle);
             return $result;
         }
-
-        // Strip UTF-8 BOM from first column if present
         $rawHeader[0] = ltrim($rawHeader[0], "\xEF\xBB\xBF");
-        $header = array_map('trim', $rawHeader);
-        $col = array_flip($header); // column name → index
+        $col          = array_flip(array_map('trim', $rawHeader));
+        $g            = fn(array $data, string $key) => trim($data[$col[$key] ?? -1] ?? '');
 
-        // Handle duplicate tax_id columns: first=tax_id, second=vat_number
-        $taxIdIndexes = array_keys($header, 'tax_id');
-        $taxIdCol     = $taxIdIndexes[0] ?? null;
-        $vatCol       = $taxIdIndexes[1] ?? ($col['vat_number'] ?? null);
+        $typeMap = [
+            'individual' => 'individual', 'privato'    => 'individual',
+            'company'    => 'company',    'azienda'    => 'company',
+            'freelancer' => 'freelancer',
+            'colleague'  => 'colleague',  'collega'    => 'colleague',
+        ];
 
+        $row = 0;
         while (($data = fgetcsv($handle)) !== false) {
             $row++;
             if (empty(array_filter($data))) continue;
 
-            $g = fn(string $key) => trim($data[$col[$key] ?? -1] ?? '');
-
-            $full_name   = $g('full_name');
-            $client_type = $g('client_type') ?: 'individual';
-            $address     = $g('address');
-            $phone_land  = $g('phone_landline');
-            $phone_mob   = $g('phone_mobile');
-            $email       = strtolower($g('email'));
-            $tax_id      = strtoupper($g('tax_id'));
-            $vat_number  = $vatCol !== null ? strtoupper(trim($data[$vatCol] ?? '')) : '';
-            $postal_code = $g('postal_code');
-            $city        = $g('city');
-            $province    = strtoupper($g('province'));
-            $notes       = $g('notes');
-
+            $full_name = $g($data, 'full_name');
             if (!$full_name) {
-                $result['errors'][] = "Row {$row}: Name (full_name) is required";
+                $result['errors'][] = "Row {$row}: full_name is required — skipped";
                 $result['skipped']++;
                 continue;
             }
 
+            $email = strtolower($g($data, 'email'));
             if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $result['errors'][] = "Row {$row}: Invalid email — skipping email only";
+                $result['errors'][] = "Row {$row}: invalid email ignored";
                 $email = '';
             }
 
-            // Normalize client_type to our values
-            $typeMap = [
-                'privato'    => 'individual', 'individual' => 'individual',
-                'azienda'    => 'company',    'company'    => 'company',
-                'freelancer' => 'freelancer',
-                'colleague'  => 'colleague',  'collega'    => 'colleague',
-            ];
-            $client_type = $typeMap[strtolower($client_type)] ?? 'individual';
+            $rawType     = strtolower($g($data, 'client_type')) ?: 'individual';
+            $client_type = $typeMap[$rawType] ?? 'individual';
 
             try {
                 $this->db->insert('customers', [
                     'full_name'      => $full_name,
                     'client_type'    => $client_type,
-                    'address'        => $address ?: null,
-                    'phone_landline' => $phone_land ?: null,
-                    'phone_mobile'   => $phone_mob ?: null,
                     'email'          => $email ?: null,
-                    'tax_id'         => $tax_id ?: null,
-                    'vat_number'     => $vat_number ?: null,
-                    'postal_code'    => $postal_code ?: null,
-                    'city'           => $city ?: null,
-                    'province'       => $province ?: null,
-                    'notes'          => $notes ?: null,
+                    'phone_mobile'   => $g($data, 'phone_mobile')   ?: null,
+                    'phone_landline' => $g($data, 'phone_landline')  ?: null,
+                    'address'        => $g($data, 'address')         ?: null,
+                    'city'           => $g($data, 'city')            ?: null,
+                    'postal_code'    => $g($data, 'postal_code')     ?: null,
+                    'province'       => strtoupper($g($data, 'province')) ?: null,
+                    'vat_number'     => strtoupper($g($data, 'vat_number')) ?: null,
+                    'tax_id'         => strtoupper($g($data, 'tax_id'))     ?: null,
+                    'notes'          => $g($data, 'notes')           ?: null,
                     'status'         => 'active',
                     'created_at'     => date('Y-m-d H:i:s'),
                     'updated_at'     => date('Y-m-d H:i:s'),
@@ -242,121 +232,85 @@ class ImportController
         return $result;
     }
 
+    // ── IMPORT: Repairs ────────────────────────────────────────────────────────
+
     private function importRepairs(string $filepath): array
     {
         $result = ['success' => 0, 'skipped' => 0, 'errors' => []];
-        $row = 0;
 
         if (!($handle = fopen($filepath, 'r'))) {
             $result['errors'][] = 'Could not open file';
             return $result;
         }
 
-        // Read and normalize header row
-        $rawHeader = fgetcsv($handle);
+        $rawHeader    = fgetcsv($handle);
         if (!$rawHeader) {
             $result['errors'][] = 'Empty file or missing header row';
             fclose($handle);
             return $result;
         }
         $rawHeader[0] = ltrim($rawHeader[0], "\xEF\xBB\xBF");
-        $header = array_map('trim', $rawHeader);
-        $col    = array_flip($header);
+        $col          = array_flip(array_map('trim', $rawHeader));
+        $g            = fn(array $data, string $key) => trim($data[$col[$key] ?? -1] ?? '');
 
-        // Italian status → our status
         $statusMap = [
-            'completato'        => 'completed',
-            'in sospeso'        => 'on_hold',
-            'in corso'          => 'in_progress',
-            'pronto'            => 'ready_for_pickup',
-            'ritirato'          => 'collected',
-            'annullato'         => 'cancelled',
-            'attesa ricambi'    => 'waiting_for_parts',
-            // English fallbacks
-            'completed'         => 'completed',
-            'on_hold'           => 'on_hold',
-            'in_progress'       => 'in_progress',
-            'ready_for_pickup'  => 'ready_for_pickup',
-            'collected'         => 'collected',
-            'cancelled'         => 'cancelled',
-            'waiting_for_parts' => 'waiting_for_parts',
+            'in_progress'       => 'in_progress',  'in corso'          => 'in_progress',
+            'on_hold'           => 'on_hold',       'in sospeso'        => 'on_hold',
+            'waiting_for_parts' => 'waiting_for_parts', 'attesa ricambi' => 'waiting_for_parts',
+            'ready_for_pickup'  => 'ready_for_pickup',  'pronto'        => 'ready_for_pickup',
+            'completed'         => 'completed',     'completato'        => 'completed',
+            'collected'         => 'collected',     'ritirato'          => 'collected',
+            'cancelled'         => 'cancelled',     'annullato'         => 'cancelled',
         ];
 
+        $row = 0;
         while (($data = fgetcsv($handle)) !== false) {
             $row++;
             if (empty(array_filter($data))) continue;
 
-            $g = fn(string $key) => trim($data[$col[$key] ?? -1] ?? '');
-
-            $clientIdFk      = $g('ClientID_FK');
-            $deviceName      = $g('DeviceName');
-            $deviceSerial    = $g('DeviceSerial');
-            $problemDesc     = $g('ProblemDescription');
-            $workDone        = $g('WorkDone');
-            $statusRaw       = strtolower($g('Status'));
-            $notes           = $g('Notes');
-            $dateIn          = $g('DateIn');
-            $dateOut         = $g('DateOut');
-            $repairDate      = $g('RepairDate');
-
-            // Resolve customer via legacy_id
-            $customerId = null;
-            if ($clientIdFk !== '') {
-                $customer = $this->db->fetchOne(
-                    'SELECT customer_id FROM customers WHERE legacy_id = ? LIMIT 1',
-                    [$clientIdFk]
-                );
-                $customerId = $customer['customer_id'] ?? null;
-                if (!$customerId) {
-                    $result['errors'][] = "Row {$row}: ClientID_FK {$clientIdFk} not found in customers — imported without customer link";
-                }
+            $problem = $g($data, 'problem_description');
+            if (!$problem) {
+                $result['errors'][] = "Row {$row}: problem_description is required — skipped";
+                $result['skipped']++;
+                continue;
             }
 
-            // Map status
-            $status = $statusMap[$statusRaw] ?? 'in_progress';
+            $customerId = (int)$g($data, 'customer_id') ?: null;
+            $staffId    = (int)$g($data, 'staff_id')    ?: null;
 
-            // Parse dates safely
-            $parsedDateIn  = $this->parseDate($dateIn)  ?: $this->parseDate($repairDate) ?: date('Y-m-d H:i:s');
-            $parsedDateOut = $this->parseDate($dateOut);
+            $rawStatus = strtolower($g($data, 'status'));
+            $status    = $statusMap[$rawStatus] ?? 'in_progress';
 
-            // Combine Notes + WorkDone
-            $combinedNotes = trim(implode("\n\n", array_filter([
-                $notes    ? "Notes: {$notes}"     : '',
-                $workDone ? "Work Done: {$workDone}" : '',
-            ])));
+            $priority = $g($data, 'priority');
+            if (!in_array($priority, ['low', 'normal', 'high', 'urgent'])) {
+                $priority = 'normal';
+            }
+
+            $amount = $g($data, 'actual_amount');
+            $amount = is_numeric($amount) ? (float)$amount : null;
+
+            $dateIn  = $this->parseDate($g($data, 'date_in'))           ?: date('Y-m-d H:i:s');
+            $dateOut = $this->parseDate($g($data, 'date_expected_out'));
 
             try {
-                $pdo = $this->db->getPdo();
-                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-                $stmt = $pdo->prepare("
-                    INSERT INTO repairs
-                        (customer_id, staff_id, device_brand, device_model,
-                         device_serial_number, problem_description, work_done,
-                         status, notes, date_in, date_out, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ");
-
-                $stmt->execute([
-                    $customerId,
-                    null,
-                    $deviceName ?: null,
-                    null,
-                    $deviceSerial ?: null,
-                    $problemDesc ?: null,
-                    $workDone ?: null,
-                    $status,
-                    $combinedNotes ?: null,
-                    $parsedDateIn,
-                    $parsedDateOut,
-                    $parsedDateIn,
-                    date('Y-m-d H:i:s'),
+                $this->db->insert('repairs', [
+                    'customer_id'          => $customerId,
+                    'staff_id'             => $staffId,
+                    'device_brand'         => $g($data, 'device_brand')         ?: null,
+                    'device_model'         => $g($data, 'device_model')         ?: '',
+                    'device_serial_number' => $g($data, 'device_serial_number') ?: null,
+                    'problem_description'  => $problem,
+                    'diagnosis'            => $g($data, 'diagnosis_notes')      ?: null,
+                    'status'               => $status,
+                    'priority'             => $priority,
+                    'collection_date'      => $dateOut ? substr($dateOut, 0, 10) : null,
+                    'actual_amount'        => $amount,
+                    'notes'                => $g($data, 'notes')                ?: null,
+                    'date_in'              => $dateIn,
+                    'created_at'           => $dateIn,
+                    'updated_at'           => date('Y-m-d H:i:s'),
                 ]);
-
                 $result['success']++;
-            } catch (PDOException $e) {
-                $result['errors'][] = "Row {$row}: SQL error — " . $e->getMessage();
-                $result['skipped']++;
             } catch (Exception $e) {
                 $result['errors'][] = "Row {$row}: " . $e->getMessage();
                 $result['skipped']++;
@@ -367,83 +321,60 @@ class ImportController
         return $result;
     }
 
-    /**
-     * Parse various date formats from Excel/CSV safely.
-     * Returns MySQL datetime string or null.
-     */
-    private function parseDate(string $raw): ?string
-    {
-        if ($raw === '' || $raw === '0') return null;
-
-        // Already MySQL format: 2025-12-15 00:00:00
-        if (preg_match('/^\d{4}-\d{2}-\d{2}/', $raw)) {
-            return date('Y-m-d H:i:s', strtotime($raw)) ?: null;
-        }
-
-        // Excel serial number (numeric only)
-        if (is_numeric($raw)) {
-            $ts = ($raw - 25569) * 86400; // Excel epoch to Unix
-            return date('Y-m-d H:i:s', (int)$ts);
-        }
-
-        // Short formats: 9/12/25, 10/12/2025, 12-12-25
-        $raw = str_replace('-', '/', $raw);
-        if (preg_match('#^(\d{1,2})/(\d{1,2})/(\d{2,4})$#', $raw, $m)) {
-            $year = strlen($m[3]) === 2 ? '20' . $m[3] : $m[3];
-            $ts   = mktime(0, 0, 0, (int)$m[2], (int)$m[1], (int)$year); // DD/MM/YYYY
-            return $ts ? date('Y-m-d H:i:s', $ts) : null;
-        }
-
-        // Try PHP strtotime as last resort
-        $ts = strtotime($raw);
-        return $ts ? date('Y-m-d H:i:s', $ts) : null;
-    }
+    // ── IMPORT: Invoices ───────────────────────────────────────────────────────
 
     private function importInvoices(string $filepath): array
     {
         $result = ['success' => 0, 'skipped' => 0, 'errors' => []];
-        $row = 0;
 
         if (!($handle = fopen($filepath, 'r'))) {
             $result['errors'][] = 'Could not open file';
             return $result;
         }
 
-        fgetcsv($handle);
+        $rawHeader    = fgetcsv($handle);
+        if (!$rawHeader) {
+            $result['errors'][] = 'Empty file or missing header row';
+            fclose($handle);
+            return $result;
+        }
+        $rawHeader[0] = ltrim($rawHeader[0], "\xEF\xBB\xBF");
+        $col          = array_flip(array_map('trim', $rawHeader));
+        $g            = fn(array $data, string $key) => trim($data[$col[$key] ?? -1] ?? '');
 
+        $row = 0;
         while (($data = fgetcsv($handle)) !== false) {
             $row++;
-
             if (empty(array_filter($data))) continue;
 
-            $customer_id  = (int)($data[0] ?? 0);
-            $repair_id    = !empty($data[1]) ? (int)$data[1] : null;
-            $status       = trim($data[2] ?? 'draft');
-            $total        = (float)($data[3] ?? 0);
-            $paid         = (float)($data[4] ?? 0);
-            $due_date     = !empty($data[5]) ? $data[5] : null;
-            $notes        = trim($data[6] ?? '');
+            $customerId = (int)$g($data, 'customer_id');
+            $total      = (float)$g($data, 'total_amount');
 
-            if (!$customer_id || $total <= 0) {
-                $result['errors'][] = "Row {$row}: Customer ID and total amount required";
+            if (!$customerId || $total <= 0) {
+                $result['errors'][] = "Row {$row}: customer_id and total_amount are required — skipped";
                 $result['skipped']++;
                 continue;
             }
 
+            $repairId = (int)$g($data, 'repair_id') ?: null;
+            $status   = $g($data, 'status') ?: 'draft';
+            $paid     = (float)$g($data, 'paid_amount');
+            $dueDate  = $g($data, 'due_date') ?: null;
+            $notes    = $g($data, 'notes') ?: null;
+
             try {
                 $invoiceNumber = $this->invoiceModel->generateInvoiceNumber();
-
                 $this->db->insert('invoices', [
-                    'customer_id'   => $customer_id,
-                    'repair_id'     => $repair_id,
+                    'customer_id'    => $customerId,
+                    'repair_id'      => $repairId,
                     'invoice_number' => $invoiceNumber,
-                    'status'        => $status,
-                    'total_amount'  => $total,
-                    'paid_amount'   => $paid,
-                    'due_date'      => $due_date ?: null,
-                    'notes'         => $notes ?: null,
-                    'created_at'    => date('Y-m-d H:i:s'),
-                    'updated_at'    => date('Y-m-d H:i:s'),
+                    'status'         => $status,
+                    'total_amount'   => $total,
+                    'paid_amount'    => $paid,
+                    'due_date'       => $dueDate,
+                    'notes'          => $notes,
+                    'created_at'     => date('Y-m-d H:i:s'),
+                    'updated_at'     => date('Y-m-d H:i:s'),
                 ]);
                 $result['success']++;
             } catch (Exception $e) {
@@ -456,41 +387,52 @@ class ImportController
         return $result;
     }
 
+    // ── IMPORT: Staff ──────────────────────────────────────────────────────────
+
     private function importStaff(string $filepath): array
     {
         $result = ['success' => 0, 'skipped' => 0, 'errors' => []];
-        $row = 0;
 
         if (!($handle = fopen($filepath, 'r'))) {
             $result['errors'][] = 'Could not open file';
             return $result;
         }
 
-        fgetcsv($handle);
+        $rawHeader    = fgetcsv($handle);
+        if (!$rawHeader) {
+            $result['errors'][] = 'Empty file or missing header row';
+            fclose($handle);
+            return $result;
+        }
+        $rawHeader[0] = ltrim($rawHeader[0], "\xEF\xBB\xBF");
+        $col          = array_flip(array_map('trim', $rawHeader));
+        $g            = fn(array $data, string $key) => trim($data[$col[$key] ?? -1] ?? '');
 
+        $validRoles = ['admin', 'manager', 'technician', 'staff'];
+
+        $row = 0;
         while (($data = fgetcsv($handle)) !== false) {
             $row++;
-
             if (empty(array_filter($data))) continue;
 
-            $first_name = trim($data[0] ?? '');
-            $last_name  = trim($data[1] ?? '');
-            $email      = trim($data[2] ?? '');
-            $phone      = trim($data[3] ?? '');
-            $role       = trim($data[4] ?? 'technician');
+            $firstName = $g($data, 'first_name');
+            $lastName  = $g($data, 'last_name');
 
-            if (!$first_name || !$last_name) {
-                $result['errors'][] = "Row {$row}: First and last name required";
+            if (!$firstName || !$lastName) {
+                $result['errors'][] = "Row {$row}: first_name and last_name are required — skipped";
                 $result['skipped']++;
                 continue;
             }
 
+            $role = $g($data, 'role');
+            if (!in_array($role, $validRoles)) $role = 'technician';
+
             try {
                 $this->db->insert('staff', [
-                    'first_name' => $first_name,
-                    'last_name'  => $last_name,
-                    'email'      => $email ?: null,
-                    'phone'      => $phone ?: null,
+                    'first_name' => $firstName,
+                    'last_name'  => $lastName,
+                    'email'      => $g($data, 'email') ?: null,
+                    'phone'      => $g($data, 'phone') ?: null,
                     'role'       => $role,
                     'is_active'  => 1,
                     'created_at' => date('Y-m-d H:i:s'),
@@ -505,5 +447,33 @@ class ImportController
 
         fclose($handle);
         return $result;
+    }
+
+    // ── Helper: parse various date formats ────────────────────────────────────
+
+    private function parseDate(string $raw): ?string
+    {
+        if ($raw === '' || $raw === '0') return null;
+
+        // Already MySQL format
+        if (preg_match('/^\d{4}-\d{2}-\d{2}/', $raw)) {
+            return date('Y-m-d H:i:s', strtotime($raw)) ?: null;
+        }
+
+        // Excel serial number
+        if (is_numeric($raw)) {
+            return date('Y-m-d H:i:s', (int)(($raw - 25569) * 86400));
+        }
+
+        // DD/MM/YYYY or DD-MM-YYYY
+        $raw = str_replace('-', '/', $raw);
+        if (preg_match('#^(\d{1,2})/(\d{1,2})/(\d{2,4})$#', $raw, $m)) {
+            $year = strlen($m[3]) === 2 ? '20' . $m[3] : $m[3];
+            $ts   = mktime(0, 0, 0, (int)$m[2], (int)$m[1], (int)$year);
+            return $ts ? date('Y-m-d H:i:s', $ts) : null;
+        }
+
+        $ts = strtotime($raw);
+        return $ts ? date('Y-m-d H:i:s', $ts) : null;
     }
 }
