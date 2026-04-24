@@ -365,6 +365,7 @@ class RepairController
             'priority'             => in_array($post['priority'] ?? '', ['low','normal','high','urgent']) ? $post['priority'] : 'normal',
             'estimate_amount'      => is_numeric($post['estimate_amount'] ?? '') ? (float)$post['estimate_amount'] : null,
             'actual_amount'        => is_numeric($post['actual_amount']   ?? '') ? (float)$post['actual_amount']   : null,
+            'deposit_paid'         => is_numeric($post['deposit_paid']    ?? '') ? (float)$post['deposit_paid']    : null,
             'status'               => $status,
             'notes'                => Utils::sanitize($post['notes'] ?? ''),
             'created_by'           => Auth::id(),
