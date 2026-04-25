@@ -112,12 +112,21 @@ class Customer extends BaseModel
 
         $col     = in_array($sort, self::SORTABLE, true) ? $sort : 'full_name';
         $dir     = strtoupper($dir) === 'DESC' ? 'DESC' : 'ASC';
-        $orderBy = "`{$col}` {$dir}";
+
+        // When searching by name with default sort, use relevance ordering
+        // so partial matches (e.g. "CHIARA") surface the best results first
+        if ($query !== '' && $col === 'full_name' && $dir === 'ASC') {
+            $orderBy   = "CASE WHEN full_name LIKE ? THEN 0 ELSE 1 END, LOCATE(?, full_name), full_name ASC";
+            $extraParams = [$query . '%', $query];
+        } else {
+            $orderBy   = "`{$col}` {$dir}";
+            $extraParams = [];
+        }
 
         $rows = $this->db->fetchAll(
             "SELECT * FROM customers WHERE {$where}
              ORDER BY {$orderBy} LIMIT ? OFFSET ?",
-            array_merge($params, [$paging['perPage'], $paging['offset']])
+            array_merge($params, $extraParams, [$paging['perPage'], $paging['offset']])
         );
 
         return ['rows' => $rows, 'pagination' => $paging];
@@ -185,16 +194,21 @@ class Customer extends BaseModel
 
     // ── Autocomplete (AJAX) ───────────────────────────────────────────────────
 
-    public function autocomplete(string $query, int $limit = 10): array
+    public function autocomplete(string $query, int $limit = 20): array
     {
-        $like = '%' . $query . '%';
+        $like      = '%' . $query . '%';
+        $startLike = $query . '%';
         return $this->db->fetchAll(
             "SELECT customer_id, full_name, phone_mobile, email, city
              FROM customers
              WHERE status = 'active'
                AND (full_name LIKE ? OR phone_mobile LIKE ? OR email LIKE ?)
-             ORDER BY full_name LIMIT ?",
-            [$like, $like, $like, $limit]
+             ORDER BY
+               CASE WHEN full_name LIKE ? THEN 0 ELSE 1 END,
+               LOCATE(?, full_name),
+               full_name
+             LIMIT ?",
+            [$like, $like, $like, $startLike, $query, $limit]
         );
     }
 
