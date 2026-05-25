@@ -173,7 +173,7 @@ class ImportController
         }
         $rawHeader[0] = ltrim($rawHeader[0], "\xEF\xBB\xBF");
         $col          = array_flip(array_map('trim', $rawHeader));
-        $g            = fn(array $data, string $key) => trim($data[$col[$key] ?? -1] ?? '');
+        $g            = fn(array $data, string $key) => $this->toUtf8(trim($data[$col[$key] ?? -1] ?? ''));
 
         $typeMap = [
             'individual' => 'individual', 'privato'  => 'individual',
@@ -250,7 +250,7 @@ class ImportController
         }
         $rawHeader[0] = ltrim($rawHeader[0], "\xEF\xBB\xBF");
         $col          = array_flip(array_map('trim', $rawHeader));
-        $g            = fn(array $data, string $key) => trim($data[$col[$key] ?? -1] ?? '');
+        $g            = fn(array $data, string $key) => $this->toUtf8(trim($data[$col[$key] ?? -1] ?? ''));
 
         $statusMap = [
             'in_progress'       => 'in_progress',  'in corso'          => 'in_progress',
@@ -350,7 +350,7 @@ class ImportController
         }
         $rawHeader[0] = ltrim($rawHeader[0], "\xEF\xBB\xBF");
         $col          = array_flip(array_map('trim', $rawHeader));
-        $g            = fn(array $data, string $key) => trim($data[$col[$key] ?? -1] ?? '');
+        $g            = fn(array $data, string $key) => $this->toUtf8(trim($data[$col[$key] ?? -1] ?? ''));
 
         $row = 0;
         while (($data = fgetcsv($handle)) !== false) {
@@ -418,7 +418,7 @@ class ImportController
         }
         $rawHeader[0] = ltrim($rawHeader[0], "\xEF\xBB\xBF");
         $col          = array_flip(array_map('trim', $rawHeader));
-        $g            = fn(array $data, string $key) => trim($data[$col[$key] ?? -1] ?? '');
+        $g            = fn(array $data, string $key) => $this->toUtf8(trim($data[$col[$key] ?? -1] ?? ''));
 
         $validRoles = ['admin', 'manager', 'technician', 'staff'];
 
@@ -459,6 +459,25 @@ class ImportController
 
         fclose($handle);
         return $result;
+    }
+
+    // ── Helper: ensure a string is valid UTF-8 ────────────────────────────────
+
+    /**
+     * Convert a string to UTF-8 if it isn't already.
+     * Handles Windows-1252 / Latin-1 CSV files exported from Excel or legacy
+     * Italian software (e.g. € sign stored as 0x80 in Windows-1252).
+     */
+    private function toUtf8(string $s): string
+    {
+        if ($s === '') return '';
+        // Already valid UTF-8 → nothing to do
+        if (mb_check_encoding($s, 'UTF-8')) {
+            return $s;
+        }
+        // Try Windows-1252 first (common for Western-European legacy exports)
+        $converted = mb_convert_encoding($s, 'UTF-8', 'Windows-1252');
+        return $converted !== false ? $converted : $s;
     }
 
     // ── Helper: parse various date formats ────────────────────────────────────
