@@ -37,9 +37,29 @@ class Logger
                 'user_agent'  => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
                 'created_at'  => date('Y-m-d H:i:s'),
             ]);
+
+            // Auto-purge logs older than 90 days (~1% of requests)
+            if (rand(1, 100) === 1) {
+                self::purgeOldLogs();
+            }
         } catch (Throwable $e) {
             // Never let logging break the app
             self::fileLog('ERROR logging to DB: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete activity log entries older than 90 days.
+     * Called automatically on ~1% of log writes.
+     */
+    public static function purgeOldLogs(int $days = 90): void
+    {
+        try {
+            Database::getInstance()->getPdo()->exec(
+                "DELETE FROM activity_log WHERE created_at < DATE_SUB(NOW(), INTERVAL {$days} DAY)"
+            );
+        } catch (Throwable $e) {
+            self::fileLog('ERROR purging old logs: ' . $e->getMessage());
         }
     }
 
