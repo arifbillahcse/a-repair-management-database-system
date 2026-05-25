@@ -209,15 +209,18 @@ class Database
 
     private function handleError(string $message, string $sql = '', array $params = []): never
     {
+        // Always log the full detail to the server error log
+        error_log('[DB ERROR] ' . $message . ($sql ? " | SQL: {$sql}" : ''));
+
         if (APP_DEBUG) {
+            // Debug mode: include SQL in the exception
             $detail = $sql ? "\nSQL: {$sql}\nParams: " . json_encode($params) : '';
             throw new RuntimeException($message . $detail);
         }
 
-        // In production: log and show generic error
-        error_log('[DB ERROR] ' . $message . ($sql ? " | SQL: {$sql}" : ''));
-        http_response_code(500);
-        // Let the error handler show the 500 page
-        throw new RuntimeException('A database error occurred. Please try again later.');
+        // Production: throw the real DB message (e.g. "Duplicate entry …") but
+        // without exposing raw SQL. Callers like ImportController can surface this
+        // to the user; generic 500 pages still show nothing sensitive.
+        throw new RuntimeException($message);
     }
 }
