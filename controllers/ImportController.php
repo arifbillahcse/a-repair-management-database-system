@@ -82,15 +82,15 @@ class ImportController
             // ── Customers ──────────────────────────────────────────────────────
             'customers' => [
                 'columns' => [
-                    'full_name', 'client_type', 'email',
+                    'customer_id', 'full_name', 'client_type', 'email',
                     'phone_mobile', 'phone_landline',
                     'address', 'city', 'postal_code', 'province',
                     'vat_number', 'tax_id', 'notes',
                 ],
                 'sample' => [
-                    ['Mario Rossi',      'individual', 'mario@email.com',   '+39 333 1111111', '+39 02 1234567',  'Via Roma 1',     'Roma',       '00100', 'RM', '',             'RSSMRA80A01H501Z', ''],
-                    ['Tech Solutions Srl','company',   'info@techsrl.it',   '+39 333 2222222', '+39 06 9876543',  'Via Milano 42',  'Milano',     '20100', 'MI', 'IT12345678901', '',                'VIP customer'],
-                    ['Anna Bianchi',     'colleague',  'anna@workshop.it',  '+39 333 3333333', '',                'Via Napoli 5',   'Napoli',     '80100', 'NA', '',             '',                'Colleague technician'],
+                    [271, 'Mario Rossi',           'individual', 'mario@email.com',   '+39 333 1111111', '+39 02 1234567',  'Via Roma 1',     'Roma',       '00100', 'RM', '',             'RSSMRA80A01H501Z', ''],
+                    [19206, 'Tech Solutions Srl',  'company',    'info@techsrl.it',   '+39 333 2222222', '+39 06 9876543',  'Via Milano 42',  'Milano',     '20100', 'MI', 'IT12345678901', '',                'VIP customer'],
+                    ['', 'Anna Bianchi',           'colleague',  'anna@workshop.it',  '+39 333 3333333', '',                'Via Napoli 5',   'Napoli',     '80100', 'NA', '',             '',                'Colleague technician'],
                 ],
             ],
 
@@ -201,9 +201,10 @@ class ImportController
 
             $rawType     = strtolower($g($data, 'client_type')) ?: 'individual';
             $client_type = $typeMap[$rawType] ?? 'individual';
+            $customerId  = (int)$g($data, 'customer_id') ?: 0;
 
             try {
-                $this->db->insert('customers', [
+                $insertData = [
                     'full_name'      => $full_name,
                     'client_type'    => $client_type,
                     'email'          => $email ?: null,
@@ -219,7 +220,14 @@ class ImportController
                     'status'         => 'active',
                     'created_at'     => date('Y-m-d H:i:s'),
                     'updated_at'     => date('Y-m-d H:i:s'),
-                ]);
+                ];
+
+                // If customer_id is explicitly provided, prepend it to use that ID
+                if ($customerId > 0) {
+                    $insertData = ['customer_id' => $customerId] + $insertData;
+                }
+
+                $this->db->insert('customers', $insertData);
                 $result['success']++;
             } catch (Exception $e) {
                 $result['errors'][] = "Row {$row}: " . $e->getMessage();
