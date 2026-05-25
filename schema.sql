@@ -245,6 +245,7 @@ CREATE TABLE IF NOT EXISTS `repairs` (
     -- Financials
     `estimate_amount`    DECIMAL(10,2)            DEFAULT NULL, -- Quoted price
     `actual_amount`      DECIMAL(10,2)            DEFAULT NULL, -- Final price charged
+    `deposit_paid`       DECIMAL(10,2)            DEFAULT NULL, -- Deposit received upfront
     -- Tracking
     `status`             ENUM(
                              'in_progress',
@@ -439,6 +440,68 @@ CREATE TABLE IF NOT EXISTS `activity_log` (
   COLLATE=utf8mb4_unicode_ci
   COMMENT='Immutable audit trail of all system actions';
 
+-- =============================================================================
+--  CREDIT NOTES
+--    Standalone credit / debit notes with per-note company header
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS `credit_notes` (
+    `cn_id`           INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    `cn_number`       INT UNSIGNED    NOT NULL,
+    `cn_date`         DATE            NOT NULL,
+    `company_name`    VARCHAR(200)    NOT NULL DEFAULT '',
+    `company_address` VARCHAR(500)    NOT NULL DEFAULT '',
+    `company_phone`   VARCHAR(50)     NOT NULL DEFAULT '',
+    `company_email`   VARCHAR(150)    NOT NULL DEFAULT '',
+    `company_vat`     VARCHAR(50)     NOT NULL DEFAULT '',
+    `customer_name`   VARCHAR(200)    NOT NULL DEFAULT '',
+    `customer_address`VARCHAR(500)    NOT NULL DEFAULT '',
+    `customer_vat`    VARCHAR(50)     NOT NULL DEFAULT '',
+    `invoice_number`  VARCHAR(100)    NOT NULL DEFAULT '',  -- reference invoice
+    `invoice_date`    DATE                     DEFAULT NULL,
+    `note`            TEXT                     DEFAULT NULL,
+    `signature_id`    TINYINT         NOT NULL DEFAULT 0,
+    `created_by`      INT UNSIGNED             DEFAULT NULL,
+    `created_at`      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`cn_id`),
+    UNIQUE KEY `uk_cn_number` (`cn_number`),
+    KEY `idx_cn_date` (`cn_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `credit_note_items` (
+    `item_id`      INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    `cn_id`        INT UNSIGNED    NOT NULL,
+    `description`  TEXT            NOT NULL,
+    `basic_amount` DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    `vat_amount`   DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    `net_amount`   DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    `created_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`item_id`),
+    KEY `idx_cni_cn_id` (`cn_id`),
+    CONSTRAINT `fk_cni_cn`
+        FOREIGN KEY (`cn_id`) REFERENCES `credit_notes` (`cn_id`)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
+--  PERSONAL NOTES
+--    Per-user to-do / note-pad feature
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS `personal_notes` (
+    `note_id`      INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    `title`        VARCHAR(255)    NOT NULL,
+    `description`  TEXT            NOT NULL,
+    `is_completed` TINYINT(1)      NOT NULL DEFAULT 0,
+    `created_by`   INT UNSIGNED    NOT NULL,
+    `created_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`note_id`),
+    KEY `idx_pn_user`      (`created_by`),
+    KEY `idx_pn_completed` (`is_completed`),
+    KEY `idx_pn_created`   (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =============================================================================
 -- RE-ENABLE FOREIGN KEY CHECKS
