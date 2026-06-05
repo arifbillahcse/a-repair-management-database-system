@@ -158,7 +158,89 @@ class AdminController
         Utils::redirect('/admin/users');
     }
 
-    // ── Private helpers ───────────────────────────────────────────────────────
+    // ── GET /admin/db-export ──────────────────────────────────────────────────
+
+    public function dbExport(): void
+    {
+        Auth::requireRole('admin');
+
+        $db  = Database::getInstance();
+        $pdo = $db->getPdo();
+
+        $dbName   = $db->fetchScalar("SELECT DATABASE()");
+        $filename = 'db_backup_' . $dbName . '_' . date('Y-m-d_His') . '.sql';
+
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        // Open output stream
+        $out = fopen('php://output', 'w');
+
+        fwrite($out, "-- ============================================================\n");
+        fwrite($out, "-- Database Backup: {$dbName}\n");
+        fwrite($out, "-- Generated:       " . date('Y-m-d H:i:s') . "\n");
+        fwrite($out, "-- ============================================================\n\n");
+        fwrite($out, "SET FOREIGN_KEY_CHECKS = 0;\n");
+        fwrite($out, "SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';\n");
+        fwrite($out, "SET NAMES utf8mb4;\n\n");
+
+        // Get all tables
+        $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+
+        foreach ($tables as $table) {
+            fwrite($out, "-- ------------------------------------------------------------\n");
+            fwrite($out, "-- Table: `{$table}`\n");
+            fwrite($out, "-- ------------------------------------------------------------\n\n");
+
+            // DROP + CREATE
+            fwrite($out, "DROP TABLE IF EXISTS `{$table}`;\n");
+            $createRow = $pdo->query("SHOW CREATE TABLE `{$table}`")->fetch(PDO::FETCH_ASSOC);
+            $createSql = $createRow['Create Table'] ?? $createRow[1] ?? '';
+            fwrite($out, $createSql . ";\n\n");
+
+            // Data rows — batch in chunks to keep memory low
+            $stmt = $pdo->query("SELECT * FROM `{$table}`");
+            $cols = null;
+            $batch = [];
+            $batchSize = 100;
+
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                if ($cols === null) {
+                    $cols = '`' . implode('`, `', array_keys($row)) . '`';
+                }
+
+                $values = array_map(function ($val) use ($pdo): string {
+                    if ($val === null) return 'NULL';
+                    return $pdo->quote($val);
+                }, array_values($row));
+
+                $batch[] = '(' . implode(', ', $values) . ')';
+
+                if (count($batch) >= $batchSize) {
+                    fwrite($out, "INSERT INTO `{$table}` ({$cols}) VALUES\n" . implode(",\n", $batch) . ";\n");
+                    $batch = [];
+                }
+            }
+
+            if ($batch) {
+                fwrite($out, "INSERT INTO `{$table}` ({$cols}) VALUES\n" . implode(",\n", $batch) . ";\n");
+            }
+
+            fwrite($out, "\n");
+        }
+
+        fwrite($out, "SET FOREIGN_KEY_CHECKS = 1;\n");
+        fwrite($out, "-- End of backup\n");
+        fclose($out);
+
+        Logger::log('exported', 'database', null, null, ['tables' => count($tables)]);
+        exit;
+    }
+
+
 
     private function migrateCompanySettings(Database $db): void
     {
