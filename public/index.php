@@ -184,7 +184,8 @@ $router->get(  '/import/summary',                    'ImportController@summary')
 $router->get(  '/import/template/:type',             'ImportController@downloadTemplate');
 
 // Admin
-$router->get(  '/admin/db-export',                   'AdminController@dbExport');
+$router->get(  '/admin/db-export',                   'AdminController@dbExportPage');
+$router->post( '/admin/db-export',                   'AdminController@dbExport');
 $router->get(  '/admin/settings',                    'AdminController@settings');
 $router->post( '/admin/settings',                    'AdminController@settings');
 $router->get(  '/admin/sysinfo',                     'AdminController@sysinfo');

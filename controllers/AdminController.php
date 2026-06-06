@@ -160,9 +160,43 @@ class AdminController
 
     // ── GET /admin/db-export ──────────────────────────────────────────────────
 
+    public function dbExportPage(): void
+    {
+        Auth::requireRole('admin');
+
+        $db = Database::getInstance();
+
+        $dbName  = $db->fetchScalar("SELECT DATABASE()");
+        $version = $db->fetchScalar("SELECT VERSION()");
+        $charset = $db->fetchScalar("SELECT @@character_set_database");
+
+        $sizeRow = $db->fetchOne(
+            "SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS size_mb,
+                    COUNT(*) AS table_count
+             FROM information_schema.tables
+             WHERE table_schema = DATABASE()"
+        );
+        $sizeMb     = $sizeRow['size_mb']     ?? 0;
+        $tableCount = (int)($sizeRow['table_count'] ?? 0);
+
+        $tableRows = $db->fetchAll(
+            "SELECT table_name,
+                    table_rows,
+                    ROUND((data_length + index_length) / 1024, 1) AS size_kb
+             FROM information_schema.tables
+             WHERE table_schema = DATABASE()
+             ORDER BY table_name"
+        );
+
+        require VIEWS_PATH . '/admin/db-export.php';
+    }
+
+    // ── POST /admin/db-export ─────────────────────────────────────────────────
+
     public function dbExport(): void
     {
         Auth::requireRole('admin');
+        Auth::checkCSRF();
 
         $db  = Database::getInstance();
         $pdo = $db->getPdo();
