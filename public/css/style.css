@@ -992,7 +992,100 @@ html[data-theme="dark"] .form-select {
     display: block;
 }
 
-/* ── Print styles ───────────────────────────────────────────────────────────── */
+/* ── Colorful Sidebar ──────────────────────────────────────────────────────── */
+/*
+ * The sidebar uses its own permanent dark gradient so it looks vibrant in
+ * both light and dark mode. Override every sidebar-specific color here.
+ */
+.sidebar {
+    background: linear-gradient(175deg, #1e1b4b 0%, #1e3a5f 52%, #0c4a6e 100%);
+    border-right: none;
+    box-shadow: 4px 0 32px rgba(0, 0, 0, .30);
+}
+
+html[data-theme="dark"] .sidebar {
+    background: linear-gradient(175deg, #0f0c29 0%, #101d35 52%, #071525 100%);
+    box-shadow: 4px 0 32px rgba(0, 0, 0, .55);
+}
+
+.sidebar-header {
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding: .9rem 1rem;
+}
+.sidebar-title {
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: rgba(255,255,255,.35);
+    font-weight: 600;
+}
+.sidebar-close-btn { color: rgba(255,255,255,.5); }
+.sidebar-close-btn:hover { color: #fff; }
+
+/* ── Nav links on the coloured sidebar ─────────────────────────────── */
+.sidebar .nav-list { padding: .75rem 0; }
+
+.sidebar .nav-link {
+    color: rgba(255,255,255,.62);
+    border-left: 3px solid transparent;
+    border-radius: var(--radius);
+    margin: 1px .5rem;
+    width: calc(100% - 1rem);
+}
+.sidebar .nav-link:hover {
+    color: rgba(255,255,255,.95);
+    background: rgba(255,255,255,.09);
+    border-left-color: transparent;
+}
+.sidebar .nav-link.active {
+    color: #fff;
+    background: rgba(255,255,255,.15);
+    border-left-color: rgba(255,255,255,.7);
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.sidebar .nav-link.active .nav-icon { opacity: 1; }
+
+/* Sub-menu */
+.sidebar .sub-nav { background: rgba(0,0,0,.18); border-radius: 0 0 var(--radius) var(--radius); }
+.sidebar .sub-nav-link { color: rgba(255,255,255,.5); }
+.sidebar .sub-nav-link:hover,
+.sidebar .sub-nav-link.active { color: rgba(255,255,255,.95); }
+
+/* Divider */
+.sidebar .nav-divider { background: rgba(255,255,255,.1); margin: .6rem .5rem; width: calc(100% - 1rem); }
+
+/* Icon accent colours — one per section */
+.nav-link-dashboard .nav-icon { stroke: #818cf8; }   /* indigo     */
+.nav-link-repairs   .nav-icon { stroke: #fb923c; }   /* orange     */
+.nav-link-clients   .nav-icon { stroke: #c084fc; }   /* purple     */
+.nav-link-credit    .nav-icon { stroke: #2dd4bf; }   /* teal       */
+.nav-link-notes     .nav-icon { stroke: #f472b6; }   /* pink       */
+.nav-link-reports   .nav-icon { stroke: #fbbf24; }   /* amber      */
+.nav-link-staff     .nav-icon { stroke: #34d399; }   /* emerald    */
+.nav-link-export    .nav-icon { stroke: #22d3ee; }   /* cyan       */
+.nav-link-settings  .nav-icon { stroke: #94a3b8; }   /* slate      */
+.nav-link-import    .nav-icon { stroke: #f87171; }   /* rose       */
+
+/* Keep icon stroke visible on hover / active */
+.sidebar .nav-link:hover .nav-icon,
+.sidebar .nav-link.active .nav-icon { opacity: 1; }
+
+/* Hamburger lines ↔ white on coloured sidebar */
+.sidebar-toggle .hamburger-line { background: var(--text-secondary); }
+.sidebar-toggle:hover .hamburger-line { background: var(--text-primary); }
+
+/* Footer / logout */
+.sidebar-footer { border-top: 1px solid rgba(255,255,255,.1); }
+.sidebar-logout { color: rgba(255,255,255,.55); border-radius: var(--radius); }
+.sidebar-logout:hover { color: #fca5a5; background: rgba(248,113,113,.14); }
+.sidebar-logout svg { stroke: inherit; }
+
+/* Scrollbar on dark sidebar */
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); }
+.sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.30); }
+
+/* ── End Colorful Sidebar ──────────────────────────────────────────────────── */
 @media print {
     .topbar, .sidebar, .sidebar-overlay,
     .app-footer, .flash-container,
