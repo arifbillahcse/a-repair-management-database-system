@@ -12,6 +12,7 @@
     }
 
     ready(function () {
+        initThemeToggle();
         initSidebar();
         initUserMenu();
         initFlashMessages();
@@ -20,6 +21,31 @@
         initStatusBadgeColors();
         initCustomerAutocomplete();
     });
+
+    // ── Dark / light theme toggle ─────────────────────────────────────────────
+    function initThemeToggle() {
+        var btn = document.getElementById('themeToggle');
+        if (!btn) return;
+
+        btn.addEventListener('click', function () {
+            var current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+            var next    = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            try { localStorage.setItem('theme', next); } catch (e) {}
+            btn.setAttribute('aria-label', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+        });
+
+        // Follow OS changes only when the user hasn't explicitly chosen a theme
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+                var saved;
+                try { saved = localStorage.getItem('theme'); } catch (err) {}
+                if (!saved) {
+                    document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+                }
+            });
+        }
+    }
 
     // ── Sidebar toggle (mobile) ───────────────────────────────────────────────
     function initSidebar() {

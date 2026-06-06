@@ -275,13 +275,6 @@ class ImportController
             $row++;
             if (empty(array_filter($data))) continue;
 
-            $problem = $g($data, 'problem_description');
-            if (!$problem) {
-                $result['errors'][] = "Row {$row}: problem_description is required — skipped";
-                $result['skipped']++;
-                continue;
-            }
-
             $customerId = (int)$g($data, 'customer_id') ?: null;
             $staffId    = (int)$g($data, 'staff_id')    ?: null;
 
@@ -314,7 +307,7 @@ class ImportController
                     'device_serial_number' => $g($data, 'device_serial_number') ?: null,
                     'device_condition'     => $g($data, 'device_condition')     ?: null,
                     'device_password'      => $g($data, 'device_password')      ?: null,
-                    'problem_description'  => $problem,
+                    'problem_description'  => $g($data, 'problem_description') ?: null,
                     'diagnosis'            => $g($data, 'diagnosis_notes')      ?: null,
                     'internal_notes'       => $g($data, 'internal_notes')       ?: null,
                     'status'               => $status,
