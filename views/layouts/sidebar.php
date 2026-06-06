@@ -26,7 +26,7 @@ function navActive(string $pattern): string
 
         <!-- Dashboard -->
         <li class="nav-item">
-            <a href="<?= BASE_URL ?>/" class="nav-link <?= navActive('^/repair-system/public/?$') ?>">
+            <a href="<?= BASE_URL ?>/" class="nav-link nav-link-dashboard <?= navActive('^/repair-system/public/?$') ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
@@ -38,7 +38,7 @@ function navActive(string $pattern): string
 
         <!-- Repairs -->
         <li class="nav-item has-sub <?= navActive('/repairs') ?>">
-            <button class="nav-link nav-group-toggle" aria-expanded="<?= navActive('/repairs') ? 'true' : 'false' ?>">
+            <button class="nav-link nav-link-repairs nav-group-toggle" aria-expanded="<?= navActive('/repairs') ? 'true' : 'false' ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
@@ -56,7 +56,7 @@ function navActive(string $pattern): string
 
         <!-- Clients -->
         <li class="nav-item has-sub <?= navActive('/customers') ?>">
-            <button class="nav-link nav-group-toggle" aria-expanded="<?= navActive('/customers') ? 'true' : 'false' ?>">
+            <button class="nav-link nav-link-clients nav-group-toggle" aria-expanded="<?= navActive('/customers') ? 'true' : 'false' ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -77,7 +77,7 @@ function navActive(string $pattern): string
 
         <!-- Credit Notes -->
         <li class="nav-item">
-            <a href="<?= BASE_URL ?>/credit-notes" class="nav-link <?= navActive('/credit-notes') ?>">
+            <a href="<?= BASE_URL ?>/credit-notes" class="nav-link nav-link-credit <?= navActive('/credit-notes') ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -91,7 +91,7 @@ function navActive(string $pattern): string
 
         <!-- Personal Notes -->
         <li class="nav-item">
-            <a href="<?= BASE_URL ?>/personal-notes" class="nav-link <?= navActive('/personal-notes') ?>">
+            <a href="<?= BASE_URL ?>/personal-notes" class="nav-link nav-link-notes <?= navActive('/personal-notes') ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -103,7 +103,7 @@ function navActive(string $pattern): string
         <!-- Reports (manager+) -->
         <?php if (Auth::can('manager')): ?>
         <li class="nav-item">
-            <a href="<?= BASE_URL ?>/reports" class="nav-link <?= navActive('/reports') ?>">
+            <a href="<?= BASE_URL ?>/reports" class="nav-link nav-link-reports <?= navActive('/reports') ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <line x1="18" y1="20" x2="18" y2="10"/>
@@ -118,7 +118,7 @@ function navActive(string $pattern): string
         <!-- Staff (manager+) -->
         <?php if (Auth::can('manager')): ?>
         <li class="nav-item">
-            <a href="<?= BASE_URL ?>/staff" class="nav-link <?= navActive('/staff') ?>">
+            <a href="<?= BASE_URL ?>/staff" class="nav-link nav-link-staff <?= navActive('/staff') ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -133,7 +133,7 @@ function navActive(string $pattern): string
         <?php if (Auth::isAdmin()): ?>
         <li class="nav-divider" role="separator"></li>
         <li class="nav-item">
-            <a href="<?= BASE_URL ?>/admin/db-export" class="nav-link">
+            <a href="<?= BASE_URL ?>/admin/db-export" class="nav-link nav-link-export">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <ellipse cx="12" cy="5" rx="9" ry="3"/>
@@ -149,7 +149,7 @@ function navActive(string $pattern): string
         <?php if (Auth::can('manager')): ?>
         <li class="nav-divider" role="separator"></li>
         <li class="nav-item">
-            <a href="<?= BASE_URL ?>/admin/settings" class="nav-link <?= navActive('^.*/admin/settings') ?>">
+            <a href="<?= BASE_URL ?>/admin/settings" class="nav-link nav-link-settings <?= navActive('^.*/admin/settings') ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="3"/>
@@ -163,7 +163,7 @@ function navActive(string $pattern): string
         <!-- Admin section (admin only) -->
         <?php if (Auth::isAdmin()): ?>
         <li class="nav-item">
-            <a href="<?= BASE_URL ?>/import" class="nav-link <?= navActive('/import') ?>">
+            <a href="<?= BASE_URL ?>/import" class="nav-link nav-link-import <?= navActive('/import') ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
