@@ -334,7 +334,7 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
     padding: .75rem 1rem;
     border-bottom: 1px solid var(--border);
 }
-.sidebar-title { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); }
+.sidebar-title { font-size: .80rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); }
 .sidebar-close-btn {
     background: none;
     border: none;
@@ -357,7 +357,7 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
     padding: .55rem 1rem;
     margin: 1px .5rem;
     color: var(--text-secondary);
-    font-size: .87rem;
+    font-size: .95rem;
     font-weight: 500;
     border-radius: var(--radius);
     transition: all var(--transition);
@@ -393,7 +393,7 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
     display: block;
     padding: .42rem 1rem .42rem 2.8rem;
     color: var(--text-secondary);
-    font-size: .83rem;
+    font-size: .90rem;
     transition: all var(--transition);
     text-decoration: none;
 }
@@ -998,14 +998,14 @@ html[data-theme="dark"] .form-select {
  * both light and dark mode. Override every sidebar-specific color here.
  */
 .sidebar {
-    background: linear-gradient(175deg, #1e1b4b 0%, #1e3a5f 52%, #0c4a6e 100%);
+    background: linear-gradient(175deg, #1a1a1a 0%, #0f0f0f 52%, #000000 100%);
     border-right: none;
-    box-shadow: 4px 0 32px rgba(0, 0, 0, .30);
+    box-shadow: 4px 0 32px rgba(0, 0, 0, .50);
 }
 
 html[data-theme="dark"] .sidebar {
-    background: linear-gradient(175deg, #0f0c29 0%, #101d35 52%, #071525 100%);
-    box-shadow: 4px 0 32px rgba(0, 0, 0, .55);
+    background: linear-gradient(175deg, #0f0f0f 0%, #050505 52%, #000000 100%);
+    box-shadow: 4px 0 32px rgba(0, 0, 0, .70);
 }
 
 .sidebar-header {
@@ -1013,7 +1013,7 @@ html[data-theme="dark"] .sidebar {
     padding: .9rem 1rem;
 }
 .sidebar-title {
-    font-size: .68rem;
+    font-size: .75rem;
     text-transform: uppercase;
     letter-spacing: .12em;
     color: rgba(255,255,255,.35);
