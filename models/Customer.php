@@ -94,8 +94,19 @@ class Customer extends BaseModel
         string $dir    = 'ASC',
         string $type   = ''
     ): array {
-        $like   = '%' . $query . '%';
-        $params = [$like, $like, $like, $like, $like];
+        // Collapse repeated/odd whitespace (tabs, double spaces, etc.) so the
+        // typed query matches names regardless of how the original data was
+        // formatted (legacy imports often contain irregular spacing).
+        $query = trim(preg_replace('/\s+/u', ' ', $query));
+        $like  = '%' . $query . '%';
+
+        // Match full_name word-by-word so extra/irregular whitespace *inside*
+        // the stored name (e.g. "GIAMPIERO  DE PALMA" with a double space)
+        // doesn't prevent a normally-spaced search query from matching.
+        $words    = $query === '' ? [] : preg_split('/\s+/', $query);
+        $nameLike = $words ? '%' . implode('%', $words) . '%' : $like;
+
+        $params = [$nameLike, $like, $like, $like, $like];
 
         $where = "(full_name LIKE ?
                    OR email LIKE ? OR phone_mobile LIKE ? OR city LIKE ?
