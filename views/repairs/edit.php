@@ -91,6 +91,7 @@ $statusFlow  = REPAIR_STATUS_FLOW[$repair['status']] ?? [];
                     <?php endif; ?>
                 </div>
                 <div class="card-body">
+                    <input type="hidden" name="customer_id" value="<?= (int)$repair['customer_id'] ?>">
                     <div style="display:flex;align-items:center;gap:.65rem;padding:.55rem .75rem;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                              style="width:16px;height:16px;flex-shrink:0;stroke:var(--text-muted)" aria-hidden="true">

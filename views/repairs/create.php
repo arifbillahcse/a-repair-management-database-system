@@ -56,7 +56,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
     </a>
 </div>
 
-<form method="POST" action="<?= BASE_URL ?>/repairs" enctype="multipart/form-data"
+<form id="repairCreateForm" method="POST" action="<?= BASE_URL ?>/repairs" enctype="multipart/form-data"
       data-validate="1" novalidate>
     <input type="hidden" name="csrf_token" value="<?= Utils::e(Auth::generateCSRFToken()) ?>">
 
@@ -71,7 +71,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                 <div class="card-body">
                     <div class="form-group">
                         <label class="form-label" for="custSearch">
-                            Client <span style="font-size:.75rem;color:var(--text-muted)">(optional)</span>
+                            Client <span class="text-danger">*</span>
                         </label>
 
                         <input type="hidden" name="customer_id" id="customerId" value="<?= $custId ?: '' ?>">
@@ -370,6 +370,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
         hidNm.value  = c.full_name;
         selNm.textContent = c.full_name;
         selDiv.style.display = '';
+        inp.classList.remove('is-invalid');
         inp.closest('.customer-autocomplete').style.display = 'none';
         drop.style.display = 'none';
     }
@@ -424,6 +425,24 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
 
     function escHtml(s) {
         return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Block submission unless a real, registered customer was selected
+    var form = document.getElementById('repairCreateForm');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            if (!hidId.value) {
+                e.preventDefault();
+                drop.style.display = 'none';
+                inp.classList.add('is-invalid');
+                inp.focus();
+                if (window.showToast) {
+                    window.showToast('Please select a registered client from the list.', 'error');
+                } else {
+                    alert('Please select a registered client from the list.');
+                }
+            }
+        });
     }
 })();
 
