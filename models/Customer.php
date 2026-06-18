@@ -94,21 +94,28 @@ class Customer extends BaseModel
         string $dir    = 'ASC',
         string $type   = ''
     ): array {
-        // Collapse repeated/odd whitespace (tabs, double spaces, etc.) so the
-        // typed query matches names regardless of how the original data was
-        // formatted (legacy imports often contain irregular spacing).
+        // Collapse repeated/odd whitespace in the typed query.
         $query = trim(preg_replace('/\s+/u', ' ', $query));
         $like  = '%' . $query . '%';
 
-        // Match full_name word-by-word so extra/irregular whitespace *inside*
-        // the stored name (e.g. "GIAMPIERO  DE PALMA" with a double space)
-        // doesn't prevent a normally-spaced search query from matching.
-        $words    = $query === '' ? [] : preg_split('/\s+/', $query);
-        $nameLike = $words ? '%' . implode('%', $words) . '%' : $like;
+        // Split into individual words and require EVERY word to appear in
+        // full_name, in ANY order — so "CARMELA SCAROLA" finds "SCAROLA CARMELA"
+        // and also tolerates extra/irregular spacing inside stored names.
+        $words = $query === '' ? [] : preg_split('/\s+/u', $query, -1, PREG_SPLIT_NO_EMPTY);
 
-        $params = [$nameLike, $like, $like, $like, $like];
+        $nameClauses = [];
+        $nameParams  = [];
+        foreach ($words as $w) {
+            $nameClauses[] = 'full_name LIKE ?';
+            $nameParams[]  = '%' . $w . '%';
+        }
+        // Fallback for empty query (shouldn't occur but keeps the SQL valid)
+        if (!$nameClauses) { $nameClauses[] = 'full_name LIKE ?'; $nameParams[] = $like; }
 
-        $where = "(full_name LIKE ?
+        $nameWhere = implode(' AND ', $nameClauses);
+        $params    = array_merge($nameParams, [$like, $like, $like, $like]);
+
+        $where = "(({$nameWhere})
                    OR email LIKE ? OR phone_mobile LIKE ? OR city LIKE ?
                    OR vat_number LIKE ?)";
 
