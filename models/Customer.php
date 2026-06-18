@@ -214,19 +214,32 @@ class Customer extends BaseModel
 
     public function autocomplete(string $query, int $limit = 20): array
     {
+        $query     = trim(preg_replace('/\s+/u', ' ', $query));
         $like      = '%' . $query . '%';
         $startLike = $query . '%';
+
+        // Match every word independently so "CARMELA SCAROLA" finds "SCAROLA CARMELA"
+        $words = $query === '' ? [] : preg_split('/\s+/u', $query, -1, PREG_SPLIT_NO_EMPTY);
+        $nameClauses = [];
+        $nameParams  = [];
+        foreach ($words as $w) {
+            $nameClauses[] = 'full_name LIKE ?';
+            $nameParams[]  = '%' . $w . '%';
+        }
+        if (!$nameClauses) { $nameClauses[] = 'full_name LIKE ?'; $nameParams[] = $like; }
+        $nameWhere = implode(' AND ', $nameClauses);
+
         return $this->db->fetchAll(
-            "SELECT customer_id, full_name, phone_mobile, email, city
+            "SELECT customer_id, full_name, phone_mobile AS phone, email, city
              FROM customers
              WHERE status = 'active'
-               AND (full_name LIKE ? OR phone_mobile LIKE ? OR email LIKE ?)
+               AND (({$nameWhere}) OR phone_mobile LIKE ? OR email LIKE ?)
              ORDER BY
                CASE WHEN full_name LIKE ? THEN 0 ELSE 1 END,
                LOCATE(?, full_name),
                full_name
              LIMIT ?",
-            [$like, $like, $like, $startLike, $query, $limit]
+            array_merge($nameParams, [$like, $like, $startLike, $query, $limit])
         );
     }
 
