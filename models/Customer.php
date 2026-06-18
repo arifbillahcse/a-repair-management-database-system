@@ -94,10 +94,28 @@ class Customer extends BaseModel
         string $dir    = 'ASC',
         string $type   = ''
     ): array {
-        $like   = '%' . $query . '%';
-        $params = [$like, $like, $like, $like, $like];
+        // Collapse repeated/odd whitespace in the typed query.
+        $query = trim(preg_replace('/\s+/u', ' ', $query));
+        $like  = '%' . $query . '%';
 
-        $where = "(full_name LIKE ?
+        // Split into individual words and require EVERY word to appear in
+        // full_name, in ANY order — so "CARMELA SCAROLA" finds "SCAROLA CARMELA"
+        // and also tolerates extra/irregular spacing inside stored names.
+        $words = $query === '' ? [] : preg_split('/\s+/u', $query, -1, PREG_SPLIT_NO_EMPTY);
+
+        $nameClauses = [];
+        $nameParams  = [];
+        foreach ($words as $w) {
+            $nameClauses[] = 'full_name LIKE ?';
+            $nameParams[]  = '%' . $w . '%';
+        }
+        // Fallback for empty query (shouldn't occur but keeps the SQL valid)
+        if (!$nameClauses) { $nameClauses[] = 'full_name LIKE ?'; $nameParams[] = $like; }
+
+        $nameWhere = implode(' AND ', $nameClauses);
+        $params    = array_merge($nameParams, [$like, $like, $like, $like]);
+
+        $where = "(({$nameWhere})
                    OR email LIKE ? OR phone_mobile LIKE ? OR city LIKE ?
                    OR vat_number LIKE ?)";
 

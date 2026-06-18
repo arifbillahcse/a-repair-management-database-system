@@ -186,7 +186,7 @@ class ImportController
             $row++;
             if (empty(array_filter($data))) continue;
 
-            $full_name = $g($data, 'full_name');
+            $full_name = trim(preg_replace('/\s+/u', ' ', $g($data, 'full_name')));
             if (!$full_name) {
                 $result['errors'][] = "Row {$row}: full_name is required — skipped";
                 $result['skipped']++;
