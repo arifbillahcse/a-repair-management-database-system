@@ -33,7 +33,7 @@ class Utils
     /** Strip tags, trim whitespace. Safe for display (not for DB — use PDO params). */
     public static function sanitize(?string $value): string
     {
-        return htmlspecialchars(trim((string)$value), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return trim((string)$value);
     }
 
     /** Sanitise a whole array of POST/GET values. */

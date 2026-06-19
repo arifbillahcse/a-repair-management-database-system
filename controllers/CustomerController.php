@@ -316,7 +316,7 @@ class CustomerController
     private function prepareData(array $post): array
     {
         return [
-            'full_name'      => trim(preg_replace('/\s+/u', ' ', Utils::sanitize($post['full_name'] ?? ''))),
+            'full_name'      => trim(preg_replace('/\s+/u', ' ', trim($post['full_name'] ?? ''))),
             'client_type'    => in_array($post['client_type'] ?? '', ['individual','company','colleague'])
                                     ? $post['client_type']
                                     : 'individual',
