@@ -138,4 +138,37 @@ $c = $company ?? [];
     </div>
 </form>
 
+<!-- ── Data Tools ────────────────────────────────────────────────────────────── -->
+<?php if (Auth::isAdmin()): ?>
+<div class="settings-grid" style="margin-top:1.5rem;max-width:820px">
+    <div class="card">
+        <div class="card-header"><h2 class="card-title">Data Tools</h2></div>
+        <div class="card-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+                <div>
+                    <div style="font-size:.9rem;font-weight:600;margin-bottom:.2rem">Move Landline → Mobile</div>
+                    <div style="font-size:.8rem;color:var(--text-muted)">
+                        For every client whose mobile number is empty but has a landline, copies the
+                        landline number into mobile and clears the landline field.
+                        Only affects clients with no mobile number.
+                    </div>
+                </div>
+                <form method="POST" action="<?= BASE_URL ?>/admin/migrate-landline"
+                      onsubmit="return confirm('This will move landline numbers to mobile for all clients that have no mobile number. Continue?')">
+                    <input type="hidden" name="csrf_token" value="<?= Utils::e(Auth::generateCSRFToken()) ?>">
+                    <button type="submit" class="btn btn-secondary" style="white-space:nowrap">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             style="width:15px;height:15px" aria-hidden="true">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                        Run Migration
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <?php require VIEWS_PATH . '/layouts/footer.php'; ?>
