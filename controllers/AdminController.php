@@ -328,4 +328,29 @@ class AdminController
         Utils::flashSuccess('Password updated.');
         Utils::redirect('/admin/users');
     }
+
+    // ── POST /admin/migrate-landline ──────────────────────────────────────────
+
+    public function migrateLandlineToMobile(): void
+    {
+        Auth::requireRole('admin');
+        Auth::checkCSRF();
+
+        $db  = Database::getInstance();
+        $pdo = $db->getPdo();
+
+        // Copy landline → mobile only where mobile is empty and landline has a value
+        $stmt = $pdo->exec(
+            "UPDATE customers
+             SET phone_mobile   = phone_landline,
+                 phone_landline = ''
+             WHERE (phone_mobile IS NULL OR phone_mobile = '')
+               AND phone_landline IS NOT NULL
+               AND phone_landline != ''"
+        );
+
+        Logger::log('updated', 'customers', null, null, ['landline_migrated' => $stmt]);
+        Utils::flashSuccess("Done — {$stmt} client(s) had their landline number moved to mobile.");
+        Utils::redirect('/admin/settings');
+    }
 }

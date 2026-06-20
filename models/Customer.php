@@ -113,10 +113,10 @@ class Customer extends BaseModel
         if (!$nameClauses) { $nameClauses[] = 'full_name LIKE ?'; $nameParams[] = $like; }
 
         $nameWhere = implode(' AND ', $nameClauses);
-        $params    = array_merge($nameParams, [$like, $like, $like, $like]);
+        $params    = array_merge($nameParams, [$like, $like, $like, $like, $like]);
 
         $where = "(({$nameWhere})
-                   OR email LIKE ? OR phone_mobile LIKE ? OR city LIKE ?
+                   OR email LIKE ? OR phone_mobile LIKE ? OR phone_landline LIKE ? OR city LIKE ?
                    OR vat_number LIKE ?)";
 
         if ($status !== '') { $where .= " AND status = ?";      $params[] = $status; }
@@ -233,13 +233,13 @@ class Customer extends BaseModel
             "SELECT customer_id, full_name, phone_mobile AS phone, email, city
              FROM customers
              WHERE status = 'active'
-               AND (({$nameWhere}) OR phone_mobile LIKE ? OR email LIKE ?)
+               AND (({$nameWhere}) OR phone_mobile LIKE ? OR phone_landline LIKE ? OR email LIKE ?)
              ORDER BY
                CASE WHEN full_name LIKE ? THEN 0 ELSE 1 END,
                LOCATE(?, full_name),
                full_name
              LIMIT ?",
-            array_merge($nameParams, [$like, $like, $startLike, $query, $limit])
+            array_merge($nameParams, [$like, $like, $like, $startLike, $query, $limit])
         );
     }
 
