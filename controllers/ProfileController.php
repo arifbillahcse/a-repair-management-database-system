@@ -14,7 +14,8 @@ class ProfileController
     {
         Auth::requireAuth();
 
-        $user   = $this->userModel->findById(Auth::id());
+        $user   = Auth::id() ? $this->userModel->findById(Auth::id()) : null;
+        $user   = $user ?: Auth::user();
         $errors = $_SESSION['_form_errors'] ?? [];
         $saved  = $_SESSION['_profile_saved'] ?? false;
         unset($_SESSION['_form_errors'], $_SESSION['_profile_saved']);
