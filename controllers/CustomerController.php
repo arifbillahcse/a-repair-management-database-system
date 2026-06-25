@@ -45,9 +45,19 @@ class CustomerController
             $this->notFound();
         }
 
-        $repairs  = $this->model->getRepairHistory($id, 5);
+        $repairs  = $this->model->getRepairHistory($id);
         $invoices = $this->model->getInvoices($id);
         $stats    = $this->model->getStats($id);
+
+        // Build merged timeline (repairs + invoices) sorted newest first
+        $timeline = [];
+        foreach ($repairs as $r) {
+            $timeline[] = ['type' => 'repair',  'date' => $r['date_in'],       'data' => $r];
+        }
+        foreach ($invoices as $inv) {
+            $timeline[] = ['type' => 'invoice', 'date' => $inv['invoice_date'], 'data' => $inv];
+        }
+        usort($timeline, fn($a, $b) => strcmp($b['date'], $a['date']));
 
         Logger::log('viewed', 'customer', $id);
         require VIEWS_PATH . '/customers/view.php';

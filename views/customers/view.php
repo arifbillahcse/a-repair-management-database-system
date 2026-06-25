@@ -4,7 +4,6 @@ require VIEWS_PATH . '/layouts/header.php';
 ?>
 
 <style>
-/* ── Customer profile page ─────────────────────────────────────────────── */
 .profile-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem}
 .profile-avatar{width:56px;height:56px;border-radius:50%;background:var(--accent-dim);color:var(--accent);font-size:1.4rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .profile-meta{flex:1;min-width:0}
@@ -13,13 +12,13 @@ require VIEWS_PATH . '/layouts/header.php';
 .profile-id{font-size:.75rem;color:var(--text-muted);background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-full);padding:.15rem .5rem}
 .profile-actions{display:flex;gap:.5rem;flex-wrap:wrap}
 
-.mini-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem}
+.mini-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem}
 .mini-stat{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem}
 .mini-stat-value{font-size:1.35rem;font-weight:700;line-height:1;margin-bottom:.3rem}
 .mini-stat-label{font-size:.75rem;color:var(--text-secondary)}
 
 .profile-grid{display:grid;grid-template-columns:1fr;gap:1.25rem}
-@media(min-width:900px){.profile-grid{grid-template-columns:340px 1fr}}
+@media(min-width:900px){.profile-grid{grid-template-columns:320px 1fr}}
 
 .info-list{list-style:none;padding:0;margin:0}
 .info-item{display:flex;gap:.75rem;padding:.65rem 1.25rem;border-bottom:1px solid var(--border)}
@@ -36,8 +35,25 @@ require VIEWS_PATH . '/layouts/header.php';
 .section-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.25rem;border-bottom:1px solid var(--border)}
 .section-title{font-size:.9rem;font-weight:600;margin:0}
 
-.timeline-status{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--text-muted)}
-.timeline-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+/* Tab bar */
+.hist-tabs{display:flex;gap:.3rem;border-bottom:2px solid var(--border);margin-bottom:1.5rem}
+.hist-tab{padding:.55rem 1.1rem;font-size:.85rem;font-weight:600;color:var(--text-muted);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:all var(--transition);display:inline-flex;align-items:center;gap:.4rem}
+.hist-tab.active,.hist-tab:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.hist-tab .tab-count{background:var(--bg-tertiary);border-radius:var(--radius-full);font-size:.7rem;padding:.05rem .4rem;color:var(--text-muted);font-weight:500}
+.hist-tab.active .tab-count{background:var(--accent-dim);color:var(--accent)}
+.hist-panel{display:none}.hist-panel.active{display:block}
+
+/* Timeline */
+.tl-list{list-style:none;padding:0 1.25rem;margin:0}
+.tl-item{display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--border);position:relative}
+.tl-item:last-child{border-bottom:none}
+.tl-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.1rem}
+.tl-icon-repair{background:var(--accent-dim);color:var(--accent)}
+.tl-icon-invoice{background:rgba(34,197,94,.15);color:var(--success)}
+.tl-body{flex:1;min-width:0}
+.tl-date{font-size:.72rem;color:var(--text-muted);margin-bottom:.25rem}
+.tl-title{font-size:.88rem;font-weight:600;color:var(--text-primary);margin-bottom:.2rem}
+.tl-sub{font-size:.78rem;color:var(--text-secondary)}
 </style>
 
 <!-- ── Profile header ────────────────────────────────────────────────────── -->
@@ -67,9 +83,7 @@ require VIEWS_PATH . '/layouts/header.php';
                 <?php endif; ?>
                 <span class="profile-id">#<?= $customer['customer_id'] ?></span>
                 <?php if ($customer['customer_since']): ?>
-                <span class="profile-id">
-                    Customer since <?= Utils::formatDate($customer['customer_since']) ?>
-                </span>
+                <span class="profile-id">Customer since <?= Utils::formatDate($customer['customer_since']) ?></span>
                 <?php endif; ?>
             </div>
         </div>
@@ -125,7 +139,7 @@ require VIEWS_PATH . '/layouts/header.php';
 </div>
 <script>
 (function () {
-    const modal  = document.getElementById('deleteModal');
+    const modal    = document.getElementById('deleteModal');
     const openBtn  = document.getElementById('deleteCustomerBtn');
     const closeBtn = document.getElementById('cancelDeleteBtn');
     openBtn.addEventListener('click',  function () { modal.style.display = 'flex'; });
@@ -167,7 +181,34 @@ require VIEWS_PATH . '/layouts/header.php';
     <?php endif; ?>
 </div>
 
-<!-- ── Main profile grid ─────────────────────────────────────────────────── -->
+<!-- ── Tab navigation ────────────────────────────────────────────────────── -->
+<div class="hist-tabs">
+    <button class="hist-tab active" data-panel="overview">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Overview
+    </button>
+    <button class="hist-tab" data-panel="repairs">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Repairs
+        <?php if ((int)$stats['total_repairs'] > 0): ?>
+        <span class="tab-count"><?= (int)$stats['total_repairs'] ?></span>
+        <?php endif; ?>
+    </button>
+    <button class="hist-tab" data-panel="invoices">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Invoices
+        <?php if (count($invoices) > 0): ?>
+        <span class="tab-count"><?= count($invoices) ?></span>
+        <?php endif; ?>
+    </button>
+    <button class="hist-tab" data-panel="timeline">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+        Timeline
+    </button>
+</div>
+
+<!-- ══ Overview tab ══════════════════════════════════════════════════════════ -->
+<div class="hist-panel active" id="panel-overview">
 <div class="profile-grid">
 
     <!-- Left: contact info -->
@@ -179,8 +220,6 @@ require VIEWS_PATH . '/layouts/header.php';
                 <a href="<?= BASE_URL ?>/customers/<?= $customer['customer_id'] ?>/edit" class="btn btn-xs btn-secondary">Edit</a>
             </div>
             <ul class="info-list">
-
-                <!-- Phone mobile -->
                 <li class="info-item">
                     <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.87 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
@@ -194,8 +233,6 @@ require VIEWS_PATH . '/layouts/header.php';
                         </span>
                     </div>
                 </li>
-
-                <!-- Landline -->
                 <?php if ($customer['phone_landline']): ?>
                 <li class="info-item">
                     <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -209,8 +246,6 @@ require VIEWS_PATH . '/layouts/header.php';
                     </div>
                 </li>
                 <?php endif; ?>
-
-                <!-- Email -->
                 <li class="info-item">
                     <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -225,8 +260,6 @@ require VIEWS_PATH . '/layouts/header.php';
                         </span>
                     </div>
                 </li>
-
-                <!-- Address -->
                 <li class="info-item">
                     <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -248,11 +281,10 @@ require VIEWS_PATH . '/layouts/header.php';
                         </span>
                     </div>
                 </li>
-
             </ul>
         </div>
 
-        <!-- Business info card -->
+        <!-- Business info -->
         <?php if ($customer['vat_number'] || $customer['tax_id']): ?>
         <div class="section-card" style="margin-bottom:1.25rem">
             <div class="section-header">
@@ -289,7 +321,7 @@ require VIEWS_PATH . '/layouts/header.php';
         </div>
         <?php endif; ?>
 
-        <!-- Notes card -->
+        <!-- Notes -->
         <?php if ($customer['notes']): ?>
         <div class="section-card">
             <div class="section-header">
@@ -300,135 +332,8 @@ require VIEWS_PATH . '/layouts/header.php';
         <?php endif; ?>
     </div>
 
-    <!-- Right: repairs + invoices -->
-    <div style="display:flex;flex-direction:column;gap:1.25rem">
-
-        <!-- Recent repairs -->
-        <div class="section-card">
-            <div class="section-header">
-                <h2 class="section-title">
-                    Repair History
-                    <?php if ((int)$stats['total_repairs'] > 0): ?>
-                    <span class="badge badge-gray" style="margin-left:.4rem"><?= (int)$stats['total_repairs'] ?></span>
-                    <?php endif; ?>
-                </h2>
-                <a href="<?= BASE_URL ?>/repairs?customer_id=<?= $customer['customer_id'] ?>" class="btn btn-xs btn-secondary">View All</a>
-            </div>
-
-            <?php if (empty($repairs)): ?>
-            <div class="empty-state" style="padding:2rem">No repairs on record yet.</div>
-            <?php else: ?>
-            <div class="table-responsive">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Device</th>
-                            <th>Date In</th>
-                            <th>Status</th>
-                            <th>Days</th>
-                            <th style="text-align:right">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($repairs as $r): ?>
-                    <tr>
-                        <td>
-                            <a href="<?= BASE_URL ?>/repairs/<?= $r['repair_id'] ?>"
-                               style="font-weight:600;color:var(--text-primary);text-decoration:none"
-                               onmouseover="this.style.color='var(--accent)'"
-                               onmouseout="this.style.color='var(--text-primary)'">
-                                #<?= $r['repair_id'] ?>
-                            </a>
-                        </td>
-                        <td style="max-width:160px">
-                            <span title="<?= Utils::e($r['device_model']) ?>">
-                                <?= Utils::e(Utils::truncate($r['device_model'], 22)) ?>
-                            </span>
-                            <?php if ($r['device_serial_number']): ?>
-                            <div style="font-size:.72rem;color:var(--text-muted)"><?= Utils::e($r['device_serial_number']) ?></div>
-                            <?php endif; ?>
-                        </td>
-                        <td style="white-space:nowrap"><?= Utils::formatDate($r['date_in']) ?></td>
-                        <td>
-                            <span class="badge <?= REPAIR_STATUS_CLASS[$r['status']] ?? 'badge-gray' ?>">
-                                <?= Utils::e(REPAIR_STATUS[$r['status']] ?? $r['status']) ?>
-                            </span>
-                        </td>
-                        <td>
-                            <?php $days = (int)$r['days_in_lab']; ?>
-                            <span style="color:<?= $days > 14 ? 'var(--error)' : ($days > 7 ? 'var(--warning)' : 'var(--text-secondary)') ?>">
-                                <?= $days ?>d
-                            </span>
-                        </td>
-                        <td style="text-align:right;font-size:.83rem">
-                            <?= $r['actual_amount'] ? Utils::formatCurrency($r['actual_amount']) : ($r['estimate_amount'] ? '<span style="color:var(--text-muted)">~'.Utils::formatCurrency($r['estimate_amount']).'</span>' : '—') ?>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            <?php if ((int)$stats['total_repairs'] > count($repairs)): ?>
-            <div style="padding:.6rem 1rem;border-top:1px solid var(--border);text-align:center">
-                <a href="<?= BASE_URL ?>/repairs?customer_id=<?= $customer['customer_id'] ?>"
-                   style="font-size:.8rem;color:var(--accent)">
-                    View all <?= (int)$stats['total_repairs'] ?> repairs →
-                </a>
-            </div>
-            <?php endif; ?>
-            <?php endif; ?>
-        </div>
-
-        <!-- Invoices -->
-        <div class="section-card">
-            <div class="section-header">
-                <h2 class="section-title">Invoices</h2>
-                <a href="<?= BASE_URL ?>/invoices?customer_id=<?= $customer['customer_id'] ?>" class="btn btn-xs btn-secondary">View All</a>
-            </div>
-
-            <?php if (empty($invoices)): ?>
-            <div class="empty-state" style="padding:2rem">No invoices yet.</div>
-            <?php else: ?>
-            <div class="table-responsive">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Invoice #</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th style="text-align:right">Total</th>
-                            <th style="text-align:right">Paid</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach (array_slice($invoices, 0, 5) as $inv): ?>
-                    <tr>
-                        <td>
-                            <a href="<?= BASE_URL ?>/invoices/<?= $inv['invoice_id'] ?>"
-                               style="font-weight:600;color:var(--text-primary);text-decoration:none"
-                               onmouseover="this.style.color='var(--accent)'"
-                               onmouseout="this.style.color='var(--text-primary)'">
-                                <?= Utils::e($inv['invoice_number']) ?>
-                            </a>
-                        </td>
-                        <td><?= Utils::formatDate($inv['invoice_date']) ?></td>
-                        <td>
-                            <span class="badge <?= INVOICE_STATUS_CLASS[$inv['status']] ?? 'badge-gray' ?>">
-                                <?= Utils::e(INVOICE_STATUS[$inv['status']] ?? $inv['status']) ?>
-                            </span>
-                        </td>
-                        <td style="text-align:right"><?= Utils::formatCurrency($inv['total_amount'] ?? 0) ?></td>
-                        <td style="text-align:right;color:var(--success)"><?= Utils::formatCurrency($inv['amount_paid'] ?? 0) ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- System info (created/updated) -->
+    <!-- Right: record info -->
+    <div>
         <div class="section-card">
             <div class="section-header">
                 <h2 class="section-title">Record Information</h2>
@@ -476,8 +381,276 @@ require VIEWS_PATH . '/layouts/header.php';
                 <?php endif; ?>
             </ul>
         </div>
+    </div>
+</div>
+</div><!-- /panel-overview -->
 
-    </div><!-- /right column -->
-</div><!-- /profile-grid -->
+<!-- ══ Repairs tab ═══════════════════════════════════════════════════════════ -->
+<div class="hist-panel" id="panel-repairs">
+    <div class="section-card">
+        <div class="section-header">
+            <h2 class="section-title">
+                All Repairs
+                <?php if ((int)$stats['total_repairs'] > 0): ?>
+                <span class="badge badge-gray" style="margin-left:.4rem"><?= (int)$stats['total_repairs'] ?></span>
+                <?php endif; ?>
+            </h2>
+            <a href="<?= BASE_URL ?>/repairs/create?customer_id=<?= $customer['customer_id'] ?>" class="btn btn-xs btn-primary">+ New Repair</a>
+        </div>
+
+        <?php if (empty($repairs)): ?>
+        <div class="empty-state" style="padding:2.5rem">No repairs on record yet.</div>
+        <?php else: ?>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Device</th>
+                        <th>Date In</th>
+                        <th>Date Out</th>
+                        <th>Technician</th>
+                        <th>Status</th>
+                        <th>Days</th>
+                        <th style="text-align:right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($repairs as $r): ?>
+                <tr>
+                    <td>
+                        <a href="<?= BASE_URL ?>/repairs/<?= $r['repair_id'] ?>"
+                           style="font-weight:600;color:var(--text-primary);text-decoration:none"
+                           onmouseover="this.style.color='var(--accent)'"
+                           onmouseout="this.style.color='var(--text-primary)'">
+                            #<?= $r['repair_id'] ?>
+                        </a>
+                    </td>
+                    <td style="max-width:160px">
+                        <span title="<?= Utils::e($r['device_model']) ?>">
+                            <?= Utils::e(Utils::truncate($r['device_model'], 22)) ?>
+                        </span>
+                        <?php if ($r['device_serial_number']): ?>
+                        <div style="font-size:.72rem;color:var(--text-muted)"><?= Utils::e($r['device_serial_number']) ?></div>
+                        <?php endif; ?>
+                    </td>
+                    <td style="white-space:nowrap"><?= Utils::formatDate($r['date_in']) ?></td>
+                    <td style="white-space:nowrap"><?= $r['date_out'] ? Utils::formatDate($r['date_out']) : '<span style="color:var(--text-muted)">—</span>' ?></td>
+                    <td style="font-size:.83rem"><?= $r['technician_name'] ? Utils::e(trim($r['technician_name'])) : '<span style="color:var(--text-muted)">—</span>' ?></td>
+                    <td>
+                        <span class="badge <?= REPAIR_STATUS_CLASS[$r['status']] ?? 'badge-gray' ?>">
+                            <?= Utils::e(REPAIR_STATUS[$r['status']] ?? $r['status']) ?>
+                        </span>
+                    </td>
+                    <td>
+                        <?php $days = (int)$r['days_in_lab']; ?>
+                        <span style="color:<?= $days > 14 ? 'var(--error)' : ($days > 7 ? 'var(--warning)' : 'var(--text-secondary)') ?>">
+                            <?= $days ?>d
+                        </span>
+                    </td>
+                    <td style="text-align:right;font-size:.83rem">
+                        <?= $r['actual_amount']
+                            ? Utils::formatCurrency($r['actual_amount'])
+                            : ($r['estimate_amount']
+                                ? '<span style="color:var(--text-muted)">~'.Utils::formatCurrency($r['estimate_amount']).'</span>'
+                                : '—') ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+    </div>
+</div><!-- /panel-repairs -->
+
+<!-- ══ Invoices tab ══════════════════════════════════════════════════════════ -->
+<div class="hist-panel" id="panel-invoices">
+    <div class="section-card">
+        <div class="section-header">
+            <h2 class="section-title">
+                All Invoices
+                <?php if (count($invoices) > 0): ?>
+                <span class="badge badge-gray" style="margin-left:.4rem"><?= count($invoices) ?></span>
+                <?php endif; ?>
+            </h2>
+        </div>
+
+        <?php if (empty($invoices)): ?>
+        <div class="empty-state" style="padding:2.5rem">No invoices yet.</div>
+        <?php else: ?>
+        <?php
+            $totalBilled  = array_sum(array_column($invoices, 'total_amount'));
+            $totalPaid    = array_sum(array_column($invoices, 'amount_paid'));
+            $totalBalance = $totalBilled - $totalPaid;
+        ?>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Date</th>
+                        <th>Repair</th>
+                        <th>Status</th>
+                        <th style="text-align:right">Total</th>
+                        <th style="text-align:right">Paid</th>
+                        <th style="text-align:right">Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($invoices as $inv): ?>
+                <?php $balance = (float)$inv['total_amount'] - (float)$inv['amount_paid']; ?>
+                <tr>
+                    <td>
+                        <a href="<?= BASE_URL ?>/invoices/<?= $inv['invoice_id'] ?>"
+                           style="font-weight:600;color:var(--text-primary);text-decoration:none"
+                           onmouseover="this.style.color='var(--accent)'"
+                           onmouseout="this.style.color='var(--text-primary)'">
+                            <?= Utils::e($inv['invoice_number']) ?>
+                        </a>
+                    </td>
+                    <td style="white-space:nowrap"><?= Utils::formatDate($inv['invoice_date']) ?></td>
+                    <td>
+                        <?php if ($inv['repair_id']): ?>
+                        <a href="<?= BASE_URL ?>/repairs/<?= $inv['repair_id'] ?>"
+                           style="color:var(--text-secondary);text-decoration:none;font-size:.83rem"
+                           onmouseover="this.style.color='var(--accent)'"
+                           onmouseout="this.style.color='var(--text-secondary)'">
+                            #<?= $inv['repair_id'] ?>
+                        </a>
+                        <?php else: ?>
+                        <span style="color:var(--text-muted)">—</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <span class="badge <?= INVOICE_STATUS_CLASS[$inv['status']] ?? 'badge-gray' ?>">
+                            <?= Utils::e(INVOICE_STATUS[$inv['status']] ?? $inv['status']) ?>
+                        </span>
+                    </td>
+                    <td style="text-align:right"><?= Utils::formatCurrency($inv['total_amount'] ?? 0) ?></td>
+                    <td style="text-align:right;color:var(--success)"><?= Utils::formatCurrency($inv['amount_paid'] ?? 0) ?></td>
+                    <td style="text-align:right;color:<?= $balance > 0 ? 'var(--error)' : 'var(--text-muted)' ?>">
+                        <?= $balance > 0 ? Utils::formatCurrency($balance) : '—' ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight:700;background:var(--bg-tertiary)">
+                        <td colspan="4" style="padding:.6rem 1rem;font-size:.83rem;color:var(--text-muted)">Totals</td>
+                        <td style="text-align:right;padding:.6rem 1rem"><?= Utils::formatCurrency($totalBilled) ?></td>
+                        <td style="text-align:right;padding:.6rem 1rem;color:var(--success)"><?= Utils::formatCurrency($totalPaid) ?></td>
+                        <td style="text-align:right;padding:.6rem 1rem;color:<?= $totalBalance > 0 ? 'var(--error)' : 'var(--text-muted)' ?>">
+                            <?= $totalBalance > 0 ? Utils::formatCurrency($totalBalance) : '—' ?>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <?php endif; ?>
+    </div>
+</div><!-- /panel-invoices -->
+
+<!-- ══ Timeline tab ══════════════════════════════════════════════════════════ -->
+<div class="hist-panel" id="panel-timeline">
+    <div class="section-card">
+        <div class="section-header">
+            <h2 class="section-title">Activity Timeline</h2>
+            <span style="font-size:.78rem;color:var(--text-muted)"><?= count($timeline) ?> event<?= count($timeline) !== 1 ? 's' : '' ?></span>
+        </div>
+
+        <?php if (empty($timeline)): ?>
+        <div class="empty-state" style="padding:2.5rem">No activity recorded yet.</div>
+        <?php else: ?>
+        <ul class="tl-list">
+        <?php foreach ($timeline as $event): ?>
+        <?php if ($event['type'] === 'repair'): $r = $event['data']; ?>
+            <li class="tl-item">
+                <div class="tl-icon tl-icon-repair">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                    </svg>
+                </div>
+                <div class="tl-body">
+                    <div class="tl-date"><?= Utils::formatDate($r['date_in']) ?></div>
+                    <div class="tl-title">
+                        <a href="<?= BASE_URL ?>/repairs/<?= $r['repair_id'] ?>"
+                           style="color:inherit;text-decoration:none"
+                           onmouseover="this.style.color='var(--accent)'"
+                           onmouseout="this.style.color='inherit'">
+                            Repair #<?= $r['repair_id'] ?> — <?= Utils::e(Utils::truncate($r['device_model'], 30)) ?>
+                        </a>
+                    </div>
+                    <div class="tl-sub" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;margin-top:.2rem">
+                        <span class="badge <?= REPAIR_STATUS_CLASS[$r['status']] ?? 'badge-gray' ?>" style="font-size:.7rem">
+                            <?= Utils::e(REPAIR_STATUS[$r['status']] ?? $r['status']) ?>
+                        </span>
+                        <?php if ($r['technician_name'] && trim($r['technician_name'])): ?>
+                        <span>Tech: <?= Utils::e(trim($r['technician_name'])) ?></span>
+                        <?php endif; ?>
+                        <?php if ($r['actual_amount']): ?>
+                        <span style="color:var(--text-primary);font-weight:600"><?= Utils::formatCurrency($r['actual_amount']) ?></span>
+                        <?php elseif ($r['estimate_amount']): ?>
+                        <span>Est. <?= Utils::formatCurrency($r['estimate_amount']) ?></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </li>
+        <?php elseif ($event['type'] === 'invoice'): $inv = $event['data']; ?>
+            <li class="tl-item">
+                <div class="tl-icon tl-icon-invoice">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
+                <div class="tl-body">
+                    <div class="tl-date"><?= Utils::formatDate($inv['invoice_date']) ?></div>
+                    <div class="tl-title">
+                        <a href="<?= BASE_URL ?>/invoices/<?= $inv['invoice_id'] ?>"
+                           style="color:inherit;text-decoration:none"
+                           onmouseover="this.style.color='var(--accent)'"
+                           onmouseout="this.style.color='inherit'">
+                            Invoice <?= Utils::e($inv['invoice_number']) ?>
+                        </a>
+                    </div>
+                    <div class="tl-sub" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;margin-top:.2rem">
+                        <span class="badge <?= INVOICE_STATUS_CLASS[$inv['status']] ?? 'badge-gray' ?>" style="font-size:.7rem">
+                            <?= Utils::e(INVOICE_STATUS[$inv['status']] ?? $inv['status']) ?>
+                        </span>
+                        <span style="color:var(--text-primary);font-weight:600"><?= Utils::formatCurrency($inv['total_amount'] ?? 0) ?></span>
+                        <?php if ((float)$inv['amount_paid'] > 0): ?>
+                        <span style="color:var(--success)">Paid: <?= Utils::formatCurrency($inv['amount_paid']) ?></span>
+                        <?php endif; ?>
+                        <?php $bal = (float)$inv['total_amount'] - (float)$inv['amount_paid']; ?>
+                        <?php if ($bal > 0): ?>
+                        <span style="color:var(--error)">Due: <?= Utils::formatCurrency($bal) ?></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </li>
+        <?php endif; ?>
+        <?php endforeach; ?>
+        </ul>
+        <?php endif; ?>
+    </div>
+</div><!-- /panel-timeline -->
+
+<script>
+(function () {
+    var tabs   = document.querySelectorAll('.hist-tab');
+    var panels = document.querySelectorAll('.hist-panel');
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var target = tab.dataset.panel;
+            tabs.forEach(function (t)   { t.classList.toggle('active',   t.dataset.panel === target); });
+            panels.forEach(function (p) { p.classList.toggle('active', p.id === 'panel-' + target); });
+        });
+    });
+})();
+</script>
 
 <?php require VIEWS_PATH . '/layouts/footer.php'; ?>
