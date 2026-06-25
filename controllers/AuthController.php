@@ -54,8 +54,7 @@ class AuthController
 
     public function logout(): void
     {
-        $this->auth->logout();
-        Utils::redirect('/login');
+        Utils::redirect('/');
     }
 
     // ── GET /register ─────────────────────────────────────────────────────────

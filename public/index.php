@@ -108,6 +108,10 @@ $router->post('/register', 'AuthController@register');
 // Dashboard
 $router->get('/', 'DashboardController@index');
 
+// Profile
+$router->get( '/profile', 'ProfileController@index');
+$router->post('/profile', 'ProfileController@update');
+
 // Repairs
 $router->get( '/repairs',                  'RepairController@index');
 $router->get( '/repairs/create',           'RepairController@create');
