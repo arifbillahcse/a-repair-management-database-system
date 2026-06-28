@@ -105,13 +105,6 @@ $currentUser = Auth::user();
             </button>
 
             <div class="user-dropdown" id="userDropdown" role="menu" hidden>
-                <a href="<?= BASE_URL ?>/profile" role="menuitem">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    My Profile
-                </a>
                 <?php if (Auth::isAdmin()): ?>
                 <a href="<?= BASE_URL ?>/admin/settings" role="menuitem">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
