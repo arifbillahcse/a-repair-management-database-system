@@ -31,6 +31,26 @@ class DashboardController
         $totalCustomers = $this->customerModel->count();
         $totalInvoices  = $this->invoiceModel->count();
 
+        // Revenue this month split by client type
+        $db = Database::getInstance();
+        $typeRevRows = $db->fetchAll(
+            "SELECT c.client_type,
+                    COALESCE(SUM(i.total_amount), 0) AS revenue,
+                    COALESCE(SUM(i.amount_paid),  0) AS paid,
+                    COUNT(*) AS cnt
+             FROM invoices i
+             JOIN customers c ON c.customer_id = i.customer_id
+             WHERE MONTH(i.invoice_date) = MONTH(NOW())
+               AND YEAR(i.invoice_date)  = YEAR(NOW())
+               AND i.status != 'cancelled'
+             GROUP BY c.client_type",
+            []
+        );
+        $revenueByType = [];
+        foreach ($typeRevRows as $row) {
+            $revenueByType[$row['client_type']] = $row;
+        }
+
         require VIEWS_PATH . '/dashboard/index.php';
     }
 }

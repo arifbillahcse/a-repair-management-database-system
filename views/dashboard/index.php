@@ -17,6 +17,14 @@ $completed     = (int)($stats['completed']         ?? 0);
 $mRevenue  = (float)($monthlyStats['total_revenue'] ?? 0);
 $mPaid     = (float)($monthlyStats['total_paid']    ?? 0);
 $mInvoices = (int)($monthlyStats['invoice_count']   ?? 0);
+
+$revenueByType  = $revenueByType ?? [];
+$indRevenue     = (float)($revenueByType['individual']['revenue'] ?? 0);
+$indPaid        = (float)($revenueByType['individual']['paid']    ?? 0);
+$indCount       = (int)($revenueByType['individual']['cnt']       ?? 0);
+$colRevenue     = (float)($revenueByType['colleague']['revenue']  ?? 0);
+$colPaid        = (float)($revenueByType['colleague']['paid']     ?? 0);
+$colCount       = (int)($revenueByType['colleague']['cnt']        ?? 0);
 ?>
 <style>
 /* ── KPI grid ──────────────────────────────────────────── */
@@ -144,32 +152,37 @@ $mInvoices = (int)($monthlyStats['invoice_count']   ?? 0);
     <div class="stat-card">
         <div class="stat-icon stat-icon-green">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
             </svg>
         </div>
         <div class="stat-body">
-            <div class="stat-value" style="color:var(--success)"><?= Utils::formatCurrency($mRevenue) ?></div>
-            <div class="stat-label">Revenue This Month</div>
-            <div style="font-size:.73rem;color:var(--text-muted);margin-top:.1rem"><?= $mInvoices ?> invoice<?= $mInvoices !== 1 ? 's' : '' ?> issued</div>
+            <div class="stat-value" style="color:var(--success)"><?= Utils::formatCurrency($indRevenue) ?></div>
+            <div class="stat-label">Individual Revenue</div>
+            <div style="font-size:.73rem;color:var(--text-muted);margin-top:.1rem">
+                <?= $indCount > 0
+                    ? $indCount . ' invoice' . ($indCount !== 1 ? 's' : '') . ' · paid ' . Utils::formatCurrency($indPaid)
+                    : 'no invoices this month' ?>
+            </div>
         </div>
-        <a href="<?= BASE_URL ?>/invoices" class="stat-link" title="View invoices">&#x2197;</a>
+        <a href="<?= BASE_URL ?>/customers?type=individual" class="stat-link" title="View individual clients">&#x2197;</a>
     </div>
 
     <div class="stat-card">
-        <div class="stat-icon <?= ($mRevenue - $mPaid) > 0 ? 'stat-icon-orange' : 'stat-icon-green' ?>">
+        <div class="stat-icon stat-icon-purple">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>
         </div>
         <div class="stat-body">
-            <div class="stat-value" style="color:<?= ($mRevenue - $mPaid) > 0 ? 'var(--warning)' : 'var(--success)' ?>">
-                <?= Utils::formatCurrency($mPaid) ?>
-            </div>
-            <div class="stat-label">Collected This Month</div>
+            <div class="stat-value" style="color:var(--accent)"><?= Utils::formatCurrency($colRevenue) ?></div>
+            <div class="stat-label">Colleague Revenue</div>
             <div style="font-size:.73rem;color:var(--text-muted);margin-top:.1rem">
-                <?= $mRevenue > 0 ? round($mPaid / $mRevenue * 100) . '% of revenue' : 'no invoices yet' ?>
+                <?= $colCount > 0
+                    ? $colCount . ' invoice' . ($colCount !== 1 ? 's' : '') . ' · paid ' . Utils::formatCurrency($colPaid)
+                    : 'no invoices this month' ?>
             </div>
         </div>
+        <a href="<?= BASE_URL ?>/customers?type=colleague" class="stat-link" title="View colleague clients">&#x2197;</a>
     </div>
     <?php endif; ?>
 
