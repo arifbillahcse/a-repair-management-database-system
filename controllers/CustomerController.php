@@ -307,7 +307,7 @@ class CustomerController
 
         // Postal code format (if provided)
         if (!empty($data['postal_code']) && !Utils::isValidPostalCode($data['postal_code'])) {
-            $errors['postal_code'] = 'Postal code must be 5 digits.';
+            $errors['postal_code'] = 'Postal code must be 4 or 5 digits.';
         }
 
         // Duplicate email warning (soft — controller can decide to warn rather than block)
