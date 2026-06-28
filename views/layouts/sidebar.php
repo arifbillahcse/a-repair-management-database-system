@@ -130,8 +130,8 @@ function navActive(string $pattern): string
         </li>
         <?php endif; ?>
 
-        <!-- Staff (manager+) -->
-        <?php if (Auth::can('manager')): ?>
+        <!-- Staff (manager+) — hidden -->
+        <?php if (false && Auth::can('manager')): ?>
         <li class="nav-item">
             <a href="<?= BASE_URL ?>/staff" class="nav-link nav-link-staff <?= navActive('/staff') ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
