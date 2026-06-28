@@ -80,7 +80,7 @@ class InvoiceController
             'tax_percentage' => (float)($_POST['tax_percentage'] ?? DEFAULT_TAX_PCT),
             'status'         => 'draft',
             'notes'          => Utils::sanitize($_POST['notes'] ?? ''),
-            'created_by'     => Auth::id(),
+            'created_by'     => Auth::id() ?: null,
         ]);
 
         foreach ($_POST['items'] ?? [] as $item) {
