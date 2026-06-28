@@ -74,7 +74,7 @@ class CreditNoteController
             'invoice_date'     => !empty($_POST['invoice_date']) ? $_POST['invoice_date'] : null,
             'note'             => Utils::sanitize($_POST['note']             ?? ''),
             'signature_id'     => (int)($_POST['signature_id'] ?? 0),
-            'created_by'       => Auth::id(),
+            'created_by'       => Auth::id() ?: null,
         ]);
 
         foreach ($_POST['items'] ?? [] as $item) {

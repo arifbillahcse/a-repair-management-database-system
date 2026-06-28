@@ -86,7 +86,7 @@ class Utils
     public static function isValidPostalCode(?string $code): bool
     {
         if (!$code) return true; // optional
-        return (bool)preg_match('/^\d{5}$/', $code);
+        return (bool)preg_match('/^\d{4,5}$/', $code);
     }
 
     // ── Formatting ────────────────────────────────────────────────────────────

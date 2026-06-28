@@ -370,7 +370,7 @@ class RepairController
             'deposit_paid'         => is_numeric($post['deposit_paid']    ?? '') ? (float)$post['deposit_paid']    : null,
             'status'               => $status,
             'notes'                => Utils::sanitize($post['notes'] ?? ''),
-            'created_by'           => Auth::id(),
+            'created_by'           => Auth::id() ?: null,
         ];
     }
 
