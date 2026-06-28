@@ -303,7 +303,8 @@ $statusFlow  = REPAIR_STATUS_FLOW[$repair['status']] ?? [];
                 </div>
             </div>
 
-            <!-- Assignment -->
+            <!-- Assignment (hidden — uncomment to restore) -->
+            <?php if (false): ?>
             <div class="card">
                 <div class="card-header"><h2 class="card-title">Assignment</h2></div>
                 <div class="card-body">
@@ -321,6 +322,7 @@ $statusFlow  = REPAIR_STATUS_FLOW[$repair['status']] ?? [];
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
         </div>
     </div>

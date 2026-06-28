@@ -291,7 +291,8 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                 </div>
             </div>
 
-            <!-- Assigned to -->
+            <!-- Assignment (hidden — uncomment to restore) -->
+            <?php if (false): ?>
             <div class="card">
                 <div class="card-header"><h2 class="card-title">Assignment</h2></div>
                 <div class="card-body">
@@ -309,6 +310,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
         </div>
     </div>
