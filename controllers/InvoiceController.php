@@ -4,12 +4,28 @@ class InvoiceController
     private Invoice  $model;
     private Repair   $repairModel;
     private Customer $customerModel;
+    private Business $businessModel;
 
     public function __construct()
     {
         $this->model         = new Invoice();
         $this->repairModel   = new Repair();
         $this->customerModel = new Customer();
+        $this->businessModel = new Business();   // also bootstraps the businesses table
+        $this->ensureBusinessColumn();
+    }
+
+    /** Idempotently add the business_id column to invoices. */
+    private function ensureBusinessColumn(): void
+    {
+        $pdo  = Database::getInstance()->getPdo();
+        $cols = array_column(
+            $pdo->query("SHOW COLUMNS FROM `invoices`")->fetchAll(PDO::FETCH_ASSOC),
+            'Field'
+        );
+        if (!in_array('business_id', $cols, true)) {
+            $pdo->exec("ALTER TABLE `invoices` ADD COLUMN `business_id` INT UNSIGNED DEFAULT NULL AFTER `customer_id`");
+        }
     }
 
     // ── GET /invoices ─────────────────────────────────────────────────────────
@@ -54,6 +70,8 @@ class InvoiceController
 
         $invoiceNumber = $this->model->generateInvoiceNumber();
         $csrfToken     = Auth::generateCSRFToken();
+        $businesses    = $this->businessModel->allActive();
+        $defaultBiz    = $this->businessModel->getDefault();
 
         require VIEWS_PATH . '/invoices/create.php';
     }
@@ -74,6 +92,7 @@ class InvoiceController
         $id = $this->model->create([
             'repair_id'      => !empty($_POST['repair_id']) ? (int)$_POST['repair_id'] : null,
             'customer_id'    => (int)$_POST['customer_id'],
+            'business_id'    => !empty($_POST['business_id']) ? (int)$_POST['business_id'] : null,
             'invoice_number' => $invoiceNumber,
             'invoice_date'   => $_POST['invoice_date'] ?? date('Y-m-d'),
             'due_date'       => !empty($_POST['due_date']) ? $_POST['due_date'] : null,
@@ -145,6 +164,24 @@ class InvoiceController
         if (!$invoice) $this->notFound();
 
         $company = Database::getInstance()->fetchOne("SELECT * FROM company_settings LIMIT 1") ?? [];
+
+        // If the invoice was issued from a specific business, use its details
+        $biz = null;
+        if (!empty($invoice['business_id'])) {
+            $biz = $this->businessModel->findById((int)$invoice['business_id']);
+        }
+        if ($biz) {
+            $company['company_name']    = $biz['name'];
+            $company['company_address'] = $biz['address'];
+            $company['company_phone']   = $biz['phone'];
+            $company['company_email']   = $biz['email'];
+            $company['vat_number']      = $biz['vat_number'];
+            $company['tax_id']          = $biz['tax_id'];
+            if (!empty($biz['bank_details'])) {
+                $company['payment_info'] = $biz['bank_details'];
+            }
+        }
+
         require VIEWS_PATH . '/invoices/print.php';
     }
 

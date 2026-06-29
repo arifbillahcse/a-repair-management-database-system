@@ -50,6 +50,90 @@ class AdminController
         require VIEWS_PATH . '/admin/settings.php';
     }
 
+    // ── GET /admin/businesses ─────────────────────────────────────────────────
+
+    public function businesses(): void
+    {
+        Auth::requireRole('manager');
+
+        $model      = new Business();
+        $businesses = $model->allForAdmin();
+        $csrfToken  = Auth::generateCSRFToken();
+        $editId     = (int)($_GET['edit'] ?? 0);
+        $editing    = $editId ? $model->findById($editId) : null;
+
+        require VIEWS_PATH . '/admin/businesses.php';
+    }
+
+    // ── POST /admin/businesses ────────────────────────────────────────────────
+
+    public function businessSave(): void
+    {
+        Auth::requireRole('manager');
+        Auth::checkCSRF();
+
+        $model = new Business();
+        $id    = (int)($_POST['business_id'] ?? 0);
+
+        $name = Utils::sanitize($_POST['name'] ?? '');
+        if ($name === '') {
+            Utils::flashError('Business name is required.');
+            Utils::redirect('/admin/businesses' . ($id ? '?edit=' . $id : ''));
+        }
+
+        $fields = [
+            'name'         => $name,
+            'address'      => Utils::sanitize($_POST['address']      ?? ''),
+            'phone'        => Utils::sanitize($_POST['phone']        ?? ''),
+            'email'        => Utils::sanitize($_POST['email']        ?? ''),
+            'vat_number'   => Utils::sanitize($_POST['vat_number']   ?? ''),
+            'tax_id'       => Utils::sanitize($_POST['tax_id']       ?? ''),
+            'bank_details' => Utils::sanitize($_POST['bank_details'] ?? ''),
+            'signature'    => Utils::sanitize($_POST['signature']    ?? ''),
+            'is_active'    => isset($_POST['is_active']) ? 1 : 0,
+        ];
+
+        $makeDefault = isset($_POST['is_default']);
+
+        if ($id) {
+            $model->update($id, $fields);
+            if ($makeDefault) {
+                $model->clearDefault();
+                $model->update($id, ['is_default' => 1]);
+            }
+            Logger::log('updated', 'business', $id);
+            Utils::flashSuccess('Business updated.');
+        } else {
+            $newId = $model->create($fields);
+            if ($makeDefault) {
+                $model->clearDefault();
+                $model->update($newId, ['is_default' => 1]);
+            }
+            Logger::log('created', 'business', $newId);
+            Utils::flashSuccess('Business added.');
+        }
+
+        Utils::redirect('/admin/businesses');
+    }
+
+    // ── POST /admin/businesses/:id/delete ─────────────────────────────────────
+
+    public function businessDelete(int $id): void
+    {
+        Auth::requireRole('manager');
+        Auth::checkCSRF();
+
+        $model = new Business();
+        $biz   = $model->findById($id);
+        if ($biz) {
+            $model->delete($id);
+            Logger::log('deleted', 'business', $id);
+            Utils::flashSuccess('Business deleted.');
+        }
+
+        Utils::redirect('/admin/businesses');
+    }
+
     // ── GET /admin/sysinfo ────────────────────────────────────────────────────
 
     public function sysinfo(): void

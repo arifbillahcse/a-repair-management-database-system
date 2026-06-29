@@ -40,6 +40,7 @@ class CreditNoteController
         $errors     = $_SESSION['_form_errors'] ?? [];
         $fd         = $_SESSION['_form_data']   ?? [];
         $signatures = $db->fetchOne("SELECT signature1, signature2, signature3 FROM company_settings LIMIT 1") ?? [];
+        $businesses = (new Business())->allActive();
         unset($_SESSION['_form_errors'], $_SESSION['_form_data']);
 
         require VIEWS_PATH . '/credit-notes/create.php';
@@ -110,6 +111,7 @@ class CreditNoteController
         $errors    = $_SESSION['_form_errors'] ?? [];
         $fd        = $_SESSION['_form_data']   ?? $cn;
         $signatures = $db->fetchOne("SELECT signature1, signature2, signature3 FROM company_settings LIMIT 1") ?? [];
+        $businesses = (new Business())->allActive();
         unset($_SESSION['_form_errors'], $_SESSION['_form_data']);
 
         require VIEWS_PATH . '/credit-notes/edit.php';
