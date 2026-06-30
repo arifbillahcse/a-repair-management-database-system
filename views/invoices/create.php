@@ -156,6 +156,38 @@ if (!empty($repair['deposit_paid']) && (float)$repair['deposit_paid'] > 0) {
         <!-- ── Right: totals + notes ────────────────────────────────── -->
         <div style="display:flex;flex-direction:column;gap:1.25rem">
 
+            <!-- Issuing business -->
+            <?php $businesses = $businesses ?? []; $defaultBiz = $defaultBiz ?? null; ?>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Issued By</h2>
+                    <a href="<?= BASE_URL ?>/admin/businesses" class="btn btn-xs btn-secondary" target="_blank">Manage</a>
+                </div>
+                <div class="card-body">
+                    <?php if (empty($businesses)): ?>
+                    <p style="font-size:.82rem;color:var(--text-muted);margin:0">
+                        No businesses set up yet.
+                        <a href="<?= BASE_URL ?>/admin/businesses" style="color:var(--accent)">Add one</a> to choose the issuer.
+                    </p>
+                    <?php else: ?>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label" for="businessId">Issuing Business</label>
+                        <select id="businessId" name="business_id" class="form-input">
+                            <?php foreach ($businesses as $b): ?>
+                            <option value="<?= (int)$b['business_id'] ?>"
+                                <?= ($defaultBiz && $defaultBiz['business_id'] == $b['business_id']) ? 'selected' : '' ?>>
+                                <?= Utils::e($b['name']) ?><?= $b['is_default'] ? ' (default)' : '' ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p style="font-size:.72rem;color:var(--text-muted);margin-top:.35rem">
+                            This business's name, address and VAT appear on the printed invoice.
+                        </p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <!-- Client (read-only) -->
             <div class="card">
                 <div class="card-header">

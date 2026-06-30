@@ -73,6 +73,29 @@ require VIEWS_PATH . '/layouts/header.php';
             <div class="card">
                 <div class="card-header"><h2 class="card-title">Company / Issuer</h2></div>
                 <div class="card-body">
+                    <?php $businesses = $businesses ?? []; ?>
+                    <?php if (!empty($businesses)): ?>
+                    <div class="form-group">
+                        <label class="form-label" for="biz_picker">Fill from Business</label>
+                        <select id="biz_picker" class="form-input">
+                            <option value="">— Select a business to auto-fill —</option>
+                            <?php foreach ($businesses as $b): ?>
+                            <option value="<?= (int)$b['business_id'] ?>"
+                                    data-name="<?= Utils::e($b['name']) ?>"
+                                    data-address="<?= Utils::e($b['address']) ?>"
+                                    data-phone="<?= Utils::e($b['phone']) ?>"
+                                    data-email="<?= Utils::e($b['email']) ?>"
+                                    data-vat="<?= Utils::e($b['vat_number']) ?>">
+                                <?= Utils::e($b['name']) ?><?= $b['is_default'] ? ' (default)' : '' ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p style="font-size:.72rem;color:var(--text-muted);margin-top:.35rem">
+                            Pick a business to fill the fields below, or type manually.
+                            <a href="<?= BASE_URL ?>/admin/businesses" target="_blank" style="color:var(--accent)">Manage businesses</a>
+                        </p>
+                    </div>
+                    <?php endif; ?>
                     <div class="form-group">
                         <label class="form-label" for="company_name">Company Name <span class="required">*</span></label>
                         <input type="text" id="company_name" name="company_name" class="form-input <?= isset($errors['company_name']) ? 'is-invalid' : '' ?>"
@@ -310,6 +333,25 @@ require VIEWS_PATH . '/layouts/header.php';
     });
 
     recalcTotals();
+})();
+
+// ── Auto-fill issuer fields from a saved business ──────────────────────────
+(function () {
+    var picker = document.getElementById('biz_picker');
+    if (!picker) return;
+    picker.addEventListener('change', function () {
+        var opt = picker.options[picker.selectedIndex];
+        if (!opt || !opt.value) return;
+        var set = function (id, val) {
+            var el = document.getElementById(id);
+            if (el) el.value = val || '';
+        };
+        set('company_name',    opt.getAttribute('data-name'));
+        set('company_address', opt.getAttribute('data-address'));
+        set('company_phone',   opt.getAttribute('data-phone'));
+        set('company_email',   opt.getAttribute('data-email'));
+        set('company_vat',     opt.getAttribute('data-vat'));
+    });
 })();
 </script>
 

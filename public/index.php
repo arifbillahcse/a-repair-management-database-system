@@ -192,6 +192,9 @@ $router->get(  '/admin/db-export',                   'AdminController@dbExportPa
 $router->post( '/admin/db-export',                   'AdminController@dbExport');
 $router->get(  '/admin/settings',                    'AdminController@settings');
 $router->post( '/admin/settings',                    'AdminController@settings');
+$router->get(  '/admin/businesses',                  'AdminController@businesses');
+$router->post( '/admin/businesses',                  'AdminController@businessSave');
+$router->post( '/admin/businesses/:id/delete',       'AdminController@businessDelete');
 $router->get(  '/admin/sysinfo',                     'AdminController@sysinfo');
 $router->get(  '/admin/users',                       'AdminController@users');
 $router->post( '/admin/users/:id/toggle',            'AdminController@toggleUser');

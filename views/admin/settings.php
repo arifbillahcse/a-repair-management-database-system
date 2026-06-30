@@ -19,8 +19,9 @@ $c = $company ?? [];
 
 <!-- Settings nav -->
 <div class="settings-nav">
-    <a href="<?= BASE_URL ?>/admin/settings" class="snav-btn active">Company</a>
-    <a href="<?= BASE_URL ?>/admin/sysinfo"  class="snav-btn">System Information</a>
+    <a href="<?= BASE_URL ?>/admin/settings"   class="snav-btn active">Company</a>
+    <a href="<?= BASE_URL ?>/admin/businesses" class="snav-btn">Businesses</a>
+    <a href="<?= BASE_URL ?>/admin/sysinfo"    class="snav-btn">System Information</a>
 </div>
 
 <form method="POST" action="<?= BASE_URL ?>/admin/settings">
