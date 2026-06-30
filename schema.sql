@@ -9,14 +9,17 @@
 -- ==========================================
 --
 --  [company_settings]
+--  [businesses]
 --
 --  [staff] ──────────────┐
 --       │                │
 --       └──► [users]     │
 --                        │
 --  [customers] ──────────┼──► [repairs] ──► [invoices] ──► [invoice_items]
---                        │         │
+--                        │         │              │
 --  [products] ────────────         └──► [invoice_items]
+--                                        │
+--  [businesses] ────────────────────────►┘
 --
 --  [activity_log] ──► (references users, and any entity by entity_type + entity_id)
 --
@@ -28,6 +31,7 @@
 --  staff       (1) ──── (1) users          (login account)
 --  repairs     (1) ──► (N) invoices
 --  invoices    (1) ──► (N) invoice_items
+--  businesses  (1) ──► (N) invoices        (issuing business)
 --  users       (1) ──► (N) repairs         (created_by)
 --  users       (1) ──► (N) activity_log
 --  products    (M) ──► (N) invoice_items   (referenced by description/sku)
@@ -69,7 +73,37 @@ CREATE TABLE IF NOT EXISTS `company_settings` (
 
 
 -- =============================================================================
--- 2. STAFF / COLLEAGUES TABLE
+-- 2. BUSINESSES TABLE
+--    Issuing-business profiles (the buyer manages multiple business entities)
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS `businesses` (
+    `business_id`  INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    `name`         VARCHAR(200)    NOT NULL,
+    `address`      VARCHAR(500)    NOT NULL DEFAULT '',
+    `phone`        VARCHAR(50)     NOT NULL DEFAULT '',
+    `email`        VARCHAR(150)    NOT NULL DEFAULT '',
+    `vat_number`   VARCHAR(50)     NOT NULL DEFAULT '',
+    `tax_id`       VARCHAR(50)     NOT NULL DEFAULT '',
+    `bank_details` VARCHAR(1000)   NOT NULL DEFAULT '',
+    `signature`    VARCHAR(300)    NOT NULL DEFAULT '',
+    `is_default`   TINYINT(1)      NOT NULL DEFAULT 0,
+    `sort_order`   INT             NOT NULL DEFAULT 0,
+    `is_active`    TINYINT(1)      NOT NULL DEFAULT 1,
+    `created_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (`business_id`),
+    KEY `idx_businesses_is_active`  (`is_active`),
+    KEY `idx_businesses_is_default` (`is_default`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci
+  COMMENT='Multiple issuing-business profiles selectable per invoice / credit note';
+
+
+-- =============================================================================
+-- 3. STAFF / COLLEAGUES TABLE
 --    Technicians and other employees
 -- =============================================================================
 
@@ -101,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `staff` (
 
 
 -- =============================================================================
--- 3. USERS TABLE
+-- 4. USERS TABLE
 --    Login accounts linked 1-to-1 with a staff record
 -- =============================================================================
 
@@ -141,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 
 -- =============================================================================
--- 4. CUSTOMERS TABLE
+-- 5. CUSTOMERS TABLE
 --    Based on tblClients (19,368 records)
 -- =============================================================================
 
@@ -188,7 +222,7 @@ CREATE TABLE IF NOT EXISTS `customers` (
 
 
 -- =============================================================================
--- 5. PRODUCTS / DEVICES TABLE
+-- 6. PRODUCTS / DEVICES TABLE
 --    Based on tblProducts (120 items) — spare parts, accessories, services
 -- =============================================================================
 
@@ -220,7 +254,7 @@ CREATE TABLE IF NOT EXISTS `products` (
 
 
 -- =============================================================================
--- 6. REPAIRS TABLE
+-- 7. REPAIRS TABLE
 --    Main module — based on tblRepairs (811 records)
 -- =============================================================================
 
@@ -299,7 +333,7 @@ CREATE TABLE IF NOT EXISTS `repairs` (
 
 
 -- =============================================================================
--- 7. INVOICES TABLE
+-- 8. INVOICES TABLE
 --    Generated from a repair job
 -- =============================================================================
 
@@ -307,6 +341,7 @@ CREATE TABLE IF NOT EXISTS `invoices` (
     `invoice_id`     INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     `repair_id`      INT UNSIGNED             DEFAULT NULL,
     `customer_id`    INT UNSIGNED    NOT NULL,
+    `business_id`    INT UNSIGNED             DEFAULT NULL,  -- Issuing business profile
     `invoice_number` VARCHAR(30)     NOT NULL,               -- e.g. INV-2024-00042
     `invoice_date`   DATE            NOT NULL,
     `due_date`       DATE                     DEFAULT NULL,
@@ -332,6 +367,7 @@ CREATE TABLE IF NOT EXISTS `invoices` (
     UNIQUE KEY `uq_invoices_number`   (`invoice_number`),
     KEY `idx_invoices_repair`         (`repair_id`),
     KEY `idx_invoices_customer`       (`customer_id`),
+    KEY `idx_invoices_business`       (`business_id`),
     KEY `idx_invoices_status`         (`status`),
     KEY `idx_invoices_invoice_date`   (`invoice_date`),
     KEY `idx_invoices_created_by`     (`created_by`),
@@ -348,6 +384,12 @@ CREATE TABLE IF NOT EXISTS `invoices` (
         ON DELETE RESTRICT
         ON UPDATE CASCADE,
 
+    CONSTRAINT `fk_invoices_business`
+        FOREIGN KEY (`business_id`)
+        REFERENCES `businesses` (`business_id`)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+
     CONSTRAINT `fk_invoices_created_by`
         FOREIGN KEY (`created_by`)
         REFERENCES `users` (`user_id`)
@@ -360,7 +402,7 @@ CREATE TABLE IF NOT EXISTS `invoices` (
 
 
 -- =============================================================================
--- 8. INVOICE ITEMS TABLE
+-- 9. INVOICE ITEMS TABLE
 --    Line items (labour, parts, services) on each invoice
 -- =============================================================================
 
@@ -399,7 +441,7 @@ CREATE TABLE IF NOT EXISTS `invoice_items` (
 
 
 -- =============================================================================
--- 9. ACTIVITY LOG TABLE
+-- 10. ACTIVITY LOG TABLE
 --    Full audit trail for every significant action
 -- =============================================================================
 
