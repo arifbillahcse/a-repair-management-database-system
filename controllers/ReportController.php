@@ -149,6 +149,14 @@ class ReportController
             [$start, $end]
         );
 
+        // ── Inventory & sales (products module) ───────────────────────────────
+        $productModel = new Product();
+        $saleModel    = new Sale();
+        $stockStats   = $productModel->getStockStats();
+        $lowStock     = $productModel->getLowStock(10);
+        $bestSellers  = $productModel->getBestSellers($start, $end, 10);
+        $salesPeriod  = $saleModel->getRangeStats($start, $end);
+
         require VIEWS_PATH . '/reports/index.php';
     }
 }

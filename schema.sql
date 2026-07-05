@@ -236,6 +236,7 @@ CREATE TABLE IF NOT EXISTS `products` (
     `selling_price`    DECIMAL(10,2)   NOT NULL DEFAULT 0.00, -- Prezzo vendita
     `cost_price`       DECIMAL(10,2)            DEFAULT NULL, -- Costo acquisto
     `quantity_on_hand` INT             NOT NULL DEFAULT 0,    -- Stock
+    `low_stock_threshold` INT          NOT NULL DEFAULT 0,    -- Alert when qty <= this (0 = off)
     `notes`            TEXT                     DEFAULT NULL,
     `is_active`        TINYINT(1)      NOT NULL DEFAULT 1,
     `created_at`       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -543,6 +544,98 @@ CREATE TABLE IF NOT EXISTS `personal_notes` (
     KEY `idx_pn_user`      (`created_by`),
     KEY `idx_pn_completed` (`is_completed`),
     KEY `idx_pn_created`   (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
+--  PRODUCT CATEGORIES
+--    Simple category list for the product catalog
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS `product_categories` (
+    `category_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name`        VARCHAR(100) NOT NULL,
+    `sort_order`  INT          NOT NULL DEFAULT 0,
+    `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`category_id`),
+    UNIQUE KEY `uq_pc_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
+--  STOCK MOVEMENTS
+--    Audit trail for every stock quantity change
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS `stock_movements` (
+    `movement_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `product_id`  INT UNSIGNED NOT NULL,
+    `change_qty`  INT          NOT NULL,               -- positive = in, negative = out
+    `reason`      ENUM('received','sold','returned','damaged','correction')
+                               NOT NULL DEFAULT 'correction',
+    `note`        VARCHAR(255) NOT NULL DEFAULT '',
+    `created_by`  INT UNSIGNED          DEFAULT NULL,
+    `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`movement_id`),
+    KEY `idx_sm_product` (`product_id`),
+    KEY `idx_sm_created` (`created_at`),
+    CONSTRAINT `fk_sm_product`
+        FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
+--  SALES
+--    Direct product sales (not tied to a repair); deduct stock on creation
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS `sales` (
+    `sale_id`        INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    `sale_number`    VARCHAR(30)   NOT NULL,           -- e.g. S-2026-00001
+    `customer_id`    INT UNSIGNED           DEFAULT NULL,
+    `customer_name`  VARCHAR(200)  NOT NULL DEFAULT '', -- walk-in name if not linked
+    `sale_date`      DATE          NOT NULL,
+    `subtotal`       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `tax_percentage` DECIMAL(5,2)  NOT NULL DEFAULT 22.00,
+    `tax_amount`     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `total_amount`   DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `amount_paid`    DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `status`         ENUM('unpaid','partial','paid','cancelled')
+                                   NOT NULL DEFAULT 'unpaid',
+    `notes`          TEXT                   DEFAULT NULL,
+    `created_by`     INT UNSIGNED           DEFAULT NULL,
+    `created_at`     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`sale_id`),
+    UNIQUE KEY `uq_sales_number` (`sale_number`),
+    KEY `idx_sales_customer` (`customer_id`),
+    KEY `idx_sales_date`     (`sale_date`),
+    KEY `idx_sales_status`   (`status`),
+    CONSTRAINT `fk_sales_customer`
+        FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `fk_sales_created_by`
+        FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`)
+        ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `sale_items` (
+    `sale_item_id` INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    `sale_id`      INT UNSIGNED  NOT NULL,
+    `product_id`   INT UNSIGNED           DEFAULT NULL,
+    `description`  VARCHAR(500)  NOT NULL,
+    `quantity`     DECIMAL(10,3) NOT NULL DEFAULT 1.000,
+    `unit_price`   DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `discount_pct` DECIMAL(5,2)  NOT NULL DEFAULT 0.00,
+    `line_total`   DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `created_at`   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`sale_item_id`),
+    KEY `idx_sale_items_sale`    (`sale_id`),
+    KEY `idx_sale_items_product` (`product_id`),
+    CONSTRAINT `fk_sale_items_sale`
+        FOREIGN KEY (`sale_id`) REFERENCES `sales` (`sale_id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_sale_items_product`
+        FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =============================================================================

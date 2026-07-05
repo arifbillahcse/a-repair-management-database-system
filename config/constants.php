@@ -87,6 +87,30 @@ define('INVOICE_STATUS_CLASS', [
     'cancelled'      => 'badge-dark',
 ]);
 
+// ── Sale statuses ──────────────────────────────────────────────────────────────
+define('SALE_STATUS', [
+    'unpaid'    => 'Unpaid',
+    'partial'   => 'Partially Paid',
+    'paid'      => 'Paid',
+    'cancelled' => 'Cancelled',
+]);
+
+define('SALE_STATUS_CLASS', [
+    'unpaid'    => 'badge-orange',
+    'partial'   => 'badge-blue',
+    'paid'      => 'badge-green',
+    'cancelled' => 'badge-dark',
+]);
+
+// ── Stock movement reasons ──────────────────────────────────────────────────────
+define('STOCK_REASONS', [
+    'received'   => 'Stock Received',
+    'sold'       => 'Sold',
+    'returned'   => 'Customer Return',
+    'damaged'    => 'Damaged / Lost',
+    'correction' => 'Manual Correction',
+]);
+
 // ── User roles ─────────────────────────────────────────────────────────────────
 define('USER_ROLES', [
     'admin'       => 'Admin',

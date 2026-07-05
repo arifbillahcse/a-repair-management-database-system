@@ -419,6 +419,121 @@ $qs = fn(string $r) => BASE_URL . '/reports?range=' . $r;
 </div>
 <?php endif; ?>
 
+<!-- ══ Inventory & Sales ══════════════════════════════════════════════════════ -->
+<div class="grid-2col" style="display:grid;grid-template-columns:1fr;gap:1.5rem;margin-bottom:1.5rem">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem">
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.85rem 1.1rem">
+            <div style="font-size:1.25rem;font-weight:700"><?= Utils::formatCurrency($salesPeriod['total_revenue'] ?? 0) ?></div>
+            <div style="font-size:.75rem;color:var(--text-secondary)">Product Sales (<?= Utils::e($rangeLabel) ?>)</div>
+        </div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.85rem 1.1rem">
+            <div style="font-size:1.25rem;font-weight:700;color:var(--success)"><?= Utils::formatCurrency($salesPeriod['total_paid'] ?? 0) ?></div>
+            <div style="font-size:.75rem;color:var(--text-secondary)">Sales Collected</div>
+        </div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.85rem 1.1rem">
+            <div style="font-size:1.25rem;font-weight:700"><?= Utils::formatCurrency($stockStats['cost_value'] ?? 0) ?></div>
+            <div style="font-size:.75rem;color:var(--text-secondary)">Stock Value (cost)</div>
+        </div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.85rem 1.1rem">
+            <div style="font-size:1.25rem;font-weight:700;color:<?= ($stockStats['low_stock_count'] ?? 0) > 0 ? 'var(--warning)' : 'var(--text-primary)' ?>">
+                <?= (int)($stockStats['low_stock_count'] ?? 0) ?>
+            </div>
+            <div style="font-size:.75rem;color:var(--text-secondary)">Low-Stock Products</div>
+        </div>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr;gap:1.5rem;margin-bottom:1.5rem" class="inv-2col">
+<style>@media(min-width:960px){.inv-2col{grid-template-columns:1fr 1fr !important}}</style>
+
+    <!-- Best sellers -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h2 class="chart-title">Best-Selling Products</h2>
+            <a href="<?= BASE_URL ?>/sales" class="btn btn-xs btn-secondary">All Sales</a>
+        </div>
+        <?php if (empty($bestSellers)): ?>
+        <p style="padding:1.5rem;text-align:center;color:var(--text-muted);font-size:.85rem;margin:0">
+            No product sales in this period.
+        </p>
+        <?php else: ?>
+        <div class="table-responsive">
+            <table class="clients-table">
+                <thead>
+                    <tr>
+                        <th style="width:32px">#</th>
+                        <th>Product</th>
+                        <th style="width:80px;text-align:center">Units</th>
+                        <th style="width:120px;text-align:right">Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($bestSellers as $i => $bs): ?>
+                <tr>
+                    <td class="rank"><?= $i + 1 ?></td>
+                    <td>
+                        <?php if (!empty($bs['product_id'])): ?>
+                        <a href="<?= BASE_URL ?>/products/<?= (int)$bs['product_id'] ?>" class="table-link"><?= Utils::e($bs['name']) ?></a>
+                        <?php else: ?>
+                        <?= Utils::e($bs['name']) ?>
+                        <?php endif; ?>
+                        <?php if (!empty($bs['sku'])): ?>
+                        <div style="font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono)"><?= Utils::e($bs['sku']) ?></div>
+                        <?php endif; ?>
+                    </td>
+                    <td style="text-align:center;font-weight:600"><?= rtrim(rtrim(number_format((float)$bs['units_sold'], 3), '0'), '.') ?></td>
+                    <td style="text-align:right;color:var(--success);font-weight:500"><?= Utils::formatCurrency($bs['revenue']) ?></td>
+                </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Low stock -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h2 class="chart-title">Low Stock</h2>
+            <a href="<?= BASE_URL ?>/products?stock=low" class="btn btn-xs btn-secondary">View All</a>
+        </div>
+        <?php if (empty($lowStock)): ?>
+        <p style="padding:1.5rem;text-align:center;color:var(--text-muted);font-size:.85rem;margin:0">
+            No products below their alert threshold. 👍
+        </p>
+        <?php else: ?>
+        <div class="table-responsive">
+            <table class="clients-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th style="width:90px;text-align:center">On Hand</th>
+                        <th style="width:90px;text-align:center">Threshold</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($lowStock as $ls): ?>
+                <tr>
+                    <td>
+                        <a href="<?= BASE_URL ?>/products/<?= (int)$ls['product_id'] ?>" class="table-link"><?= Utils::e($ls['name']) ?></a>
+                        <?php if (!empty($ls['sku'])): ?>
+                        <div style="font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono)"><?= Utils::e($ls['sku']) ?></div>
+                        <?php endif; ?>
+                    </td>
+                    <td style="text-align:center;font-weight:700;color:<?= (int)$ls['quantity_on_hand'] === 0 ? 'var(--error)' : 'var(--warning)' ?>">
+                        <?= (int)$ls['quantity_on_hand'] ?>
+                    </td>
+                    <td style="text-align:center;color:var(--text-secondary)"><?= (int)$ls['low_stock_threshold'] ?></td>
+                </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+    </div>
+
+</div>
+
 <?php
 // Chart.js data
 $revLabels  = json_encode(array_column($monthlyRev     ?? [], 'month'));
