@@ -116,7 +116,7 @@ class Utils
     public static function formatCurrency(mixed $amount): string
     {
         if ($amount === null || $amount === '') return '—';
-        return CURRENCY_SYMBOL . ' ' . number_format((float)$amount, 2, ',', '.');
+        return APP_CURRENCY_SYMBOL . ' ' . number_format((float)$amount, 2, ',', '.');
     }
 
     /** How many days between two dates (positive = $b is in the future). */
