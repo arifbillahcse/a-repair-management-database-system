@@ -43,11 +43,20 @@ $pg       = $pagination;
         <h1 class="page-title">Sales</h1>
         <p class="page-subtitle"><?= number_format($pg['total']) ?> total sales</p>
     </div>
-    <a href="<?= BASE_URL ?>/sales/create" class="btn btn-primary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px" aria-hidden="true">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>New Sale
-    </a>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <?php if (Auth::can('manager')): ?>
+        <a href="<?= BASE_URL ?>/sales/report" class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px" aria-hidden="true">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>Report
+        </a>
+        <?php endif; ?>
+        <a href="<?= BASE_URL ?>/sales/create" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>New Sale
+        </a>
+    </div>
 </div>
 
 <!-- Monthly stats -->
@@ -114,7 +123,7 @@ $pg       = $pagination;
                     <th class="hide-mobile" style="text-align:center">Items</th>
                     <th>Status</th>
                     <th style="text-align:right">Total</th>
-                    <th style="width:90px;text-align:right">Actions</th>
+                    <th style="width:120px;text-align:right">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -168,6 +177,9 @@ $pg       = $pagination;
                         <div class="act-btns">
                             <a href="<?= BASE_URL ?>/sales/<?= $s['sale_id'] ?>" class="act-btn" title="View sale">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </a>
+                            <a href="<?= BASE_URL ?>/sales/<?= $s['sale_id'] ?>/edit" class="act-btn" title="Edit sale">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </a>
                             <a href="<?= BASE_URL ?>/sales/<?= $s['sale_id'] ?>/print" target="_blank" class="act-btn act-btn-p" title="Print receipt">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>

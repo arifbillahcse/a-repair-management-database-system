@@ -30,10 +30,20 @@ class Product extends BaseModel
                     `name`        VARCHAR(100) NOT NULL,
                     `sort_order`  INT          NOT NULL DEFAULT 0,
                     `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    `updated_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     PRIMARY KEY (`category_id`),
                     UNIQUE KEY `uq_pc_name` (`name`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
             );
+        } else {
+            // Sites that auto-created this table before updated_at was added
+            $pcCols = array_column(
+                $pdo->query("SHOW COLUMNS FROM `product_categories`")->fetchAll(PDO::FETCH_ASSOC),
+                'Field'
+            );
+            if (!in_array('updated_at', $pcCols, true)) {
+                $pdo->exec("ALTER TABLE `product_categories` ADD COLUMN `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `created_at`");
+            }
         }
 
         if (!$pdo->query("SHOW TABLES LIKE 'stock_movements'")->fetch()) {
