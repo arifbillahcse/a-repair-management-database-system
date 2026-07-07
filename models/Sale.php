@@ -154,6 +154,11 @@ class Sale extends BaseModel
         );
     }
 
+    public function deleteItems(int $saleId): void
+    {
+        $this->db->delete('sale_items', 'sale_id = ?', [$saleId]);
+    }
+
     public function addItem(int $saleId, array $item): int
     {
         $item['sale_id']    = $saleId;

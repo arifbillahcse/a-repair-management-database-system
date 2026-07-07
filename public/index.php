@@ -187,6 +187,8 @@ $router->get( '/sales',                    'SaleController@index');
 $router->get( '/sales/create',             'SaleController@create');
 $router->post('/sales',                    'SaleController@store');
 $router->get( '/sales/:id',                'SaleController@show');
+$router->get( '/sales/:id/edit',           'SaleController@edit');
+$router->post('/sales/:id',                'SaleController@update');
 $router->post('/sales/:id/paid',           'SaleController@markPaid');
 $router->get( '/sales/:id/print',          'SaleController@printSale');
 $router->post('/sales/:id/delete',         'SaleController@destroy');

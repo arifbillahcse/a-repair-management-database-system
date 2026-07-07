@@ -35,6 +35,11 @@ $custLabel = $sale['linked_customer_name'] ?: ($sale['customer_name'] ?: 'Walk-i
         </p>
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <a href="<?= BASE_URL ?>/sales/<?= (int)$sale['sale_id'] ?>/edit" class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>Edit
+        </a>
         <a href="<?= BASE_URL ?>/sales/<?= (int)$sale['sale_id'] ?>/print" target="_blank" class="btn btn-secondary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px" aria-hidden="true">
                 <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>

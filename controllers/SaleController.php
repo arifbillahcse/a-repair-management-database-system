@@ -138,6 +138,137 @@ class SaleController
         require VIEWS_PATH . '/sales/view.php';
     }
 
+    // ── GET /sales/:id/edit ───────────────────────────────────────────────────
+
+    public function edit(int $id): void
+    {
+        Auth::requireAuth();
+        $sale = $this->model->findById($id);
+        if (!$sale) { $this->notFound(); }
+
+        $csrfToken = Auth::generateCSRFToken();
+        $products  = $this->productModel->allActive();
+
+        // Treat this sale's own items as "available" again for the stock hints —
+        // matches what update() does server-side (return old stock, then re-check).
+        $heldByThisSale = [];
+        foreach ($sale['items'] as $item) {
+            if (!empty($item['product_id'])) {
+                $pid = (int)$item['product_id'];
+                $heldByThisSale[$pid] = ($heldByThisSale[$pid] ?? 0) + (int)round((float)$item['quantity']);
+            }
+        }
+        foreach ($products as &$p) {
+            $pid = (int)$p['product_id'];
+            if (isset($heldByThisSale[$pid])) {
+                $p['quantity_on_hand'] = (int)$p['quantity_on_hand'] + $heldByThisSale[$pid];
+            }
+        }
+        unset($p);
+
+        $errors = $_SESSION['_form_errors'] ?? [];
+        $fd     = $_SESSION['_form_data']   ?? $sale;
+        unset($_SESSION['_form_errors'], $_SESSION['_form_data']);
+
+        require VIEWS_PATH . '/sales/edit.php';
+    }
+
+    // ── POST /sales/:id ────────────────────────────────────────────────────────
+
+    public function update(int $id): void
+    {
+        Auth::requireAuth();
+        Auth::checkCSRF();
+
+        $sale = $this->model->findById($id);
+        if (!$sale) { $this->notFound(); }
+
+        $items = $this->cleanItems($_POST['items'] ?? []);
+        if (empty($items)) {
+            $_SESSION['_form_errors'] = ['items' => 'Add at least one item.'];
+            $_SESSION['_form_data']   = $_POST;
+            Utils::redirect('/sales/' . $id . '/edit');
+        }
+
+        // Return stock held by the sale's current items before validating the new set
+        foreach ($sale['items'] as $oldItem) {
+            if (!empty($oldItem['product_id'])) {
+                $this->productModel->adjustStock(
+                    (int)$oldItem['product_id'],
+                    (int)round((float)$oldItem['quantity']),
+                    'returned',
+                    'Sale ' . $sale['sale_number'] . ' edited',
+                    Auth::id() ?: null
+                );
+            }
+        }
+
+        // Pre-check stock availability per product for the new item set
+        $needed = [];
+        foreach ($items as $item) {
+            if (!empty($item['product_id'])) {
+                $needed[$item['product_id']] = ($needed[$item['product_id']] ?? 0) + (int)round($item['quantity']);
+            }
+        }
+        foreach ($needed as $productId => $qty) {
+            $product = $this->productModel->findById((int)$productId);
+            if (!$product) {
+                continue;
+            }
+            if ((int)$product['quantity_on_hand'] < $qty) {
+                // Roll back: re-deduct what was just returned so stock isn't left inflated
+                foreach ($sale['items'] as $oldItem) {
+                    if (!empty($oldItem['product_id'])) {
+                        $this->productModel->adjustStock(
+                            (int)$oldItem['product_id'],
+                            -(int)round((float)$oldItem['quantity']),
+                            'sold',
+                            'Sale ' . $sale['sale_number'] . ' edit reverted',
+                            Auth::id() ?: null
+                        );
+                    }
+                }
+                $_SESSION['_form_errors'] = ['items' =>
+                    'Not enough stock for "' . $product['name'] . '" — only '
+                    . (int)$product['quantity_on_hand'] . ' unit(s) available.'];
+                $_SESSION['_form_data'] = $_POST;
+                Utils::redirect('/sales/' . $id . '/edit');
+            }
+        }
+
+        $this->model->update($id, [
+            'customer_id'    => (int)($_POST['customer_id'] ?? 0) ?: null,
+            'customer_name'  => trim(Utils::sanitize($_POST['customer_name'] ?? '')),
+            'sale_date'      => $_POST['sale_date'] ?? $sale['sale_date'],
+            'tax_percentage' => (float)($_POST['tax_percentage'] ?? DEFAULT_TAX_PCT),
+            'notes'          => Utils::sanitize($_POST['notes'] ?? '') ?: null,
+        ]);
+
+        $this->model->deleteItems($id);
+        foreach ($items as $item) {
+            $this->model->addItem($id, [
+                'product_id'   => !empty($item['product_id']) ? (int)$item['product_id'] : null,
+                'description'  => Utils::sanitize($item['description']),
+                'quantity'     => $item['quantity'],
+                'unit_price'   => $item['unit_price'],
+                'discount_pct' => $item['discount_pct'],
+            ]);
+        }
+
+        $this->model->recalculateTotals($id);
+
+        // Deduct stock for the new item set
+        foreach ($needed as $productId => $qty) {
+            $this->productModel->adjustStock(
+                (int)$productId, -$qty, 'sold', 'Sale ' . $sale['sale_number'] . ' edited', Auth::id() ?: null
+            );
+        }
+
+        Logger::log('updated', 'sale', $id);
+        Utils::flashSuccess('Sale ' . $sale['sale_number'] . ' updated.');
+        Utils::redirect('/sales/' . $id);
+    }
+
     // ── POST /sales/:id/paid ──────────────────────────────────────────────────
 
     public function markPaid(int $id): void
