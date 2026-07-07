@@ -169,6 +169,28 @@ $router->post('/invoices/:id/send',        'InvoiceController@markSent');
 $router->post('/invoices/:id/delete',      'InvoiceController@destroy');
 $router->get( '/repairs/:id/invoice',      'InvoiceController@createFromRepair');
 
+// Products & Stock
+$router->get( '/products',                 'ProductController@index');
+$router->get( '/products/create',          'ProductController@create');
+$router->post('/products',                 'ProductController@store');
+$router->get( '/products/:id',             'ProductController@show');
+$router->get( '/products/:id/edit',        'ProductController@edit');
+$router->post('/products/:id',             'ProductController@update');
+$router->post('/products/:id/stock',       'ProductController@adjustStock');
+$router->post('/products/:id/delete',      'ProductController@destroy');
+$router->get( '/product-categories',       'ProductController@categories');
+$router->post('/product-categories',       'ProductController@categories');
+$router->post('/product-categories/:id/delete', 'ProductController@categoryDelete');
+
+// Sales
+$router->get( '/sales',                    'SaleController@index');
+$router->get( '/sales/create',             'SaleController@create');
+$router->post('/sales',                    'SaleController@store');
+$router->get( '/sales/:id',                'SaleController@show');
+$router->post('/sales/:id/paid',           'SaleController@markPaid');
+$router->get( '/sales/:id/print',          'SaleController@printSale');
+$router->post('/sales/:id/delete',         'SaleController@destroy');
+
 // Reports
 $router->get( '/reports',                  'ReportController@index');
 

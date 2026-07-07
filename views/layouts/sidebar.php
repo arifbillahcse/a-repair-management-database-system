@@ -104,6 +104,39 @@ function navActive(string $pattern): string
             </a>
         </li>
 
+        <!-- Products / Stock -->
+        <li class="nav-item has-sub <?= navActive('/products|/product-categories') ?>">
+            <button class="nav-link nav-link-products nav-group-toggle" aria-expanded="<?= navActive('/products|/product-categories') ? 'true' : 'false' ?>">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                    <line x1="12" y1="22.08" x2="12" y2="12"/>
+                </svg>
+                <span>Products</span>
+                <svg class="sub-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <ul class="sub-nav <?= navActive('/products|/product-categories') ? 'open' : '' ?>">
+                <li><a href="<?= BASE_URL ?>/products/create" class="sub-nav-link <?= navActive('/products/create') ?>">+ New Product</a></li>
+                <li><a href="<?= BASE_URL ?>/products" class="sub-nav-link <?= navActive('^.*/products/?$') ?>">All Products</a></li>
+                <li><a href="<?= BASE_URL ?>/products?stock=low" class="sub-nav-link">Low Stock</a></li>
+            </ul>
+        </li>
+
+        <!-- Sales -->
+        <li class="nav-item">
+            <a href="<?= BASE_URL ?>/sales" class="nav-link nav-link-sales <?= navActive('/sales') ?>">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                <span>Sales</span>
+            </a>
+        </li>
+
         <!-- Personal Notes -->
         <li class="nav-item">
             <a href="<?= BASE_URL ?>/personal-notes" class="nav-link nav-link-notes <?= navActive('/personal-notes') ?>">

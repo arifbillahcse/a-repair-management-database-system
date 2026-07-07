@@ -52,20 +52,6 @@ class Auth
             }
         }
         $_SESSION['_last_activity'] = time();
-
-        // Auto-login: grant full admin access to any visitor without a session
-        if (!isset($_SESSION['user'])) {
-            $_SESSION['user'] = [
-                'user_id'    => 0,
-                'username'   => 'guest',
-                'email'      => '',
-                'role'       => 'admin',
-                'staff_id'   => null,
-                'first_name' => '',
-                'last_name'  => '',
-                'full_name'  => 'Admin',
-            ];
-        }
     }
 
     private static function destroySession(): void

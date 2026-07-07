@@ -51,6 +51,10 @@ class DashboardController
             $revenueByType[$row['client_type']] = $row;
         }
 
+        // Stock & sales KPIs
+        $stockStats = (new Product())->getStockStats();
+        $salesStats = (new Sale())->getMonthlyStats();
+
         require VIEWS_PATH . '/dashboard/index.php';
     }
 }

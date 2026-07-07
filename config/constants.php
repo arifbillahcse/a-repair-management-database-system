@@ -87,6 +87,30 @@ define('INVOICE_STATUS_CLASS', [
     'cancelled'      => 'badge-dark',
 ]);
 
+// ── Sale statuses ──────────────────────────────────────────────────────────────
+define('SALE_STATUS', [
+    'unpaid'    => 'Unpaid',
+    'partial'   => 'Partially Paid',
+    'paid'      => 'Paid',
+    'cancelled' => 'Cancelled',
+]);
+
+define('SALE_STATUS_CLASS', [
+    'unpaid'    => 'badge-orange',
+    'partial'   => 'badge-blue',
+    'paid'      => 'badge-green',
+    'cancelled' => 'badge-dark',
+]);
+
+// ── Stock movement reasons ──────────────────────────────────────────────────────
+define('STOCK_REASONS', [
+    'received'   => 'Stock Received',
+    'sold'       => 'Sold',
+    'returned'   => 'Customer Return',
+    'damaged'    => 'Damaged / Lost',
+    'correction' => 'Manual Correction',
+]);
+
 // ── User roles ─────────────────────────────────────────────────────────────────
 define('USER_ROLES', [
     'admin'       => 'Admin',
@@ -114,7 +138,9 @@ define('CLIENT_TYPES', [
 define('DATE_FORMAT',      'd/m/Y');
 define('DATETIME_FORMAT',  'd/m/Y H:i');
 define('DB_DATE_FORMAT',   'Y-m-d');
-define('CURRENCY_SYMBOL',  '€');
+// Note: named APP_CURRENCY_SYMBOL because PHP 8.4+ predefines CURRENCY_SYMBOL
+// as an nl_langinfo() locale constant on Linux, which would shadow ours.
+define('APP_CURRENCY_SYMBOL', '€');
 define('CURRENCY_CODE',    'EUR');
 define('DEFAULT_TAX_PCT',  22.00);
 

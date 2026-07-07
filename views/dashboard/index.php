@@ -184,6 +184,62 @@ $colCount       = (int)($revenueByType['colleague']['cnt']        ?? 0);
         </div>
         <a href="<?= BASE_URL ?>/customers?type=colleague" class="stat-link" title="View colleague clients">&#x2197;</a>
     </div>
+
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+        </div>
+        <div class="stat-body">
+            <div class="stat-value"><?= Utils::formatCurrency($stockStats['cost_value'] ?? 0) ?></div>
+            <div class="stat-label">Stock Value</div>
+            <div style="font-size:.73rem;color:var(--text-muted);margin-top:.1rem">
+                <?= number_format((int)($stockStats['total_units'] ?? 0)) ?> units ·
+                <?= (int)($stockStats['active_products'] ?? 0) ?> products
+            </div>
+        </div>
+        <a href="<?= BASE_URL ?>/products" class="stat-link" title="View products">&#x2197;</a>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+        <div class="stat-body">
+            <div class="stat-value" style="color:<?= ($stockStats['low_stock_count'] ?? 0) > 0 ? 'var(--warning)' : 'var(--success)' ?>">
+                <?= (int)($stockStats['low_stock_count'] ?? 0) ?>
+            </div>
+            <div class="stat-label">Low Stock Alerts</div>
+            <div style="font-size:.73rem;color:var(--text-muted);margin-top:.1rem">
+                <?= (int)($stockStats['out_of_stock_count'] ?? 0) ?> out of stock
+            </div>
+        </div>
+        <a href="<?= BASE_URL ?>/products?stock=low" class="stat-link" title="View low stock">&#x2197;</a>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+        </div>
+        <div class="stat-body">
+            <div class="stat-value" style="color:var(--success)"><?= Utils::formatCurrency($salesStats['total_revenue'] ?? 0) ?></div>
+            <div class="stat-label">Sales This Month</div>
+            <div style="font-size:.73rem;color:var(--text-muted);margin-top:.1rem">
+                <?= (int)($salesStats['sale_count'] ?? 0) ?> sale<?= ($salesStats['sale_count'] ?? 0) == 1 ? '' : 's' ?> ·
+                today <?= Utils::formatCurrency($salesStats['today_revenue'] ?? 0) ?>
+            </div>
+        </div>
+        <a href="<?= BASE_URL ?>/sales" class="stat-link" title="View sales">&#x2197;</a>
+    </div>
     <?php endif; ?>
 
 </div>
