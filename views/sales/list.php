@@ -43,11 +43,20 @@ $pg       = $pagination;
         <h1 class="page-title">Sales</h1>
         <p class="page-subtitle"><?= number_format($pg['total']) ?> total sales</p>
     </div>
-    <a href="<?= BASE_URL ?>/sales/create" class="btn btn-primary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px" aria-hidden="true">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>New Sale
-    </a>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <?php if (Auth::can('manager')): ?>
+        <a href="<?= BASE_URL ?>/sales/report" class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px" aria-hidden="true">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>Report
+        </a>
+        <?php endif; ?>
+        <a href="<?= BASE_URL ?>/sales/create" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>New Sale
+        </a>
+    </div>
 </div>
 
 <!-- Monthly stats -->

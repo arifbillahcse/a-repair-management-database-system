@@ -232,6 +232,52 @@ class Sale extends BaseModel
         ) ?? [];
     }
 
+    /**
+     * Every sale within a date range (unpaginated), newest first, for the
+     * dedicated sales report. Optionally filtered by status.
+     */
+    public function getForReport(string $dateFrom, string $dateTo, string $status = ''): array
+    {
+        $sql = "SELECT s.*, c.full_name AS linked_customer_name,
+                       (SELECT COUNT(*) FROM sale_items si WHERE si.sale_id = s.sale_id) AS item_count
+                FROM sales s
+                LEFT JOIN customers c ON c.customer_id = s.customer_id
+                WHERE s.sale_date BETWEEN ? AND ?";
+        $params = [$dateFrom, $dateTo];
+
+        if ($status !== '' && array_key_exists($status, SALE_STATUS)) {
+            $sql        .= " AND s.status = ?";
+            $params[]    = $status;
+        }
+        $sql .= " ORDER BY s.sale_date DESC, s.sale_id DESC";
+
+        return $this->db->fetchAll($sql, $params);
+    }
+
+    /** Full totals (incl. balance & item count) for a set of sales in a range. */
+    public function getReportSummary(string $dateFrom, string $dateTo, string $status = ''): array
+    {
+        $sql = "SELECT COUNT(*)                                    AS sale_count,
+                       COALESCE(SUM(subtotal), 0)                  AS subtotal,
+                       COALESCE(SUM(tax_amount), 0)                AS tax_amount,
+                       COALESCE(SUM(total_amount), 0)              AS total_amount,
+                       COALESCE(SUM(amount_paid), 0)               AS total_paid,
+                       COALESCE(SUM(total_amount - amount_paid),0) AS balance
+                FROM sales
+                WHERE sale_date BETWEEN ? AND ?";
+        $params = [$dateFrom, $dateTo];
+
+        if ($status !== '' && array_key_exists($status, SALE_STATUS)) {
+            $sql     .= " AND status = ?";
+            $params[] = $status;
+        } else {
+            // Default report excludes cancelled sales from the money totals
+            $sql .= " AND status != 'cancelled'";
+        }
+
+        return $this->db->fetchOne($sql, $params) ?? [];
+    }
+
     // ── Private ───────────────────────────────────────────────────────────────
 
     private function buildFilters(array $filters): array

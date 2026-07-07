@@ -185,6 +185,7 @@ $router->post('/product-categories/:id/delete', 'ProductController@categoryDelet
 // Sales
 $router->get( '/sales',                    'SaleController@index');
 $router->get( '/sales/create',             'SaleController@create');
+$router->get( '/sales/report',             'SaleController@report');
 $router->post('/sales',                    'SaleController@store');
 $router->get( '/sales/:id',                'SaleController@show');
 $router->get( '/sales/:id/edit',           'SaleController@edit');

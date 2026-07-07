@@ -32,6 +32,57 @@ class SaleController
         require VIEWS_PATH . '/sales/list.php';
     }
 
+    // ── GET /sales/report ─────────────────────────────────────────────────────
+
+    public function report(): void
+    {
+        Auth::requireRole('manager');
+
+        // Date-range detection (mirrors the main Reports page)
+        $range    = $_GET['range']     ?? 'this_month';
+        $status   = $_GET['status']    ?? '';
+        $dateFrom = trim($_GET['date_from'] ?? '');
+        $dateTo   = trim($_GET['date_to']   ?? '');
+
+        switch ($range) {
+            case 'this_year':
+                $start = date('Y-01-01'); $end = date('Y-12-31');
+                $rangeLabel = 'Year ' . date('Y');
+                break;
+            case 'last_3m':
+                $start = date('Y-m-d', strtotime('-3 months')); $end = date('Y-m-d');
+                $rangeLabel = 'Last 3 Months';
+                break;
+            case 'last_6m':
+                $start = date('Y-m-d', strtotime('-6 months')); $end = date('Y-m-d');
+                $rangeLabel = 'Last 6 Months';
+                break;
+            case 'last_12m':
+                $start = date('Y-m-d', strtotime('-12 months')); $end = date('Y-m-d');
+                $rangeLabel = 'Last 12 Months';
+                break;
+            case 'custom':
+                $start = $dateFrom ?: date('Y-m-01');
+                $end   = $dateTo   ?: date('Y-m-d');
+                if ($start > $end) { [$start, $end] = [$end, $start]; }
+                $rangeLabel = date('d M Y', strtotime($start)) . ' – ' . date('d M Y', strtotime($end));
+                break;
+            default:
+                $range = 'this_month';
+                $start = date('Y-m-01'); $end = date('Y-m-t');
+                $rangeLabel = date('F Y');
+        }
+
+        if ($status !== '' && !array_key_exists($status, SALE_STATUS)) {
+            $status = '';
+        }
+
+        $sales   = $this->model->getForReport($start, $end, $status);
+        $summary = $this->model->getReportSummary($start, $end, $status);
+
+        require VIEWS_PATH . '/sales/report.php';
+    }
+
     // ── GET /sales/create ─────────────────────────────────────────────────────
 
     public function create(): void
