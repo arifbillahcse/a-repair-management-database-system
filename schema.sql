@@ -556,6 +556,7 @@ CREATE TABLE IF NOT EXISTS `product_categories` (
     `name`        VARCHAR(100) NOT NULL,
     `sort_order`  INT          NOT NULL DEFAULT 0,
     `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`category_id`),
     UNIQUE KEY `uq_pc_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
