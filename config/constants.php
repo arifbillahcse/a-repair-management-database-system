@@ -24,7 +24,9 @@ define('APP_ENV',     $_ENV['APP_ENV']   ?? 'production');
 define('APP_DEBUG',   filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN));
 
 // ── Session ────────────────────────────────────────────────────────────────────
-define('SESSION_TIMEOUT', (int)($_ENV['SESSION_TIMEOUT'] ?? 1800));   // 30 minutes
+// 24 hours: log in once per day; closing the browser still logs you out
+// immediately since the session cookie itself is not persistent.
+define('SESSION_TIMEOUT', (int)($_ENV['SESSION_TIMEOUT'] ?? 86400));
 define('SESSION_NAME',    $_ENV['SESSION_NAME'] ?? 'repair_sys_sess');
 
 // ── Pagination ────────────────────────────────────────────────────────────────

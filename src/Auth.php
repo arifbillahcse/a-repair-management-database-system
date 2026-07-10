@@ -34,9 +34,15 @@ class Auth
             }
             session_save_path($sessionPath);
 
+            // Keep the server-side session file alive for the full
+            // SESSION_TIMEOUT window so PHP's own garbage collector doesn't
+            // purge it early (its default is often ~24 min) and force a
+            // re-login before our own inactivity check would.
+            ini_set('session.gc_maxlifetime', (string) SESSION_TIMEOUT);
+
             session_name(SESSION_NAME);
             session_set_cookie_params([
-                'lifetime' => 0,
+                'lifetime' => 0, // session cookie — browser clears it when fully closed, forcing re-login
                 'path'     => '/',
                 'secure'   => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
                 'httponly' => true,
