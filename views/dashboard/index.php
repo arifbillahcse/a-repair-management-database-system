@@ -28,7 +28,12 @@ $colCount       = (int)($revenueByType['colleague']['cnt']        ?? 0);
 ?>
 <style>
 /* ── KPI grid ──────────────────────────────────────────── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:1rem;margin-bottom:1.5rem}
+/* Flex-wrap + centered so a partial last row (e.g. the 9th admin card)
+   centers instead of leaving a lonely left-aligned orphan. Works cleanly
+   for both the 4-card (staff) and 9-card (admin) layouts. */
+.kpi-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;margin-bottom:1.5rem}
+.kpi-grid .stat-card{flex:1 1 200px;max-width:260px}
+@media(max-width:520px){.kpi-grid .stat-card{max-width:none}}
 
 /* ── Chart card (re-use from reports) ─────────────────── */
 .chart-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
