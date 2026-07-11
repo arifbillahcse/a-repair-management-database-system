@@ -28,6 +28,7 @@ class Sale extends BaseModel
                     `sale_id`        INT UNSIGNED  NOT NULL AUTO_INCREMENT,
                     `sale_number`    VARCHAR(30)   NOT NULL,
                     `customer_id`    INT UNSIGNED           DEFAULT NULL,
+                    `business_id`    INT UNSIGNED           DEFAULT NULL,
                     `customer_name`  VARCHAR(200)  NOT NULL DEFAULT '',
                     `sale_date`      DATE          NOT NULL,
                     `subtotal`       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
@@ -79,6 +80,15 @@ class Sale extends BaseModel
                         ON DELETE SET NULL ON UPDATE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
             );
+        }
+
+        // Idempotently add business_id to installs created before this feature
+        $cols = array_column(
+            $pdo->query("SHOW COLUMNS FROM `sales`")->fetchAll(PDO::FETCH_ASSOC),
+            'Field'
+        );
+        if (!in_array('business_id', $cols, true)) {
+            $pdo->exec("ALTER TABLE `sales` ADD COLUMN `business_id` INT UNSIGNED DEFAULT NULL AFTER `customer_id`");
         }
     }
 

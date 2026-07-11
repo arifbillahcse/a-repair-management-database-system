@@ -1,13 +1,15 @@
 <?php
 class SaleController
 {
-    private Sale    $model;
-    private Product $productModel;
+    private Sale     $model;
+    private Product  $productModel;
+    private Business $businessModel;
 
     public function __construct()
     {
-        $this->model        = new Sale();      // bootstraps sales tables
-        $this->productModel = new Product();   // bootstraps stock tables
+        $this->model         = new Sale();      // bootstraps sales tables (incl. business_id)
+        $this->productModel  = new Product();   // bootstraps stock tables
+        $this->businessModel = new Business();  // bootstraps businesses table
     }
 
     // ── GET /sales ────────────────────────────────────────────────────────────
@@ -92,6 +94,8 @@ class SaleController
         $saleNumber = $this->model->generateSaleNumber();
         $csrfToken  = Auth::generateCSRFToken();
         $products   = $this->productModel->allActive();
+        $businesses = $this->businessModel->allActive();
+        $defaultBiz = $this->businessModel->getDefault();
         $errors     = $_SESSION['_form_errors'] ?? [];
         $fd         = $_SESSION['_form_data']   ?? [];
         unset($_SESSION['_form_errors'], $_SESSION['_form_data']);
@@ -139,6 +143,7 @@ class SaleController
         $id = $this->model->create([
             'sale_number'    => Utils::sanitize($saleNumber),
             'customer_id'    => (int)($_POST['customer_id'] ?? 0) ?: null,
+            'business_id'    => (int)($_POST['business_id'] ?? 0) ?: null,
             'customer_name'  => trim(Utils::sanitize($_POST['customer_name'] ?? '')),
             'sale_date'      => $_POST['sale_date'] ?? date('Y-m-d'),
             'tax_percentage' => (float)($_POST['tax_percentage'] ?? DEFAULT_TAX_PCT),
@@ -197,8 +202,9 @@ class SaleController
         $sale = $this->model->findById($id);
         if (!$sale) { $this->notFound(); }
 
-        $csrfToken = Auth::generateCSRFToken();
-        $products  = $this->productModel->allActive();
+        $csrfToken  = Auth::generateCSRFToken();
+        $products   = $this->productModel->allActive();
+        $businesses = $this->businessModel->allActive();
 
         // Treat this sale's own items as "available" again for the stock hints —
         // matches what update() does server-side (return old stock, then re-check).
@@ -289,6 +295,7 @@ class SaleController
 
         $this->model->update($id, [
             'customer_id'    => (int)($_POST['customer_id'] ?? 0) ?: null,
+            'business_id'    => (int)($_POST['business_id'] ?? 0) ?: null,
             'customer_name'  => trim(Utils::sanitize($_POST['customer_name'] ?? '')),
             'sale_date'      => $_POST['sale_date'] ?? $sale['sale_date'],
             'tax_percentage' => (float)($_POST['tax_percentage'] ?? DEFAULT_TAX_PCT),
@@ -346,7 +353,14 @@ class SaleController
         $sale = $this->model->findById($id);
         if (!$sale) { $this->notFound(); }
 
-        $business = (new Business())->getDefault();
+        // Use the business the sale was issued from; fall back to the default.
+        $business = !empty($sale['business_id'])
+            ? $this->businessModel->findById((int)$sale['business_id'])
+            : null;
+        if (!$business) {
+            $business = $this->businessModel->getDefault();
+        }
+
         require VIEWS_PATH . '/sales/print.php';
     }
 
