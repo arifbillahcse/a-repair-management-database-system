@@ -592,6 +592,7 @@ CREATE TABLE IF NOT EXISTS `sales` (
     `sale_id`        INT UNSIGNED  NOT NULL AUTO_INCREMENT,
     `sale_number`    VARCHAR(30)   NOT NULL,           -- e.g. S-2026-00001
     `customer_id`    INT UNSIGNED           DEFAULT NULL,
+    `business_id`    INT UNSIGNED           DEFAULT NULL, -- issuing business shown on the receipt
     `customer_name`  VARCHAR(200)  NOT NULL DEFAULT '', -- walk-in name if not linked
     `sale_date`      DATE          NOT NULL,
     `subtotal`       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
@@ -608,10 +609,14 @@ CREATE TABLE IF NOT EXISTS `sales` (
     PRIMARY KEY (`sale_id`),
     UNIQUE KEY `uq_sales_number` (`sale_number`),
     KEY `idx_sales_customer` (`customer_id`),
+    KEY `idx_sales_business` (`business_id`),
     KEY `idx_sales_date`     (`sale_date`),
     KEY `idx_sales_status`   (`status`),
     CONSTRAINT `fk_sales_customer`
         FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `fk_sales_business`
+        FOREIGN KEY (`business_id`) REFERENCES `businesses` (`business_id`)
         ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT `fk_sales_created_by`
         FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`)

@@ -75,6 +75,25 @@ $dateToday = $fd['sale_date'] ?? date('Y-m-d');
                                    value="<?= Utils::e($dateToday) ?>" required>
                         </div>
                     </div>
+                    <?php $businesses = $businesses ?? []; $defaultBiz = $defaultBiz ?? null;
+                          $selBiz = (int)($fd['business_id'] ?? ($defaultBiz['business_id'] ?? 0)); ?>
+                    <?php if (!empty($businesses)): ?>
+                    <div class="form-group" style="margin-top:1rem;margin-bottom:0">
+                        <label class="form-label" for="businessId">Issued By (Company)</label>
+                        <select id="businessId" name="business_id" class="form-input">
+                            <?php foreach ($businesses as $b): ?>
+                            <option value="<?= (int)$b['business_id'] ?>" <?= $selBiz === (int)$b['business_id'] ? 'selected' : '' ?>>
+                                <?= Utils::e($b['name']) ?><?= $b['is_default'] ? ' (default)' : '' ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p style="font-size:.72rem;color:var(--text-muted);margin-top:.35rem">
+                            This company's name, address and VAT appear on the printed receipt.
+                            <a href="<?= BASE_URL ?>/admin/businesses" target="_blank" style="color:var(--accent)">Manage companies</a>
+                        </p>
+                    </div>
+                    <?php endif; ?>
+
                     <div class="form-group" style="margin-top:1rem;margin-bottom:0">
                         <label class="form-label" for="custSearch">Customer (optional)</label>
                         <div class="ac-wrap">
