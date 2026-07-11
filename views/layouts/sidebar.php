@@ -150,8 +150,8 @@ function navActive(string $pattern): string
 
         <!-- Reports (manager+) -->
         <?php if (Auth::can('manager')): ?>
-        <li class="nav-item">
-            <a href="<?= BASE_URL ?>/reports" class="nav-link nav-link-reports <?= navActive('/reports') ?>">
+        <li class="nav-item has-sub <?= navActive('/reports|/sales/report') ?>">
+            <button class="nav-link nav-link-reports nav-group-toggle" aria-expanded="<?= navActive('/reports|/sales/report') ? 'true' : 'false' ?>">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <line x1="18" y1="20" x2="18" y2="10"/>
@@ -159,7 +159,14 @@ function navActive(string $pattern): string
                     <line x1="6"  y1="20" x2="6"  y2="14"/>
                 </svg>
                 <span>Reports</span>
-            </a>
+                <svg class="sub-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <ul class="sub-nav <?= navActive('/reports|/sales/report') ? 'open' : '' ?>">
+                <li><a href="<?= BASE_URL ?>/sales/report" class="sub-nav-link <?= navActive('/sales/report') ?>">Sales Report</a></li>
+                <li><a href="<?= BASE_URL ?>/reports" class="sub-nav-link <?= navActive('^.*/reports/?$') ?>">Repairs Report</a></li>
+            </ul>
         </li>
         <?php endif; ?>
 

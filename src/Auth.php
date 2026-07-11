@@ -42,7 +42,7 @@ class Auth
 
             session_name(SESSION_NAME);
             session_set_cookie_params([
-                'lifetime' => 0, // session cookie — browser clears it when fully closed, forcing re-login
+                'lifetime' => SESSION_TIMEOUT, // persistent cookie — survives browser restarts until SESSION_TIMEOUT elapses
                 'path'     => '/',
                 'secure'   => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
                 'httponly' => true,

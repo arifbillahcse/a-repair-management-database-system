@@ -24,9 +24,11 @@ define('APP_ENV',     $_ENV['APP_ENV']   ?? 'production');
 define('APP_DEBUG',   filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN));
 
 // ── Session ────────────────────────────────────────────────────────────────────
-// 24 hours: log in once per day; closing the browser still logs you out
-// immediately since the session cookie itself is not persistent.
-define('SESSION_TIMEOUT', (int)($_ENV['SESSION_TIMEOUT'] ?? 86400));
+// 90 days: log in once and stay logged in — the cookie is persistent and
+// renews itself on every visit, so closing the browser or restarting the
+// computer does NOT log the user out. Only ~90 days of total inactivity,
+// or an explicit Logout click, will end the session.
+define('SESSION_TIMEOUT', (int)($_ENV['SESSION_TIMEOUT'] ?? 7776000));
 define('SESSION_NAME',    $_ENV['SESSION_NAME'] ?? 'repair_sys_sess');
 
 // ── Pagination ────────────────────────────────────────────────────────────────
