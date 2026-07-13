@@ -39,6 +39,7 @@ class Sale extends BaseModel
                     `status`         ENUM('unpaid','partial','paid','cancelled')
                                                    NOT NULL DEFAULT 'unpaid',
                     `notes`          TEXT                   DEFAULT NULL,
+                    `signature_id`   TINYINT       NOT NULL DEFAULT 0,
                     `created_by`     INT UNSIGNED           DEFAULT NULL,
                     `created_at`     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     `updated_at`     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -89,6 +90,9 @@ class Sale extends BaseModel
         );
         if (!in_array('business_id', $cols, true)) {
             $pdo->exec("ALTER TABLE `sales` ADD COLUMN `business_id` INT UNSIGNED DEFAULT NULL AFTER `customer_id`");
+        }
+        if (!in_array('signature_id', $cols, true)) {
+            $pdo->exec("ALTER TABLE `sales` ADD COLUMN `signature_id` TINYINT NOT NULL DEFAULT 0 AFTER `notes`");
         }
     }
 

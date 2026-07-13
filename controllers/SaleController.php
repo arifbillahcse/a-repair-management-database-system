@@ -96,6 +96,9 @@ class SaleController
         $products   = $this->productModel->allActive();
         $businesses = $this->businessModel->allActive();
         $defaultBiz = $this->businessModel->getDefault();
+        $signatures = Database::getInstance()->fetchOne(
+            "SELECT signature1, signature2, signature3 FROM company_settings LIMIT 1"
+        ) ?? [];
         $errors     = $_SESSION['_form_errors'] ?? [];
         $fd         = $_SESSION['_form_data']   ?? [];
         unset($_SESSION['_form_errors'], $_SESSION['_form_data']);
@@ -149,6 +152,7 @@ class SaleController
             'tax_percentage' => (float)($_POST['tax_percentage'] ?? DEFAULT_TAX_PCT),
             'status'         => 'unpaid',
             'notes'          => Utils::sanitize($_POST['notes'] ?? '') ?: null,
+            'signature_id'   => (int)($_POST['signature_id'] ?? 0),
             'created_by'     => Auth::id() ?: null,
         ]);
 
@@ -205,6 +209,9 @@ class SaleController
         $csrfToken  = Auth::generateCSRFToken();
         $products   = $this->productModel->allActive();
         $businesses = $this->businessModel->allActive();
+        $signatures = Database::getInstance()->fetchOne(
+            "SELECT signature1, signature2, signature3 FROM company_settings LIMIT 1"
+        ) ?? [];
 
         // Treat this sale's own items as "available" again for the stock hints —
         // matches what update() does server-side (return old stock, then re-check).
@@ -300,6 +307,7 @@ class SaleController
             'sale_date'      => $_POST['sale_date'] ?? $sale['sale_date'],
             'tax_percentage' => (float)($_POST['tax_percentage'] ?? DEFAULT_TAX_PCT),
             'notes'          => Utils::sanitize($_POST['notes'] ?? '') ?: null,
+            'signature_id'   => (int)($_POST['signature_id'] ?? 0),
         ]);
 
         $this->model->deleteItems($id);
@@ -359,6 +367,15 @@ class SaleController
             : null;
         if (!$business) {
             $business = $this->businessModel->getDefault();
+        }
+
+        $settings      = Database::getInstance()->fetchOne(
+            "SELECT signature1, signature2, signature3 FROM company_settings LIMIT 1"
+        ) ?? [];
+        $signatureText = '';
+        if (!empty($sale['signature_id'])) {
+            $sigKey        = 'signature' . (int)$sale['signature_id'];
+            $signatureText = $settings[$sigKey] ?? '';
         }
 
         require VIEWS_PATH . '/sales/print.php';
