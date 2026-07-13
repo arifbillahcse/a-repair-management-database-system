@@ -360,6 +360,7 @@ CREATE TABLE IF NOT EXISTS `invoices` (
                          'cancelled'
                      )               NOT NULL DEFAULT 'draft',
     `notes`          TEXT                     DEFAULT NULL,
+    `signature_id`   TINYINT         NOT NULL DEFAULT 0,        -- 0=none, 1-3=company_settings.signatureN
     `created_by`     INT UNSIGNED             DEFAULT NULL,
     `created_at`     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -603,6 +604,7 @@ CREATE TABLE IF NOT EXISTS `sales` (
     `status`         ENUM('unpaid','partial','paid','cancelled')
                                    NOT NULL DEFAULT 'unpaid',
     `notes`          TEXT                   DEFAULT NULL,
+    `signature_id`   TINYINT       NOT NULL DEFAULT 0,   -- 0=none, 1-3=company_settings.signatureN
     `created_by`     INT UNSIGNED           DEFAULT NULL,
     `created_at`     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

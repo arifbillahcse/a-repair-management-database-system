@@ -15,7 +15,7 @@ class InvoiceController
         $this->ensureBusinessColumn();
     }
 
-    /** Idempotently add the business_id column to invoices. */
+    /** Idempotently add the business_id / signature_id columns to invoices. */
     private function ensureBusinessColumn(): void
     {
         $pdo  = Database::getInstance()->getPdo();
@@ -25,6 +25,9 @@ class InvoiceController
         );
         if (!in_array('business_id', $cols, true)) {
             $pdo->exec("ALTER TABLE `invoices` ADD COLUMN `business_id` INT UNSIGNED DEFAULT NULL AFTER `customer_id`");
+        }
+        if (!in_array('signature_id', $cols, true)) {
+            $pdo->exec("ALTER TABLE `invoices` ADD COLUMN `signature_id` TINYINT NOT NULL DEFAULT 0 AFTER `notes`");
         }
     }
 
@@ -72,6 +75,9 @@ class InvoiceController
         $csrfToken     = Auth::generateCSRFToken();
         $businesses    = $this->businessModel->allActive();
         $defaultBiz    = $this->businessModel->getDefault();
+        $signatures    = Database::getInstance()->fetchOne(
+            "SELECT signature1, signature2, signature3 FROM company_settings LIMIT 1"
+        ) ?? [];
 
         require VIEWS_PATH . '/invoices/create.php';
     }
@@ -99,6 +105,7 @@ class InvoiceController
             'tax_percentage' => (float)($_POST['tax_percentage'] ?? DEFAULT_TAX_PCT),
             'status'         => 'draft',
             'notes'          => Utils::sanitize($_POST['notes'] ?? ''),
+            'signature_id'   => (int)($_POST['signature_id'] ?? 0),
             'created_by'     => Auth::id() ?: null,
         ]);
 
@@ -180,6 +187,12 @@ class InvoiceController
             if (!empty($biz['bank_details'])) {
                 $company['payment_info'] = $biz['bank_details'];
             }
+        }
+
+        $signatureText = '';
+        if (!empty($invoice['signature_id'])) {
+            $sigKey        = 'signature' . (int)$invoice['signature_id'];
+            $signatureText = $company[$sigKey] ?? '';
         }
 
         require VIEWS_PATH . '/invoices/print.php';

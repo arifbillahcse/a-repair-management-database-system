@@ -1,3 +1,35 @@
+<?php
+/**
+ * Printable invoice — styled to match the Credit Note document design
+ * (boxed meta rows, amount-in-words, note/signature footer).
+ * Expects: $invoice (with items), $company, $signatureText
+ */
+function invAmountToWords(float $amount): string
+{
+    $n = (int)abs(floor($amount));
+    if ($n === 0) return 'ZERO';
+
+    $units = ['','ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE',
+              'TEN','ELEVEN','TWELVE','THIRTEEN','FOURTEEN','FIFTEEN','SIXTEEN',
+              'SEVENTEEN','EIGHTEEN','NINETEEN'];
+    $tens  = ['','','TWENTY','THIRTY','FORTY','FIFTY','SIXTY','SEVENTY','EIGHTY','NINETY'];
+
+    $toWords = function (int $n) use ($units, $tens, &$toWords): string {
+        if ($n === 0)       return '';
+        if ($n < 20)        return $units[$n];
+        if ($n < 100)       return $tens[(int)($n / 10)] . ($n % 10 ? ' ' . $units[$n % 10] : '');
+        if ($n < 1000)      return $units[(int)($n / 100)] . ' HUNDRED' . ($n % 100 ? ' AND ' . $toWords($n % 100) : '');
+        if ($n < 1000000)   return $toWords((int)($n / 1000)) . ' THOUSAND' . ($n % 1000 ? ' ' . $toWords($n % 1000) : '');
+        return $toWords((int)($n / 1000000)) . ' MILLION' . ($n % 1000000 ? ' ' . $toWords($n % 1000000) : '');
+    };
+
+    return $toWords($n);
+}
+
+$total   = (float)($invoice['total_amount'] ?? 0);
+$paid    = (float)($invoice['amount_paid']  ?? 0);
+$balance = round($total - $paid, 2);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,73 +39,78 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; color: #1a1a1a; background: #fff; }
-        .page { width: 210mm; min-height: 297mm; margin: 0 auto; padding: 14mm 16mm; }
+
+        .page { width: 210mm; min-height: 297mm; margin: 0 auto; padding: 12mm 14mm; }
         @media print {
             html, body { font-size: 10pt; }
-            .page { padding: 10mm 12mm; }
+            .page { padding: 8mm 10mm; }
             .no-print { display: none !important; }
-            a { color: inherit !important; text-decoration: none !important; }
         }
 
-        /* Header */
-        .doc-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #10b981; padding-bottom: 8mm; margin-bottom: 8mm; }
-        .company-name { font-size: 17pt; font-weight: 700; color: #10b981; }
-        .company-info { font-size: 8.5pt; color: #555; margin-top: 2.5mm; line-height: 1.6; }
-        .doc-right { text-align: right; }
-        .doc-title { font-size: 11pt; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: .1em; }
-        .doc-number { font-size: 20pt; font-weight: 800; color: #1a1a1a; line-height: 1.1; margin-top: 1mm; font-family: 'Courier New', Courier, monospace; }
+        /* ── Company header ── */
+        .doc-header { text-align: center; border-bottom: 2px solid #10b981; padding-bottom: 6mm; margin-bottom: 7mm; }
+        .company-name { font-size: 16pt; font-weight: 700; color: #10b981; margin-bottom: 1mm; }
+        .company-sub  { font-size: 9pt; color: #555; line-height: 1.6; }
+
+        /* ── Title + meta ── */
+        .doc-title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6mm; }
+        .doc-title { font-size: 15pt; font-weight: 700; text-decoration: underline; letter-spacing: .03em; }
+        .doc-date-box { text-align: right; font-size: 9.5pt; }
+        .doc-date-box .label { color: #555; }
+        .doc-date-box .value { font-weight: 700; }
         .status-badge { display: inline-block; padding: 1.5mm 4mm; border-radius: 100px; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-top: 2mm; }
-        .s-draft          { background: #2a2a2a; color: #a0a0a0; border: 1px solid #404040; }
-        .s-sent           { background: #1e3a4a; color: #67b3dd; border: 1px solid #2a5a7a; }
-        .s-paid           { background: #1a3020; color: #22c55e; border: 1px solid #2a5a3a; }
-        .s-partially_paid { background: #1a3a2a; color: #10b981; border: 1px solid #2a6a4a; }
-        .s-overdue        { background: #3a1e1e; color: #ef4444; border: 1px solid #6a2a2a; }
-        .s-cancelled      { background: #2a2a2a; color: #a3a3a3; border: 1px solid #404040; }
+        .s-draft          { background: #f5f5f5; color: #777; border: 1px solid #d4d4d4; }
+        .s-sent           { background: #e8f4fb; color: #2f7fb0; border: 1px solid #bfe0f2; }
+        .s-paid           { background: #e8f7ef; color: #10b981; border: 1px solid #b8e8cf; }
+        .s-partially_paid { background: #eafaf1; color: #0d9668; border: 1px solid #b8e8cf; }
+        .s-overdue        { background: #fbeaea; color: #c0392b; border: 1px solid #f2c2c2; }
+        .s-cancelled      { background: #f5f5f5; color: #999; border: 1px solid #d4d4d4; }
 
-        /* Bill to / from */
-        .addr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; margin-bottom: 8mm; }
-        .addr-block h3 { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #888; margin-bottom: 2mm; }
-        .addr-block p { font-size: 9.5pt; line-height: 1.6; color: #1a1a1a; }
+        /* ── Meta boxes (mirrors credit-note meta table) ── */
+        .doc-meta { margin-bottom: 7mm; border: 1px solid #d4d4d4; border-radius: 2mm; overflow: hidden; }
+        .doc-meta-row { display: grid; grid-template-columns: 130px 1fr; border-bottom: 1px solid #e8e8e8; }
+        .doc-meta-row:last-child { border-bottom: none; }
+        .doc-meta-key { background: #f5f5f5; padding: 2.5mm 4mm; font-size: 8.5pt; font-weight: 700; color: #555; display: flex; align-items: center; }
+        .doc-meta-val { padding: 2.5mm 4mm; font-size: 9.5pt; color: #1a1a1a; display: flex; align-items: center; }
 
-        /* Dates row */
-        .dates-row { display: flex; gap: 8mm; margin-bottom: 8mm; flex-wrap: wrap; }
-        .date-block { flex: 1; min-width: 50mm; }
-        .date-label { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #888; margin-bottom: 1mm; }
-        .date-value { font-size: 10pt; color: #1a1a1a; font-weight: 600; }
+        /* ── Items table ── */
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; }
+        .items-table thead tr { background: #fef9e7; }
+        .items-table th { border: 1px solid #d4d4d4; padding: 2.5mm 3mm; font-size: 8pt; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: .03em; }
+        .items-table th.r, .items-table td.r { text-align: right; }
+        .items-table td { border: 1px solid #d4d4d4; padding: 3mm 3mm; font-size: 9pt; }
+        .items-table .desc-col { width: 34%; text-align: left; }
+        .totals-row { background: #f5f5f5; }
+        .totals-row td { font-weight: 700; font-size: 9.5pt; }
+        .grand-net { color: #10b981; }
 
-        /* Items table */
-        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
-        .items-table thead th { background: #f5f5f5; padding: 2.5mm 3mm; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #555; border-bottom: 2px solid #d4d4d4; text-align: left; }
-        .items-table tbody td { padding: 2.5mm 3mm; font-size: 9pt; border-bottom: 1px solid #ebebeb; vertical-align: top; }
-        .items-table tbody tr:last-child td { border-bottom: none; }
-        .items-table th:not(:first-child), .items-table td:not(:first-child) { text-align: right; }
-        .items-table .desc-col { text-align: left !important; }
-
-        /* Totals */
-        .totals-wrap { display: flex; justify-content: flex-end; margin-top: 0; border-top: 2px solid #d4d4d4; }
-        .totals-table { width: 68mm; border-collapse: collapse; }
-        .totals-table td { padding: 2mm 3mm; font-size: 9pt; border-bottom: 1px solid #ebebeb; }
-        .totals-table tr:last-child td { border-bottom: none; font-weight: 700; font-size: 11pt; padding-top: 3mm; padding-bottom: 3mm; background: #f9f9f9; }
-        .totals-table .tl { color: #555; }
-        .totals-table .tv { text-align: right; }
-        .tv-paid { color: #22c55e; }
-        .tv-due  { color: #ef4444; }
+        /* ── Balance summary ── */
+        .bal-wrap { display: flex; justify-content: flex-end; margin-bottom: 5mm; }
+        .bal-table { width: 78mm; border-collapse: collapse; }
+        .bal-table td { padding: 1.8mm 3mm; font-size: 9pt; border-bottom: 1px solid #ebebeb; }
+        .bal-table tr:last-child td { border-bottom: none; font-weight: 700; font-size: 10.5pt; padding-top: 2.5mm; }
+        .bal-table .tl { color: #555; }
+        .bal-table .tv { text-align: right; }
+        .tv-paid   { color: #22c55e; }
+        .tv-due    { color: #c0392b; }
         .tv-due-ok { color: #22c55e; }
 
-        /* Notes */
-        .notes-section { margin-top: 8mm; border-top: 1px solid #d4d4d4; padding-top: 5mm; }
-        .notes-label { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #888; margin-bottom: 2mm; }
-        .notes-text { font-size: 9pt; color: #555; line-height: 1.6; white-space: pre-wrap; }
+        /* ── In words ── */
+        .in-words { border: 1px solid #d4d4d4; border-radius: 2mm; padding: 3mm 5mm; margin-bottom: 7mm; font-size: 9pt; }
+        .in-words .label { font-weight: 700; color: #555; margin-right: 4mm; }
+        .in-words .value { font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
 
-        /* Payment info */
-        .payment-section { margin-top: 5mm; padding: 3mm 4mm; background: #f5f5f5; border-radius: 2mm; border-left: 3px solid #10b981; }
-        .payment-title { font-size: 8pt; font-weight: 700; color: #10b981; margin-bottom: 1.5mm; }
-        .payment-info { font-size: 8.5pt; color: #555; line-height: 1.6; }
+        /* ── Footer: note + signature ── */
+        .doc-footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; margin-top: 10mm; }
+        .footer-card { border: 1px solid #d4d4d4; border-radius: 2mm; padding: 3mm 4mm; min-height: 25mm; }
+        .footer-card-title { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; color: #555; letter-spacing: .05em; margin-bottom: 2mm; }
+        .sig-line { border-bottom: 1px solid #333; margin-top: 14mm; }
+        .sig-label { font-size: 7.5pt; color: #777; text-align: center; margin-top: 1mm; }
 
-        /* Footer */
-        .doc-footer { margin-top: 10mm; border-top: 1px solid #d4d4d4; padding-top: 3mm; font-size: 7.5pt; color: #aaa; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2mm; }
+        /* ── Page footer ── */
+        .page-footer { border-top: 1px solid #d4d4d4; margin-top: 8mm; padding-top: 2.5mm; font-size: 7.5pt; color: #aaa; display: flex; justify-content: space-between; }
 
-        /* Print button */
+        /* ── Print button ── */
         .print-btn { position: fixed; top: 10px; right: 10px; padding: 8px 18px; background: #10b981; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(16,185,129,.4); }
         .print-btn:hover { background: #059669; }
     </style>
@@ -83,68 +120,72 @@
 
 <div class="page">
 
-    <!-- Header -->
+    <!-- Company header -->
     <div class="doc-header">
-        <div>
-            <div class="company-name"><?= Utils::e($company['company_name'] ?? APP_NAME) ?></div>
-            <div class="company-info">
-                <?php if (!empty($company['company_address'])): ?><?= nl2br(Utils::e($company['company_address'])) ?><br><?php endif; ?>
-                <?php if (!empty($company['company_phone'])): ?>Tel: <?= Utils::e($company['company_phone']) ?><?php endif; ?>
-                <?php if (!empty($company['company_email'])): ?><?= !empty($company['company_phone']) ? ' &nbsp;·&nbsp; ' : '' ?>Email: <?= Utils::e($company['company_email']) ?><?php endif; ?>
-                <?php if (!empty($company['vat_number'])): ?><br>VAT: <?= Utils::e($company['vat_number']) ?><?php endif; ?>
-            </div>
+        <div class="company-name"><?= Utils::e($company['company_name'] ?? APP_NAME) ?></div>
+        <div class="company-sub">
+            <?php if (!empty($company['company_address'])): ?><?= nl2br(Utils::e($company['company_address'])) ?><br><?php endif; ?>
+            <?php if (!empty($company['company_phone'])): ?>Tel: <?= Utils::e($company['company_phone']) ?><?php endif; ?>
+            <?php if (!empty($company['company_phone']) && !empty($company['company_email'])): ?> &nbsp;·&nbsp; <?php endif; ?>
+            <?php if (!empty($company['company_email'])): ?>Email: <?= Utils::e($company['company_email']) ?><?php endif; ?>
+            <?php if (!empty($company['vat_number'])): ?><br>VAT: <?= Utils::e($company['vat_number']) ?><?php endif; ?>
         </div>
-        <div class="doc-right">
+    </div>
+
+    <!-- Title + date -->
+    <div class="doc-title-row">
+        <div>
             <div class="doc-title">Invoice</div>
-            <div class="doc-number"><?= Utils::e($invoice['invoice_number']) ?></div>
             <div>
                 <span class="status-badge s-<?= Utils::e($invoice['status']) ?>">
                     <?= Utils::e(INVOICE_STATUS[$invoice['status']] ?? $invoice['status']) ?>
                 </span>
             </div>
         </div>
+        <div class="doc-date-box">
+            <span class="label">Date: </span>
+            <span class="value"><?= Utils::formatDate($invoice['invoice_date']) ?></span>
+            <?php if (!empty($invoice['due_date'])): ?><br>
+            <span class="label">Due: </span>
+            <span class="value"><?= Utils::formatDate($invoice['due_date']) ?></span>
+            <?php endif; ?>
+        </div>
     </div>
 
-    <!-- Addresses -->
-    <div class="addr-grid">
-        <div class="addr-block">
-            <h3>Bill To</h3>
-            <p>
-                <strong><?= Utils::e($invoice['customer_name'] ?? '—') ?></strong><br>
-                <?php if (!empty($invoice['customer_address'])): ?><?= nl2br(Utils::e($invoice['customer_address'])) ?><br><?php endif; ?>
-                <?php if (!empty($invoice['customer_city'])): ?>
+    <!-- Invoice meta -->
+    <div class="doc-meta">
+        <div class="doc-meta-row">
+            <div class="doc-meta-key">Invoice Num:</div>
+            <div class="doc-meta-val"><strong><?= Utils::e($invoice['invoice_number']) ?></strong></div>
+        </div>
+        <div class="doc-meta-row">
+            <div class="doc-meta-key">Customer's Name:</div>
+            <div class="doc-meta-val"><?= Utils::e($invoice['customer_name'] ?? '—') ?></div>
+        </div>
+        <?php if (!empty($invoice['customer_address'])): ?>
+        <div class="doc-meta-row">
+            <div class="doc-meta-key">Address:</div>
+            <div class="doc-meta-val">
+                <?= Utils::e($invoice['customer_address']) ?>
+                <?php if (!empty($invoice['customer_city'])): ?>,
                 <?= Utils::e(trim(($invoice['customer_postal_code'] ?? '') . ' ' . ($invoice['customer_city'] ?? ''))) ?>
-                <?php if (!empty($invoice['customer_province'])): ?> (<?= Utils::e($invoice['customer_province']) ?>)<?php endif; ?><br>
+                <?php if (!empty($invoice['customer_province'])): ?> (<?= Utils::e($invoice['customer_province']) ?>)<?php endif; ?>
                 <?php endif; ?>
-                <?php if (!empty($invoice['customer_email'])): ?><?= Utils::e($invoice['customer_email']) ?><br><?php endif; ?>
-                <?php if (!empty($invoice['customer_phone'])): ?><?= Utils::e($invoice['customer_phone']) ?><br><?php endif; ?>
-                <?php if (!empty($invoice['customer_vat'])): ?>VAT: <?= Utils::e($invoice['customer_vat']) ?><?php endif; ?>
-            </p>
+            </div>
         </div>
+        <?php endif; ?>
+        <?php if (!empty($invoice['customer_vat'])): ?>
+        <div class="doc-meta-row">
+            <div class="doc-meta-key">Vat N°:</div>
+            <div class="doc-meta-val" style="font-family:monospace"><?= Utils::e($invoice['customer_vat']) ?></div>
+        </div>
+        <?php endif; ?>
         <?php if (!empty($invoice['repair_id'])): ?>
-        <div class="addr-block">
-            <h3>Reference</h3>
-            <p>Repair #<?= $invoice['repair_id'] ?></p>
+        <div class="doc-meta-row">
+            <div class="doc-meta-key">Reference:</div>
+            <div class="doc-meta-val">Repair #<?= (int)$invoice['repair_id'] ?></div>
         </div>
         <?php endif; ?>
-    </div>
-
-    <!-- Dates -->
-    <div class="dates-row">
-        <div class="date-block">
-            <div class="date-label">Invoice Date</div>
-            <div class="date-value"><?= Utils::formatDate($invoice['invoice_date']) ?></div>
-        </div>
-        <?php if (!empty($invoice['due_date'])): ?>
-        <div class="date-block">
-            <div class="date-label">Due Date</div>
-            <div class="date-value"><?= Utils::formatDate($invoice['due_date']) ?></div>
-        </div>
-        <?php endif; ?>
-        <div class="date-block">
-            <div class="date-label">Tax Rate</div>
-            <div class="date-value"><?= number_format((float)($invoice['tax_percentage'] ?? 0), 1) ?>%</div>
-        </div>
     </div>
 
     <!-- Line items -->
@@ -152,72 +193,88 @@
         <thead>
             <tr>
                 <th class="desc-col">Description</th>
-                <th style="width:55pt">Qty</th>
-                <th style="width:80pt">Unit Price</th>
-                <th style="width:55pt">Disc.%</th>
-                <th style="width:55pt">Tax%</th>
-                <th style="width:80pt">Total</th>
+                <th class="r">Qty</th>
+                <th class="r">Unit Price</th>
+                <th class="r">Disc.%</th>
+                <th class="r">Tax%</th>
+                <th class="r">Total</th>
             </tr>
         </thead>
         <tbody>
         <?php foreach ($invoice['items'] ?? [] as $item): ?>
         <tr>
             <td class="desc-col"><?= Utils::e($item['description']) ?></td>
-            <td><?= (float)$item['quantity'] ?></td>
-            <td><?= Utils::formatCurrency($item['unit_price']) ?></td>
-            <td><?= (float)($item['discount_pct'] ?? 0) > 0 ? number_format((float)$item['discount_pct'], 1) . '%' : '—' ?></td>
-            <td><?= number_format((float)($item['tax_percentage'] ?? 0), 1) ?>%</td>
-            <td><?= Utils::formatCurrency($item['line_total']) ?></td>
+            <td class="r"><?= (float)$item['quantity'] ?></td>
+            <td class="r"><?= Utils::formatCurrency($item['unit_price']) ?></td>
+            <td class="r"><?= (float)($item['discount_pct'] ?? 0) > 0 ? number_format((float)$item['discount_pct'], 1) . '%' : '—' ?></td>
+            <td class="r"><?= number_format((float)($item['tax_percentage'] ?? 0), 1) ?>%</td>
+            <td class="r"><?= Utils::formatCurrency($item['line_total']) ?></td>
         </tr>
         <?php endforeach; ?>
         </tbody>
+        <tfoot>
+            <tr class="totals-row">
+                <td colspan="5"><strong>Subtotal</strong></td>
+                <td class="r"><?= Utils::formatCurrency($invoice['subtotal'] ?? 0) ?></td>
+            </tr>
+            <?php if ((float)($invoice['tax_amount'] ?? 0) > 0): ?>
+            <tr class="totals-row">
+                <td colspan="5"><strong>Tax (<?= number_format((float)($invoice['tax_percentage'] ?? 0), 1) ?>%)</strong></td>
+                <td class="r"><?= Utils::formatCurrency($invoice['tax_amount'] ?? 0) ?></td>
+            </tr>
+            <?php endif; ?>
+            <tr class="totals-row">
+                <td colspan="5"><strong>Total</strong></td>
+                <td class="r grand-net"><?= Utils::formatCurrency($total) ?></td>
+            </tr>
+        </tfoot>
     </table>
 
-    <!-- Totals -->
-    <?php
-    $total   = (float)($invoice['total_amount'] ?? 0);
-    $paid    = (float)($invoice['amount_paid']  ?? 0);
-    $balance = round($total - $paid, 2);
-    ?>
-    <div class="totals-wrap">
-        <table class="totals-table">
-            <tr><td class="tl">Subtotal</td><td class="tv"><?= Utils::formatCurrency($invoice['subtotal'] ?? 0) ?></td></tr>
-            <?php if ((float)($invoice['tax_amount'] ?? 0) > 0): ?>
-            <tr><td class="tl">Tax (<?= number_format((float)($invoice['tax_percentage'] ?? 0), 1) ?>%)</td><td class="tv"><?= Utils::formatCurrency($invoice['tax_amount'] ?? 0) ?></td></tr>
-            <?php endif; ?>
+    <!-- Balance -->
+    <?php if ($paid > 0 || $balance != $total): ?>
+    <div class="bal-wrap">
+        <table class="bal-table">
             <?php if ($paid > 0): ?>
             <tr><td class="tl">Amount Paid</td><td class="tv tv-paid">-<?= Utils::formatCurrency($paid) ?></td></tr>
             <?php endif; ?>
-            <tr>
-                <td class="tl">Balance Due</td>
-                <td class="tv <?= $balance > 0 ? 'tv-due' : 'tv-due-ok' ?>"><?= Utils::formatCurrency($balance) ?></td>
-            </tr>
+            <tr><td class="tl">Balance Due</td><td class="tv <?= $balance > 0 ? 'tv-due' : 'tv-due-ok' ?>"><?= Utils::formatCurrency($balance) ?></td></tr>
         </table>
     </div>
-
-    <!-- Notes -->
-    <?php if (!empty($invoice['notes'])): ?>
-    <div class="notes-section">
-        <div class="notes-label">Notes</div>
-        <div class="notes-text"><?= Utils::e($invoice['notes']) ?></div>
-    </div>
     <?php endif; ?>
 
-    <!-- Payment info from company settings -->
-    <?php if (!empty($company['payment_info'] ?? $company['notes'] ?? '')): ?>
-    <div class="payment-section">
-        <div class="payment-title">Payment Information</div>
-        <div class="payment-info"><?= nl2br(Utils::e($company['payment_info'] ?? $company['notes'] ?? '')) ?></div>
+    <!-- In words -->
+    <div class="in-words">
+        <span class="label">In Words:</span>
+        <span class="value"><?= Utils::e(invAmountToWords($total)) ?></span>
     </div>
-    <?php endif; ?>
 
-    <!-- Footer -->
-    <div class="doc-footer">
+    <!-- Note + Signature -->
+    <div class="doc-footer-grid">
+        <div class="footer-card">
+            <div class="footer-card-title">Note</div>
+            <div style="font-size:8.5pt;color:#555;line-height:1.6;white-space:pre-wrap"><?= Utils::e($invoice['notes'] ?? '') ?></div>
+            <?php if (!empty($company['payment_info'] ?? $company['notes'] ?? '')): ?>
+            <div style="font-size:8pt;color:#777;line-height:1.6;margin-top:2mm;border-top:1px solid #ebebeb;padding-top:2mm">
+                <?= nl2br(Utils::e($company['payment_info'] ?? $company['notes'] ?? '')) ?>
+            </div>
+            <?php endif; ?>
+        </div>
+        <div class="footer-card">
+            <div class="footer-card-title">Signature / Date</div>
+            <?php if (!empty($signatureText)): ?>
+            <div style="font-size:9pt;font-weight:600;margin-bottom:6mm;padding-top:2mm"><?= Utils::e($signatureText) ?></div>
+            <div class="sig-line" style="margin-top:6mm"></div>
+            <?php else: ?>
+            <div class="sig-line"></div>
+            <?php endif; ?>
+            <div class="sig-label">Authorised Signature &amp; Date</div>
+        </div>
+    </div>
+
+    <!-- Page footer -->
+    <div class="page-footer">
         <span><?= Utils::e($company['company_name'] ?? APP_NAME) ?></span>
         <span>Invoice <?= Utils::e($invoice['invoice_number']) ?> &nbsp;·&nbsp; Printed <?= date('d/m/Y H:i') ?></span>
-        <?php if (!empty($company['company_email'])): ?>
-        <span><?= Utils::e($company['company_email']) ?></span>
-        <?php endif; ?>
     </div>
 
 </div>

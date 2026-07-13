@@ -204,10 +204,29 @@ $items     = $fd['items'] ?? [];
             </div>
 
             <div class="card">
-                <div class="card-header"><h2 class="card-title">Notes</h2></div>
-                <div class="card-body">
-                    <textarea name="notes" class="form-input" rows="3"
-                              placeholder="Optional notes…"><?= Utils::e($fd['notes'] ?? '') ?></textarea>
+                <div class="card-header"><h2 class="card-title">Note &amp; Signature</h2></div>
+                <div class="card-body" style="display:flex;flex-direction:column;gap:1rem">
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label" for="notes">Notes</label>
+                        <textarea id="notes" name="notes" class="form-input" rows="3"
+                                  placeholder="Optional notes…"><?= Utils::e($fd['notes'] ?? '') ?></textarea>
+                    </div>
+                    <?php $signatures = $signatures ?? []; $selSig = (int)($fd['signature_id'] ?? $sale['signature_id'] ?? 0); ?>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label" for="signature_id">Authorized Signature</label>
+                        <select id="signature_id" name="signature_id" class="form-input">
+                            <option value="0">— No signature —</option>
+                            <?php if (!empty($signatures['signature1'])): ?>
+                            <option value="1" <?= $selSig === 1 ? 'selected' : '' ?>><?= Utils::e($signatures['signature1']) ?></option>
+                            <?php endif; ?>
+                            <?php if (!empty($signatures['signature2'])): ?>
+                            <option value="2" <?= $selSig === 2 ? 'selected' : '' ?>><?= Utils::e($signatures['signature2']) ?></option>
+                            <?php endif; ?>
+                            <?php if (!empty($signatures['signature3'])): ?>
+                            <option value="3" <?= $selSig === 3 ? 'selected' : '' ?>><?= Utils::e($signatures['signature3']) ?></option>
+                            <?php endif; ?>
+                        </select>
+                    </div>
                 </div>
             </div>
 

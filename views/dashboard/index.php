@@ -32,7 +32,7 @@ $colCount       = (int)($revenueByType['colleague']['cnt']        ?? 0);
    centers instead of leaving a lonely left-aligned orphan. Works cleanly
    for both the 4-card (staff) and 9-card (admin) layouts. */
 .kpi-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;margin-bottom:1.5rem}
-.kpi-grid .stat-card{flex:1 1 200px;max-width:260px}
+.kpi-grid .stat-card{flex:1 1 calc(33.333% - 0.67rem);max-width:none;min-width:300px}
 @media(max-width:520px){.kpi-grid .stat-card{max-width:none}}
 
 /* ── Chart card (re-use from reports) ─────────────────── */
@@ -43,7 +43,9 @@ $colCount       = (int)($revenueByType['colleague']['cnt']        ?? 0);
 
 /* ── Dashboard grid ───────────────────────────────────── */
 .db-grid-main{display:grid;grid-template-columns:1fr;gap:1.25rem;margin-bottom:1.25rem}
-@media(min-width:960px){.db-grid-main{grid-template-columns:2fr 1fr}}
+@media(min-width:960px){.db-grid-main{grid-template-columns:1fr 2fr}}
+.db-grid-main > div:first-child{order:2}
+.db-grid-main > div:last-child{order:1}
 .db-grid-bot{display:grid;grid-template-columns:1fr;gap:1.25rem;margin-bottom:1.25rem}
 @media(min-width:960px){.db-grid-bot{grid-template-columns:1fr 1fr}}
 
