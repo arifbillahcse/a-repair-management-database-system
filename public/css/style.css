@@ -829,13 +829,18 @@ html[data-theme="dark"] .form-select {
 /* ── Flash / Alert messages ────────────────────────────────────────────────── */
 .flash-container {
     position: fixed;
-    top: calc(var(--topbar-h) + .75rem);
-    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
     z-index: 300;
     display: flex;
     flex-direction: column;
     gap: .5rem;
     max-width: 360px;
+}
+/* On desktop the sidebar is pinned to the left — sit just to its right
+   so the toast lines up with the footer's left edge, not under the menu. */
+@media (min-width: 1024px) {
+    .flash-container { left: calc(var(--sidebar-w) + 1rem); }
 }
 .flash {
     display: flex;
@@ -850,7 +855,7 @@ html[data-theme="dark"] .form-select {
     animation: slideIn .25s ease;
 }
 @keyframes slideIn {
-    from { opacity: 0; transform: translateX(20px); }
+    from { opacity: 0; transform: translateX(-20px); }
     to   { opacity: 1; transform: translateX(0); }
 }
 .flash-success { background: var(--success-bg); color: var(--success); border: 1px solid var(--accent); }
