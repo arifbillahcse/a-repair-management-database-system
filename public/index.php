@@ -149,6 +149,16 @@ $router->post('/credit-notes/:id',             'CreditNoteController@update');
 $router->post('/credit-notes/:id/delete',      'CreditNoteController@destroy');
 $router->get( '/credit-notes/:id/print',       'CreditNoteController@printCN');
 
+// Packing Lists (Documento di Trasporto / DDT) — standalone, manual entry
+$router->get( '/packing-lists',                'PackingListController@index');
+$router->get( '/packing-lists/create',         'PackingListController@create');
+$router->post('/packing-lists',                'PackingListController@store');
+$router->get( '/packing-lists/:id',            'PackingListController@show');
+$router->get( '/packing-lists/:id/edit',       'PackingListController@edit');
+$router->post('/packing-lists/:id',            'PackingListController@update');
+$router->get( '/packing-lists/:id/print',      'PackingListController@printPL');
+$router->post('/packing-lists/:id/delete',     'PackingListController@destroy');
+
 // Personal Notes
 $router->get( '/personal-notes',               'PersonalNoteController@index');
 $router->get( '/personal-notes/create',        'PersonalNoteController@create');
