@@ -42,17 +42,19 @@
             stroke: var(--accent);
         }
 
+        /* Logo sits directly on the page's fixed dark backdrop, so its text
+           is hardcoded light rather than following the (unset) theme vars. */
         .login-logo h1 {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: #f5f5f5;
             letter-spacing: -.02em;
             margin: 0;
         }
 
         .login-logo p {
             font-size: .85rem;
-            color: var(--text-secondary);
+            color: rgba(245,245,245,.65);
             margin: 0;
         }
 
