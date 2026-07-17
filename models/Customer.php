@@ -179,24 +179,39 @@ class Customer extends BaseModel
 
     public function getStats(int $customerId): array
     {
+        // Repairs and invoices are aggregated in separate subqueries — joining
+        // both tables directly to customers in one query would fan them out
+        // into a cross product (e.g. 3 repairs x 2 invoices = 6 rows), silently
+        // multiplying every SUM()/COUNT() whenever a customer has more than
+        // one row on each side.
         $row = $this->db->fetchOne(
             "SELECT
-                COUNT(DISTINCT r.repair_id)                                AS total_repairs,
-                SUM(r.status IN ('completed','collected'))                 AS completed_repairs,
-                SUM(r.status = 'in_progress')                             AS active_repairs,
-                COALESCE(SUM(i.total_amount), 0)                          AS total_billed,
-                COALESCE(SUM(i.amount_paid), 0)                           AS total_paid,
-                COALESCE(SUM(i.total_amount) - SUM(i.amount_paid), 0)     AS balance_due,
-                MIN(r.date_in)                                             AS first_repair,
-                MAX(r.date_in)                                             AS last_repair
+                (SELECT COUNT(*) FROM repairs r WHERE r.customer_id = c.customer_id)
+                    AS total_repairs,
+                (SELECT COUNT(*) FROM repairs r WHERE r.customer_id = c.customer_id
+                    AND r.status IN ('completed','collected'))
+                    AS completed_repairs,
+                (SELECT COUNT(*) FROM repairs r WHERE r.customer_id = c.customer_id
+                    AND r.status = 'in_progress')
+                    AS active_repairs,
+                (SELECT COALESCE(SUM(i.total_amount), 0) FROM invoices i
+                    WHERE i.customer_id = c.customer_id AND i.status != 'cancelled')
+                    AS total_billed,
+                (SELECT COALESCE(SUM(i.amount_paid), 0) FROM invoices i
+                    WHERE i.customer_id = c.customer_id AND i.status != 'cancelled')
+                    AS total_paid,
+                (SELECT MIN(r.date_in) FROM repairs r WHERE r.customer_id = c.customer_id)
+                    AS first_repair,
+                (SELECT MAX(r.date_in) FROM repairs r WHERE r.customer_id = c.customer_id)
+                    AS last_repair
              FROM customers c
-             LEFT JOIN repairs  r ON r.customer_id = c.customer_id
-             LEFT JOIN invoices i ON i.customer_id = c.customer_id
-                                  AND i.status != 'cancelled'
-             WHERE c.customer_id = ?
-             GROUP BY c.customer_id",
+             WHERE c.customer_id = ?",
             [$customerId]
         );
+
+        if ($row) {
+            $row['balance_due'] = round((float)$row['total_billed'] - (float)$row['total_paid'], 2);
+        }
 
         return $row ?? [
             'total_repairs'     => 0,
@@ -276,14 +291,16 @@ class Customer extends BaseModel
     /** Fetch ALL customers for CSV export (no pagination). */
     public function getForExport(string $status = ''): array
     {
-        $where  = $status ? "WHERE status = '{$status}'" : '';
+        $where  = $status ? 'WHERE status = ?' : '';
+        $params = $status ? [$status] : [];
         return $this->db->fetchAll(
             "SELECT customer_id, full_name, client_type,
                     address, postal_code, city, province,
                     phone_landline, phone_mobile, email,
                     vat_number, tax_id, status, customer_since, created_at
              FROM customers {$where}
-             ORDER BY full_name"
+             ORDER BY full_name",
+            $params
         );
     }
 
