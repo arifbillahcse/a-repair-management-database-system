@@ -194,7 +194,8 @@ class Product extends BaseModel
                 COALESCE(SUM(quantity_on_hand), 0)                    AS total_units,
                 COALESCE(SUM(quantity_on_hand * COALESCE(cost_price, 0)), 0)  AS cost_value,
                 COALESCE(SUM(quantity_on_hand * selling_price), 0)    AS retail_value,
-                SUM(low_stock_threshold > 0 AND quantity_on_hand <= low_stock_threshold) AS low_stock_count,
+                SUM((low_stock_threshold > 0 AND quantity_on_hand <= low_stock_threshold)
+                    OR quantity_on_hand = 0)                          AS low_stock_count,
                 SUM(quantity_on_hand = 0)                             AS out_of_stock_count
              FROM products
              WHERE is_active = 1"

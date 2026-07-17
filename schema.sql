@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS `customers` (
     `client_type`     ENUM(
                           'individual',   -- Privato
                           'company',      -- Azienda
-                          'freelancer'    -- Libero professionista
+                          'colleague'     -- Collega / tecnico
                       )               NOT NULL DEFAULT 'individual',
     -- Address
     `address`         VARCHAR(255)             DEFAULT NULL,  -- Via + civico
