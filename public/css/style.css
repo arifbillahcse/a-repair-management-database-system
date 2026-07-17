@@ -829,13 +829,18 @@ html[data-theme="dark"] .form-select {
 /* ── Flash / Alert messages ────────────────────────────────────────────────── */
 .flash-container {
     position: fixed;
-    top: calc(var(--topbar-h) + .75rem);
-    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
     z-index: 300;
     display: flex;
     flex-direction: column;
     gap: .5rem;
     max-width: 360px;
+}
+/* On desktop the sidebar is pinned to the left — sit just to its right
+   so the toast lines up with the footer's left edge, not under the menu. */
+@media (min-width: 1024px) {
+    .flash-container { left: calc(var(--sidebar-w) + 1rem); }
 }
 .flash {
     display: flex;
@@ -850,7 +855,7 @@ html[data-theme="dark"] .form-select {
     animation: slideIn .25s ease;
 }
 @keyframes slideIn {
-    from { opacity: 0; transform: translateX(20px); }
+    from { opacity: 0; transform: translateX(-20px); }
     to   { opacity: 1; transform: translateX(0); }
 }
 .flash-success { background: var(--success-bg); color: var(--success); border: 1px solid var(--accent); }
@@ -992,19 +997,57 @@ html[data-theme="dark"] .form-select {
     display: block;
 }
 
+/* ── Colorful Topbar ───────────────────────────────────────────────────────── */
+/*
+ * Vibrant gradient bar (emerald → teal → indigo) with light-on-colour controls.
+ * Same look in light and dark mode so the brand always pops.
+ */
+.topbar {
+    background: linear-gradient(90deg, #059669 0%, #0d9488 42%, #4f46e5 100%);
+    border-bottom: none;
+    box-shadow: 0 2px 14px rgba(79,70,229,.28);
+}
+html[data-theme="dark"] .topbar {
+    background: linear-gradient(90deg, #047857 0%, #0f766e 42%, #4338ca 100%);
+    box-shadow: 0 2px 16px rgba(0,0,0,.45);
+}
+
+/* Brand */
+.topbar-brand { color: #fff; }
+.topbar-brand:hover { color: #fff; opacity: .92; }
+.brand-icon { stroke: #fff; }
+
+/* Hamburger → white bars on the gradient */
+.topbar .sidebar-toggle:hover { background: rgba(255,255,255,.18); }
+.topbar .hamburger-line { background: rgba(255,255,255,.92); }
+.topbar .sidebar-toggle:hover .hamburger-line { background: #fff; }
+
+/* Icon buttons */
+.topbar-icon-btn { color: rgba(255,255,255,.9); }
+.topbar-icon-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
+.theme-toggle:hover { color: #fff; }
+
+/* User menu trigger */
+.user-menu-trigger { border-color: rgba(255,255,255,.35); color: #fff; }
+.user-menu-trigger:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.15); }
+.user-avatar { background: rgba(255,255,255,.24); color: #fff; }
+.user-name { color: #fff; }
+.user-role { color: rgba(255,255,255,.78); }
+.user-menu-trigger .chevron { color: rgba(255,255,255,.85); }
+
 /* ── Colorful Sidebar ──────────────────────────────────────────────────────── */
 /*
  * The sidebar uses its own permanent dark gradient so it looks vibrant in
  * both light and dark mode. Override every sidebar-specific color here.
  */
 .sidebar {
-    background: linear-gradient(175deg, #1a1a1a 0%, #0f0f0f 52%, #000000 100%);
+    background: linear-gradient(185deg, #1e293b 0%, #172033 46%, #0f172a 100%);
     border-right: none;
-    box-shadow: 4px 0 32px rgba(0, 0, 0, .50);
+    box-shadow: 4px 0 32px rgba(15, 23, 42, .45);
 }
 
 html[data-theme="dark"] .sidebar {
-    background: linear-gradient(175deg, #0f0f0f 0%, #050505 52%, #000000 100%);
+    background: linear-gradient(185deg, #131a2b 0%, #0c111d 50%, #060912 100%);
     box-shadow: 4px 0 32px rgba(0, 0, 0, .70);
 }
 
@@ -1029,46 +1072,56 @@ html[data-theme="dark"] .sidebar {
     color: rgba(255,255,255,.62);
     border-left: 3px solid transparent;
     border-radius: var(--radius);
-    margin: 1px .5rem;
+    margin: 2px .5rem;
     width: calc(100% - 1rem);
+    --nav-c: #9ca3af;   /* default; each .nav-link-* overrides below */
 }
 .sidebar .nav-link:hover {
-    color: rgba(255,255,255,.95);
-    background: rgba(255,255,255,.09);
-    border-left-color: transparent;
+    color: #fff;
+    background: color-mix(in srgb, var(--nav-c) 18%, transparent);
+    border-left-color: color-mix(in srgb, var(--nav-c) 55%, transparent);
 }
 .sidebar .nav-link.active {
     color: #fff;
-    background: rgba(255,255,255,.15);
-    border-left-color: rgba(255,255,255,.7);
+    background: color-mix(in srgb, var(--nav-c) 26%, transparent);
+    border-left-color: var(--nav-c);
     font-weight: 600;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nav-c) 30%, transparent),
+                0 4px 14px color-mix(in srgb, var(--nav-c) 22%, transparent);
 }
 .sidebar .nav-link.active .nav-icon { opacity: 1; }
 
 /* Sub-menu */
-.sidebar .sub-nav { background: rgba(0,0,0,.18); border-radius: 0 0 var(--radius) var(--radius); }
-.sidebar .sub-nav-link { color: rgba(255,255,255,.5); }
+.sidebar .sub-nav { background: rgba(0,0,0,.22); border-radius: 0 0 var(--radius) var(--radius); }
+.sidebar .sub-nav-link { color: rgba(255,255,255,.5); border-left: 2px solid transparent; }
 .sidebar .sub-nav-link:hover,
-.sidebar .sub-nav-link.active { color: rgba(255,255,255,.95); }
+.sidebar .sub-nav-link.active {
+    color: #fff;
+    background: rgba(255,255,255,.06);
+    border-left-color: rgba(255,255,255,.35);
+}
 
 /* Divider */
 .sidebar .nav-divider { background: rgba(255,255,255,.1); margin: .6rem .5rem; width: calc(100% - 1rem); }
 
-/* Icon accent colours — one per section */
-.nav-link-dashboard .nav-icon { stroke: #818cf8; }   /* indigo     */
-.nav-link-repairs   .nav-icon { stroke: #fb923c; }   /* orange     */
-.nav-link-clients   .nav-icon { stroke: #c084fc; }   /* purple     */
-.nav-link-credit    .nav-icon { stroke: #2dd4bf; }   /* teal       */
-.nav-link-notes     .nav-icon { stroke: #f472b6; }   /* pink       */
-.nav-link-reports   .nav-icon { stroke: #fbbf24; }   /* amber      */
-.nav-link-staff     .nav-icon { stroke: #34d399; }   /* emerald    */
-.nav-link-export    .nav-icon { stroke: #22d3ee; }   /* cyan       */
-.nav-link-settings  .nav-icon { stroke: #94a3b8; }   /* slate      */
-.nav-link-import    .nav-icon { stroke: #f87171; }   /* rose       */
+/* Icon accent colours — one per section (drives hover/active tint too) */
+.nav-link-dashboard { --nav-c: #818cf8; }   /* indigo     */
+.nav-link-repairs   { --nav-c: #fb923c; }   /* orange     */
+.nav-link-clients   { --nav-c: #c084fc; }   /* purple     */
+.nav-link-invoices  { --nav-c: #38bdf8; }   /* sky        */
+.nav-link-credit    { --nav-c: #2dd4bf; }   /* teal       */
+.nav-link-products  { --nav-c: #a3e635; }   /* lime       */
+.nav-link-sales     { --nav-c: #4ade80; }   /* green      */
+.nav-link-notes     { --nav-c: #f472b6; }   /* pink       */
+.nav-link-reports   { --nav-c: #fbbf24; }   /* amber      */
+.nav-link-staff     { --nav-c: #34d399; }   /* emerald    */
+.nav-link-export    { --nav-c: #22d3ee; }   /* cyan       */
+.nav-link-settings  { --nav-c: #94a3b8; }   /* slate      */
+.nav-link-import    { --nav-c: #f87171; }   /* rose       */
 
-/* Keep icon stroke visible on hover / active */
-.sidebar .nav-link:hover .nav-icon,
+/* Paint each icon with its section colour */
+.sidebar .nav-link .nav-icon { stroke: var(--nav-c); opacity: .95; transition: transform var(--transition), opacity var(--transition); }
+.sidebar .nav-link:hover .nav-icon { opacity: 1; transform: scale(1.12); }
 .sidebar .nav-link.active .nav-icon { opacity: 1; }
 
 /* Hamburger lines ↔ white on coloured sidebar */

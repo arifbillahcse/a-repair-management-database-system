@@ -126,7 +126,8 @@ require VIEWS_PATH . '/layouts/header.php';
             You are about to permanently delete <strong><?= Utils::e($customer['full_name']) ?></strong>.
         </p>
         <p style="margin:0 0 1.5rem;font-size:.85rem;color:var(--text-muted)">
-            This will also delete all <strong><?= (int)$stats['total_repairs'] ?> repair(s)</strong> linked to this client. This action cannot be undone.
+            This will also delete all <strong><?= (int)$stats['total_repairs'] ?> repair(s)</strong>
+            and <strong><?= count($invoices) ?> invoice(s)</strong> linked to this client. This action cannot be undone.
         </p>
         <form method="POST" action="<?= BASE_URL ?>/customers/<?= $customer['customer_id'] ?>/delete">
             <input type="hidden" name="csrf_token" value="<?= Utils::e(Auth::generateCSRFToken()) ?>">

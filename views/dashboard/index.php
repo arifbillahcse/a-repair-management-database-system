@@ -1,6 +1,5 @@
 <?php
 $pageTitle  = 'Dashboard';
-$loadCharts = true;
 require VIEWS_PATH . '/layouts/header.php';
 
 $stats        = $stats        ?? [];
@@ -46,8 +45,6 @@ $colCount       = (int)($revenueByType['colleague']['cnt']        ?? 0);
 @media(min-width:960px){.db-grid-main{grid-template-columns:1fr 2fr}}
 .db-grid-main > div:first-child{order:2}
 .db-grid-main > div:last-child{order:1}
-.db-grid-bot{display:grid;grid-template-columns:1fr;gap:1.25rem;margin-bottom:1.25rem}
-@media(min-width:960px){.db-grid-bot{grid-template-columns:1fr 1fr}}
 
 /* ── Quick actions ────────────────────────────────────── */
 .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;padding:1.1rem 1.25rem}
@@ -390,111 +387,5 @@ $colCount       = (int)($revenueByType['colleague']['cnt']        ?? 0);
     </div>
 
 </div>
-
-<!-- ── Bottom grid: revenue chart + staff (manager only) ────────────────────── -->
-<?php if (Auth::can('manager')): ?>
-<div class="db-grid-bot">
-
-    <!-- Revenue chart -->
-    <div class="chart-card">
-        <div class="chart-header">
-            <h2 class="chart-title">Revenue &amp; Collections</h2>
-            <span style="font-size:.76rem;color:var(--text-muted)">Last 12 months</span>
-        </div>
-        <div class="chart-body" style="height:240px">
-            <?php if (empty($monthlyRev)): ?>
-            <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:.85rem">No invoice data yet</div>
-            <?php else: ?>
-            <canvas id="revenueChart" aria-label="Monthly revenue chart" role="img"></canvas>
-            <?php endif; ?>
-        </div>
-    </div>
-
-    <!-- Staff performance -->
-    <div class="chart-card">
-        <div class="chart-header">
-            <h2 class="chart-title">Technician Performance</h2>
-            <a href="<?= BASE_URL ?>/staff" class="btn btn-xs btn-secondary">All Staff</a>
-        </div>
-        <?php
-        $activeStaff = array_filter($staffStats ?? [], fn($s) => (int)$s['total_repairs'] > 0);
-        ?>
-        <?php if (empty($activeStaff)): ?>
-        <div style="padding:2rem 1.25rem;text-align:center;color:var(--text-muted);font-size:.85rem">No staff data yet</div>
-        <?php else: ?>
-        <ul class="staff-list">
-            <?php foreach (array_slice(array_values($activeStaff), 0, 7) as $s): ?>
-            <li class="staff-item">
-                <div class="staff-av"><?= strtoupper(substr($s['full_name'], 0, 1)) ?></div>
-                <div>
-                    <div class="staff-name"><?= Utils::e($s['full_name']) ?></div>
-                    <div class="staff-sub">
-                        <?= (int)$s['in_progress'] ?> active ·
-                        <?= (int)$s['completed'] ?> completed
-                    </div>
-                </div>
-                <div class="staff-num"><?= (int)$s['total_repairs'] ?></div>
-            </li>
-            <?php endforeach; ?>
-        </ul>
-        <?php endif; ?>
-    </div>
-
-</div>
-<?php endif; ?>
-
-<?php
-// Chart data
-$chartLabels  = json_encode(array_column($monthlyRev ?? [], 'month'));
-$chartRevenue = json_encode(array_map('floatval', array_column($monthlyRev ?? [], 'revenue')));
-$chartPaid    = json_encode(array_map('floatval', array_column($monthlyRev ?? [], 'paid')));
-
-$inlineJs = <<<JS
-document.addEventListener('DOMContentLoaded', function () {
-    var ctx = document.getElementById('revenueChart');
-    if (!ctx || !window.Chart) return;
-
-    var dark      = document.documentElement.getAttribute('data-theme') === 'dark';
-    var gridColor = dark ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.06)';
-    var tickColor = dark ? '#a0a6b0' : '#666';
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {$chartLabels},
-            datasets: [
-                {
-                    label: 'Revenue',
-                    data: {$chartRevenue},
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16,185,129,.12)',
-                    tension: .4, fill: true, borderWidth: 2,
-                    pointBackgroundColor: '#10b981', pointRadius: 3
-                },
-                {
-                    label: 'Collected',
-                    data: {$chartPaid},
-                    borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99,102,241,.08)',
-                    tension: .4, fill: false, borderWidth: 2,
-                    pointBackgroundColor: '#6366f1', pointRadius: 3
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { labels: { color: tickColor, font: { size: 12 }, boxWidth: 14 } }
-            },
-            scales: {
-                x: { ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor } },
-                y: { ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor }, beginAtZero: true }
-            }
-        }
-    });
-});
-JS;
-?>
 
 <?php require VIEWS_PATH . '/layouts/footer.php'; ?>
