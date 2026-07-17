@@ -194,6 +194,11 @@ class CustomerController
             );
         }
 
+        // Invoices reference customer_id with ON DELETE RESTRICT, so they must
+        // be removed first or the customer delete below fails with a FK error.
+        // invoice_items cascade automatically once their invoice is gone.
+        $db->execute("DELETE FROM invoices WHERE customer_id = ?", [$id]);
+
         // Hard-delete the customer
         Logger::log('deleted', 'customer', $id, $customer);
         $this->model->delete($id);
