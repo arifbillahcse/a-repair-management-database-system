@@ -205,6 +205,7 @@ $router->get( '/sales/:id/print',          'SaleController@printSale');
 $router->post('/sales/:id/delete',         'SaleController@destroy');
 
 // Reports
+$router->get( '/reports/client-types',     'ReportController@clientTypes');
 $router->get( '/reports',                  'ReportController@index');
 
 // Staff
