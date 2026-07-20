@@ -180,6 +180,7 @@ function navActive(string $pattern): string
             <ul class="sub-nav <?= navActive('/reports|/sales/report') ? 'open' : '' ?>">
                 <li><a href="<?= BASE_URL ?>/sales/report" class="sub-nav-link <?= navActive('/sales/report') ?>">Sales Report</a></li>
                 <li><a href="<?= BASE_URL ?>/reports" class="sub-nav-link <?= navActive('^.*/reports/?$') ?>">Repairs Report</a></li>
+                <li><a href="<?= BASE_URL ?>/reports/client-types" class="sub-nav-link <?= navActive('/reports/client-types') ?>">Colleague vs Private</a></li>
             </ul>
         </li>
         <?php endif; ?>
