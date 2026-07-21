@@ -34,6 +34,7 @@ class AdminController
                 'signature1'          => Utils::sanitize($_POST['signature1']      ?? ''),
                 'signature2'          => Utils::sanitize($_POST['signature2']      ?? ''),
                 'signature3'          => Utils::sanitize($_POST['signature3']      ?? ''),
+                'session_timeout'     => $this->sanitizeSessionTimeout($_POST['session_timeout'] ?? ''),
             ];
 
             if (!empty($company['setting_id'])) {
@@ -360,6 +361,19 @@ class AdminController
 
 
 
+    /**
+     * Validate a submitted session-timeout value: it must be one of the
+     * offered presets. Anything else falls back to the .env default so a
+     * tampered form can never set an absurd (or zero) window.
+     */
+    private function sanitizeSessionTimeout(mixed $value): int
+    {
+        $seconds = (int) $value;
+        return array_key_exists($seconds, SESSION_TIMEOUT_PRESETS)
+            ? $seconds
+            : (int) SESSION_TIMEOUT;
+    }
+
     private function migrateCompanySettings(Database $db): void
     {
         $pdo = $db->getPdo();
@@ -370,9 +384,10 @@ class AdminController
             'Field'
         );
         $cols = [
-            'signature1' => "VARCHAR(300) NOT NULL DEFAULT ''",
-            'signature2' => "VARCHAR(300) NOT NULL DEFAULT ''",
-            'signature3' => "VARCHAR(300) NOT NULL DEFAULT ''",
+            'signature1'      => "VARCHAR(300) NOT NULL DEFAULT ''",
+            'signature2'      => "VARCHAR(300) NOT NULL DEFAULT ''",
+            'signature3'      => "VARCHAR(300) NOT NULL DEFAULT ''",
+            'session_timeout' => "INT UNSIGNED NOT NULL DEFAULT " . (int) SESSION_TIMEOUT,
         ];
         foreach ($cols as $col => $def) {
             if (!in_array($col, $existing)) {
@@ -410,6 +425,41 @@ class AdminController
         $this->userModel->changePassword($id, $newPassword);
         Logger::log('updated', 'user', $id, null, ['password_reset' => true]);
         Utils::flashSuccess('Password updated.');
+        Utils::redirect('/admin/users');
+    }
+
+    // ── POST /admin/users/:id/rename ──────────────────────────────────────────
+
+    public function renameUser(int $id): void
+    {
+        Auth::requireRole('admin');
+        Auth::checkCSRF();
+
+        $username = trim($_POST['username'] ?? '');
+
+        if (!preg_match('/^[A-Za-z0-9._-]{3,50}$/', $username)) {
+            Utils::flashError('Username must be 3–50 letters, numbers, dot, dash or underscore.');
+            Utils::redirect('/admin/users');
+        }
+        if ($this->userModel->isUsernameTaken($username, $id)) {
+            Utils::flashError('That username is already taken.');
+            Utils::redirect('/admin/users');
+        }
+
+        $user = $this->userModel->findById($id);
+        if (!$user) {
+            Utils::redirect('/admin/users');
+        }
+
+        $this->userModel->update($id, ['username' => $username]);
+
+        // If an admin renamed their own login, keep the session label in sync.
+        if ($id === Auth::id()) {
+            $_SESSION['user']['username'] = $username;
+        }
+
+        Logger::log('updated', 'user', $id, null, ['username_changed' => true]);
+        Utils::flashSuccess('Username updated.');
         Utils::redirect('/admin/users');
     }
 

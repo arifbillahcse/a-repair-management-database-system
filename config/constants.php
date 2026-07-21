@@ -31,6 +31,20 @@ define('APP_DEBUG',   filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BO
 define('SESSION_TIMEOUT', (int)($_ENV['SESSION_TIMEOUT'] ?? 7776000));
 define('SESSION_NAME',    $_ENV['SESSION_NAME'] ?? 'repair_sys_sess');
 
+// Selectable "keep me logged in for" durations (seconds => human label).
+// Used by Admin → Settings to let a manager change the login timeout without
+// touching .env. The stored value lives in company_settings.session_timeout.
+define('SESSION_TIMEOUT_PRESETS', [
+    1800     => '30 minutes',
+    3600     => '1 hour',
+    14400    => '4 hours',
+    28800    => '8 hours',
+    86400    => '1 day',
+    604800   => '7 days',
+    2592000  => '30 days',
+    7776000  => '90 days',
+]);
+
 // ── Pagination ────────────────────────────────────────────────────────────────
 define('PAGE_SIZE',         20);
 define('PAGE_SIZE_REPAIRS', 30);

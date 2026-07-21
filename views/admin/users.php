@@ -49,7 +49,7 @@ $currentId  = Auth::id();
                     <th>Role</th>
                     <th>Status</th>
                     <th class="hide-t">Last Login</th>
-                    <th style="text-align:right;width:180px">Actions</th>
+                    <th style="text-align:right;width:280px">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -89,6 +89,16 @@ $currentId  = Auth::id();
                     </td>
                     <td>
                         <div class="act-btns">
+                            <!-- Rename username -->
+                            <button type="button" class="btn btn-xs btn-secondary open-rn-modal"
+                                    data-user-id="<?= $u['user_id'] ?>"
+                                    data-username="<?= Utils::e($u['username']) ?>"
+                                    title="Change username">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px" aria-hidden="true">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                </svg>Rename
+                            </button>
+
                             <!-- Reset password -->
                             <button type="button" class="btn btn-xs btn-secondary open-pw-modal"
                                     data-user-id="<?= $u['user_id'] ?>"
@@ -143,6 +153,27 @@ $currentId  = Auth::id();
     </div>
 </div>
 
+<!-- Rename username modal -->
+<div class="pw-modal" id="rnModal" role="dialog" aria-modal="true" aria-labelledby="rnModalTitle">
+    <div class="pw-modal-box">
+        <h2 class="pw-modal-title" id="rnModalTitle">Change Username — <span id="rnModalUser"></span></h2>
+        <form method="POST" id="rnModalForm">
+            <input type="hidden" name="csrf_token" value="<?= Utils::e(Auth::generateCSRFToken()) ?>">
+            <div class="form-group">
+                <label class="form-label" for="modalNewUsername">New Username</label>
+                <input type="text" id="modalNewUsername" name="username" class="form-input"
+                       minlength="3" maxlength="50" pattern="[A-Za-z0-9._\-]{3,50}" required
+                       autocomplete="off" style="font-family:var(--font-mono)"
+                       placeholder="3–50 chars: letters, numbers . _ -">
+            </div>
+            <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem">
+                <button type="button" id="rnModalCancel" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Username</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 // Confirm toggle forms
 document.querySelectorAll('[data-confirm]').forEach(function (el) {
@@ -187,6 +218,37 @@ document.querySelectorAll('.pw-toggle').forEach(function (btn) {
         var inp = document.getElementById(btn.dataset.target);
         if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
     });
+});
+
+// Rename username modal
+var rnModal    = document.getElementById('rnModal');
+var rnForm     = document.getElementById('rnModalForm');
+var rnUserSpan = document.getElementById('rnModalUser');
+var rnInput    = document.getElementById('modalNewUsername');
+
+document.querySelectorAll('.open-rn-modal').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var uid   = btn.dataset.userId;
+        var uname = btn.dataset.username;
+        rnForm.action = baseUrl + '/admin/users/' + uid + '/rename';
+        rnUserSpan.textContent = '@' + uname;
+        rnInput.value = uname;
+        rnModal.classList.add('open');
+        rnInput.focus();
+        rnInput.select();
+    });
+});
+
+document.getElementById('rnModalCancel').addEventListener('click', function () {
+    rnModal.classList.remove('open');
+});
+
+rnModal.addEventListener('click', function (e) {
+    if (e.target === rnModal) rnModal.classList.remove('open');
+});
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') rnModal.classList.remove('open');
 });
 
 // hide-mobile / hide-t responsive helpers (already in CSS from style.css)

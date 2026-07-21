@@ -2,6 +2,9 @@
 $pageTitle = 'Settings';
 require VIEWS_PATH . '/layouts/header.php';
 $c = $company ?? [];
+
+// Currently-effective login timeout (stored value, else the .env default)
+$currentTimeout = (int)($c['session_timeout'] ?? 0) ?: (int) SESSION_TIMEOUT;
 ?>
 <style>
 .settings-grid{display:grid;grid-template-columns:1fr;gap:1.5rem;max-width:820px}
@@ -121,6 +124,36 @@ $c = $company ?? [];
                 <div class="form-group" style="margin-bottom:0">
                     <label class="form-label" for="sig3">Signature 3</label>
                     <textarea id="sig3" name="signature3" class="form-input" rows="2" placeholder="e.g. ТРАК ИЯ ИНВЕСТМЕНТ ЕООД, Tracia Investment Ltd"><?= Utils::e($c['signature3'] ?? '') ?></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login & Security -->
+        <div class="card">
+            <div class="card-header"><h2 class="card-title">Login &amp; Security</h2></div>
+            <div class="card-body">
+                <div class="form-group" style="margin-bottom:.5rem;max-width:340px">
+                    <label class="form-label" for="sessionTimeout">Stay logged in for</label>
+                    <select id="sessionTimeout" name="session_timeout" class="form-input">
+                        <?php
+                        $presetFound = false;
+                        foreach (SESSION_TIMEOUT_PRESETS as $secs => $label):
+                            $sel = ($secs === $currentTimeout);
+                            if ($sel) { $presetFound = true; }
+                        ?>
+                        <option value="<?= $secs ?>" <?= $sel ? 'selected' : '' ?>><?= Utils::e($label) ?></option>
+                        <?php endforeach; ?>
+                        <?php if (!$presetFound): // stored value isn't a standard preset (e.g. custom .env) ?>
+                        <option value="<?= $currentTimeout ?>" selected>
+                            Custom (<?= (int) round($currentTimeout / 86400) ?> days)
+                        </option>
+                        <?php endif; ?>
+                    </select>
+                    <p style="font-size:.72rem;color:var(--text-muted);margin-top:.4rem">
+                        How long a user stays signed in before being asked to log in again.
+                        The countdown resets on every visit, so active users are not logged out.
+                        Applies to <strong>all</strong> users on their next login or page load.
+                    </p>
                 </div>
             </div>
         </div>

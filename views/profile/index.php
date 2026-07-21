@@ -131,10 +131,17 @@ $roleLabel = ['admin' => 'Administrator', 'manager' => 'Manager', 'staff' => 'St
                 </div>
 
                 <div class="form-group" style="margin-bottom:0">
-                    <label class="form-label">Username</label>
-                    <input type="text" class="form-input" value="<?= Utils::e($u['username'] ?? '') ?>"
-                           disabled style="opacity:.6;cursor:not-allowed">
-                    <div style="font-size:.74rem;color:var(--text-muted);margin-top:.3rem">Username cannot be changed. Contact an administrator if needed.</div>
+                    <label class="form-label" for="username">Username <span class="required" aria-hidden="true">*</span></label>
+                    <input type="text" id="username" name="username"
+                           class="form-input <?= isset($errors['username']) ? 'is-invalid' : '' ?>"
+                           value="<?= Utils::e($_POST['username'] ?? $u['username'] ?? '') ?>"
+                           maxlength="50" pattern="[A-Za-z0-9._\-]{3,50}" required
+                           autocomplete="username" style="font-family:var(--font-mono)">
+                    <?php if (isset($errors['username'])): ?>
+                    <div class="invalid-feedback"><?= Utils::e($errors['username']) ?></div>
+                    <?php else: ?>
+                    <div style="font-size:.74rem;color:var(--text-muted);margin-top:.3rem">This is the name you sign in with. 3–50 letters, numbers, dot, dash or underscore.</div>
+                    <?php endif; ?>
                 </div>
 
                 <div style="margin-top:1.5rem">
