@@ -154,7 +154,8 @@ require VIEWS_PATH . '/layouts/header.php';
             </tr>
             <tr><td>Base URL</td>        <td><?= Utils::e($appInfo['base_url']) ?></td></tr>
             <tr><td>Server Time</td>     <td><?= date('d/m/Y H:i:s') ?></td></tr>
-            <tr><td>Session Timeout</td> <td><?= SESSION_TIMEOUT ?>s (<?= round(SESSION_TIMEOUT/60) ?> min)</td></tr>
+            <?php $effTimeout = Auth::sessionTimeout(); ?>
+            <tr><td>Session Timeout</td> <td><?= $effTimeout ?>s (<?= round($effTimeout/60) ?> min) &middot; <a href="<?= BASE_URL ?>/admin/settings" style="font-size:.78rem">change</a></td></tr>
         </table>
     </div>
 

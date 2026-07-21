@@ -26,6 +26,9 @@ class Auth
 
     public static function startSession(): void
     {
+        // Effective timeout is admin-configurable (see sessionTimeout()).
+        $timeout = self::sessionTimeout();
+
         if (session_status() !== PHP_SESSION_ACTIVE) {
             // Use app-local session directory so it's always writable
             $sessionPath = APP_ROOT . '/sessions';
@@ -35,14 +38,14 @@ class Auth
             session_save_path($sessionPath);
 
             // Keep the server-side session file alive for the full
-            // SESSION_TIMEOUT window so PHP's own garbage collector doesn't
+            // timeout window so PHP's own garbage collector doesn't
             // purge it early (its default is often ~24 min) and force a
             // re-login before our own inactivity check would.
-            ini_set('session.gc_maxlifetime', (string) SESSION_TIMEOUT);
+            ini_set('session.gc_maxlifetime', (string) $timeout);
 
             session_name(SESSION_NAME);
             session_set_cookie_params([
-                'lifetime' => SESSION_TIMEOUT, // persistent cookie — survives browser restarts until SESSION_TIMEOUT elapses
+                'lifetime' => $timeout, // persistent cookie — survives browser restarts until the timeout elapses
                 'path'     => '/',
                 'secure'   => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
                 'httponly' => true,
@@ -51,13 +54,45 @@ class Auth
             session_start();
         }
 
-        // Enforce session timeout
+        // Enforce session timeout (inactivity window)
         if (isset($_SESSION['_last_activity'])) {
-            if ((time() - $_SESSION['_last_activity']) > SESSION_TIMEOUT) {
+            if ((time() - $_SESSION['_last_activity']) > $timeout) {
                 self::destroySession();
             }
         }
         $_SESSION['_last_activity'] = time();
+    }
+
+    /**
+     * Effective session timeout in seconds.
+     *
+     * Reads the admin-configured value from company_settings.session_timeout,
+     * falling back to the SESSION_TIMEOUT constant (from .env) when it is unset
+     * or the column/DB is unavailable. Cached for the lifetime of the request.
+     */
+    public static function sessionTimeout(): int
+    {
+        static $cached = null;
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $cached = SESSION_TIMEOUT; // sensible default from .env / constants
+        try {
+            $val = Database::getInstance()->fetchScalar(
+                "SELECT session_timeout FROM company_settings
+                 WHERE session_timeout IS NOT NULL AND session_timeout > 0
+                 LIMIT 1"
+            );
+            if ($val !== null && (int)$val > 0) {
+                $cached = (int)$val;
+            }
+        } catch (\Throwable $e) {
+            // company_settings table/column may not exist yet, or the DB may be
+            // unavailable — keep the constant default and carry on.
+        }
+
+        return $cached;
     }
 
     private static function destroySession(): void

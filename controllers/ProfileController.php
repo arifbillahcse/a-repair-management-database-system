@@ -36,7 +36,17 @@ class ProfileController
         $action = $_POST['action'] ?? 'info';
 
         if ($action === 'info') {
-            $email = trim($_POST['email'] ?? '');
+            $email    = trim($_POST['email'] ?? '');
+            $username = trim($_POST['username'] ?? '');
+
+            // ── Username: required, format-checked, and unique ────────────────
+            if ($username === '') {
+                $errors['username'] = 'Username is required.';
+            } elseif (!preg_match('/^[A-Za-z0-9._-]{3,50}$/', $username)) {
+                $errors['username'] = 'Use 3–50 letters, numbers, dot, dash or underscore.';
+            } elseif ($this->userModel->isUsernameTaken($username, $userId)) {
+                $errors['username'] = 'That username is already taken.';
+            }
 
             if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $errors['email'] = 'Please enter a valid email address.';
@@ -45,7 +55,7 @@ class ProfileController
             }
 
             if (!$errors) {
-                $fields = ['email' => $email ?: null];
+                $fields = ['email' => $email ?: null, 'username' => $username];
 
                 // Also update linked staff name if present
                 $db = Database::getInstance();
@@ -64,6 +74,7 @@ class ProfileController
 
                 // Refresh session
                 $_SESSION['user']['email']      = $email;
+                $_SESSION['user']['username']   = $username;
                 if (!empty($user['staff_id'])) {
                     $fn = trim($_POST['first_name'] ?? '');
                     $ln = trim($_POST['last_name']  ?? '');
@@ -72,7 +83,10 @@ class ProfileController
                     $_SESSION['user']['full_name']  = trim("$fn $ln");
                 }
 
-                Logger::log('updated', 'user', $userId, null, ['email_changed' => true]);
+                Logger::log('updated', 'user', $userId, null, [
+                    'email_changed'    => ($email !== ($user['email'] ?? '')),
+                    'username_changed' => ($username !== ($user['username'] ?? '')),
+                ]);
                 $_SESSION['_profile_saved'] = true;
                 Utils::redirect('/profile');
             }

@@ -235,6 +235,7 @@ $router->get(  '/admin/sysinfo',                     'AdminController@sysinfo');
 $router->get(  '/admin/users',                       'AdminController@users');
 $router->post( '/admin/users/:id/toggle',            'AdminController@toggleUser');
 $router->post( '/admin/users/:id/reset-password',    'AdminController@resetPassword');
+$router->post( '/admin/users/:id/rename',            'AdminController@renameUser');
 $router->post( '/admin/migrate-landline',             'AdminController@migrateLandlineToMobile');
 
 // ── 9. Dispatch ───────────────────────────────────────────────────────────────
