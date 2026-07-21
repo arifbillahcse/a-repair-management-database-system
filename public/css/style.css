@@ -999,17 +999,17 @@ html[data-theme="dark"] .form-select {
 
 /* ── Colorful Topbar ───────────────────────────────────────────────────────── */
 /*
- * Vibrant gradient bar (emerald → teal → indigo) with light-on-colour controls.
- * Same look in light and dark mode so the brand always pops.
+ * The topbar shares the sidebar's dark navy/slate palette so the two surfaces
+ * read as one continuous frame. Controls stay light-on-dark in both modes.
  */
 .topbar {
-    background: linear-gradient(90deg, #059669 0%, #0d9488 42%, #4f46e5 100%);
+    background: linear-gradient(90deg, #1e293b 0%, #172033 50%, #0f172a 100%);
     border-bottom: none;
-    box-shadow: 0 2px 14px rgba(79,70,229,.28);
+    box-shadow: 0 2px 16px rgba(15, 23, 42, .35);
 }
 html[data-theme="dark"] .topbar {
-    background: linear-gradient(90deg, #047857 0%, #0f766e 42%, #4338ca 100%);
-    box-shadow: 0 2px 16px rgba(0,0,0,.45);
+    background: linear-gradient(90deg, #131a2b 0%, #0c111d 50%, #060912 100%);
+    box-shadow: 0 2px 16px rgba(0,0,0,.55);
 }
 
 /* Brand */
@@ -1125,9 +1125,12 @@ html[data-theme="dark"] .sidebar {
 .sidebar .nav-link:hover .nav-icon { opacity: 1; transform: scale(1.12); }
 .sidebar .nav-link.active .nav-icon { opacity: 1; }
 
-/* Hamburger lines ↔ white on coloured sidebar */
-.sidebar-toggle .hamburger-line { background: var(--text-secondary); }
-.sidebar-toggle:hover .hamburger-line { background: var(--text-primary); }
+/* Hamburger lines ↔ white on coloured topbar (this rule used to point at
+   var(--text-secondary) by mistake, which — at equal CSS specificity and
+   later source order — silently overrode the correct white color set in
+   the Colorful Topbar block above, leaving the icon dark and hard to see) */
+.sidebar-toggle .hamburger-line { background: rgba(255,255,255,.92); }
+.sidebar-toggle:hover .hamburger-line { background: #fff; }
 
 /* Footer / logout */
 .sidebar-footer { border-top: 1px solid rgba(255,255,255,.1); }
