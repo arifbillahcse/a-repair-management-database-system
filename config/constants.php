@@ -64,15 +64,17 @@ define('REPAIR_STATUS', [
     'cancelled'         => 'Cancelled',
 ]);
 
-// Allowed forward-only status transitions
+// Allowed status transitions.
+// 'collected' and 'cancelled' can be reopened to any other status so a
+// mistaken final status can be corrected — they are not full dead ends.
 define('REPAIR_STATUS_FLOW', [
     'in_progress'       => ['on_hold', 'waiting_for_parts', 'completed', 'cancelled'],
     'on_hold'           => ['in_progress', 'waiting_for_parts', 'cancelled'],
     'waiting_for_parts' => ['in_progress', 'on_hold', 'cancelled'],
-    'completed'         => ['ready_for_pickup'],
-    'ready_for_pickup'  => ['collected', 'on_hold'],
-    'collected'         => [],
-    'cancelled'         => [],
+    'completed'         => ['ready_for_pickup', 'in_progress'],
+    'ready_for_pickup'  => ['collected', 'on_hold', 'in_progress'],
+    'collected'         => ['ready_for_pickup', 'in_progress', 'on_hold', 'cancelled'],
+    'cancelled'         => ['in_progress', 'on_hold', 'waiting_for_parts'],
 ]);
 
 // Status badge CSS classes (mapped to style.css)
