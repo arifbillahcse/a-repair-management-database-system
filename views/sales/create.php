@@ -105,6 +105,32 @@ $dateToday = $fd['sale_date'] ?? date('Y-m-d');
                         <p style="font-size:.72rem;color:var(--text-muted);margin-top:.35rem" id="custHint">
                             Pick from the list to link the sale to a client profile, or type any name for a walk-in sale.
                         </p>
+
+                        <!-- New-customer details — appears when the typed name doesn't match an existing profile -->
+                        <div id="newCustPanel" style="display:none;margin-top:.75rem;padding:.85rem;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius)">
+                            <p style="font-size:.75rem;font-weight:600;color:var(--text-secondary);margin:0 0 .6rem">New customer — add contact details (optional)</p>
+                            <div class="form-grid-2" style="margin-bottom:.6rem">
+                                <div class="form-group" style="margin-bottom:0">
+                                    <label class="form-label" for="newCustPhone">Phone</label>
+                                    <input type="text" id="newCustPhone" name="new_customer_phone" class="form-input" maxlength="30">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0">
+                                    <label class="form-label" for="newCustCity">City</label>
+                                    <input type="text" id="newCustCity" name="new_customer_city" class="form-input" maxlength="100">
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom:.6rem">
+                                <label class="form-label" for="newCustAddress">Address</label>
+                                <input type="text" id="newCustAddress" name="new_customer_address" class="form-input" maxlength="255">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0">
+                                <label class="form-label" for="newCustNotes">Note</label>
+                                <textarea id="newCustNotes" name="new_customer_notes" class="form-input" rows="2" maxlength="500"></textarea>
+                            </div>
+                            <p style="font-size:.7rem;color:var(--text-muted);margin:.5rem 0 0">
+                                Fill any of these in and a client profile is created automatically when you save this sale.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -347,8 +373,20 @@ $dateToday = $fd['sale_date'] ?? date('Y-m-d');
     var acList    = document.getElementById('acList');
     var acTimer   = null;
 
+    var newCustPanel = document.getElementById('newCustPanel');
+
+    function toggleNewCustPanel() {
+        var hasName = custInput.value.trim().length > 0;
+        newCustPanel.style.display = (!custId.value && hasName) ? 'block' : 'none';
+        if (custId.value) {
+            newCustPanel.querySelectorAll('input,textarea').forEach(function (f) { f.value = ''; });
+        }
+    }
+    toggleNewCustPanel(); // reflect state on load (e.g. after a validation error redisplay)
+
     custInput.addEventListener('input', function () {
         custId.value = '';                       // typing breaks the link
+        toggleNewCustPanel();
         clearTimeout(acTimer);
         var q = custInput.value.trim();
         if (q.length < 2) { acList.style.display = 'none'; return; }
@@ -377,6 +415,7 @@ $dateToday = $fd['sale_date'] ?? date('Y-m-d');
         custId.value    = item.dataset.id;
         acList.style.display = 'none';
         document.getElementById('custHint').textContent = 'Linked to client profile ✓';
+        toggleNewCustPanel();
     });
 
     document.addEventListener('click', function (e) {

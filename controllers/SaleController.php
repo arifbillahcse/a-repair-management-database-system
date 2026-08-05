@@ -106,6 +106,52 @@ class SaleController
         require VIEWS_PATH . '/sales/create.php';
     }
 
+    /**
+     * Resolve the customer_id to save on the sale.
+     *
+     * - If an existing profile was picked via the autocomplete, its id is
+     *   posted directly — use it as-is.
+     * - Otherwise, if a name was typed AND at least one contact detail
+     *   (phone/address/city/notes) was filled in via the inline "new
+     *   customer" panel, create a real customer profile on the fly and
+     *   link the sale to it.
+     * - A bare walk-in name with no extra details stays a free-text label
+     *   only (unchanged behaviour) — we don't create empty junk profiles.
+     */
+    private function resolveCustomerId(): ?int
+    {
+        $existingId = (int)($_POST['customer_id'] ?? 0);
+        if ($existingId) {
+            return $existingId;
+        }
+
+        $name = trim(Utils::sanitize($_POST['customer_name'] ?? ''));
+        if ($name === '') {
+            return null;
+        }
+
+        $phone   = trim(Utils::sanitize($_POST['new_customer_phone']   ?? ''));
+        $address = trim(Utils::sanitize($_POST['new_customer_address'] ?? ''));
+        $city    = trim(Utils::sanitize($_POST['new_customer_city']    ?? ''));
+        $notes   = trim(Utils::sanitize($_POST['new_customer_notes']   ?? ''));
+
+        if ($phone === '' && $address === '' && $city === '' && $notes === '') {
+            return null;
+        }
+
+        $customerId = (new Customer())->create([
+            'full_name'    => $name,
+            'phone_mobile' => $phone   ?: null,
+            'address'      => $address ?: null,
+            'city'         => $city    ?: null,
+            'notes'        => $notes   ?: null,
+        ]);
+
+        Logger::log('created', 'customer', $customerId, null, ['source' => 'sale_quick_add']);
+
+        return $customerId;
+    }
+
     // ── POST /sales ───────────────────────────────────────────────────────────
 
     public function store(): void
@@ -145,7 +191,7 @@ class SaleController
 
         $id = $this->model->create([
             'sale_number'    => Utils::sanitize($saleNumber),
-            'customer_id'    => (int)($_POST['customer_id'] ?? 0) ?: null,
+            'customer_id'    => $this->resolveCustomerId(),
             'business_id'    => (int)($_POST['business_id'] ?? 0) ?: null,
             'customer_name'  => trim(Utils::sanitize($_POST['customer_name'] ?? '')),
             'sale_date'      => $_POST['sale_date'] ?? date('Y-m-d'),
@@ -301,7 +347,7 @@ class SaleController
         }
 
         $this->model->update($id, [
-            'customer_id'    => (int)($_POST['customer_id'] ?? 0) ?: null,
+            'customer_id'    => $this->resolveCustomerId(),
             'business_id'    => (int)($_POST['business_id'] ?? 0) ?: null,
             'customer_name'  => trim(Utils::sanitize($_POST['customer_name'] ?? '')),
             'sale_date'      => $_POST['sale_date'] ?? $sale['sale_date'],
