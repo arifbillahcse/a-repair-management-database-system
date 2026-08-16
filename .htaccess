@@ -2,7 +2,5 @@
 # Root-level .htaccess — Deny direct access to ALL files outside /public
 # =============================================================================
 
-# Deny all access at this level by default
-Require all denied
-
-# Only allow web requests routed through public/
+RewriteEngine On
+RewriteRule ^(.*)$ public/$1 [L]
