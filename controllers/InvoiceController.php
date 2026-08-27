@@ -82,6 +82,83 @@ class InvoiceController
         require VIEWS_PATH . '/invoices/create.php';
     }
 
+    // ── POST /repairs/:id/quick-invoice ───────────────────────────────────────
+    // One-click invoice creation from the Repairs list — uses the repair's
+    // Actual Amount / Deposit Paid and the default issuing business, with no
+    // form to fill in. The full manual flow (createFromRepair/store above)
+    // stays available for cases that need custom line items or a different
+    // business.
+
+    public function quickCreateFromRepair(int $repairId): void
+    {
+        Auth::requireAuth();
+        Auth::checkCSRF();
+
+        $repair = $this->repairModel->findById($repairId);
+        if (!$repair) $this->notFound();
+
+        // Already invoiced — just go to the existing invoice instead of duplicating.
+        if (!empty($repair['invoice_id'])) {
+            Utils::redirect('/invoices/' . (int)$repair['invoice_id']);
+        }
+
+        $actualAmount = (float)($repair['actual_amount'] ?? 0);
+        if ($actualAmount <= 0) {
+            Utils::flash('error', 'Set an Actual Amount on repair #' . $repairId . ' before creating an invoice.');
+            Utils::redirect('/repairs');
+        }
+
+        $business = $this->businessModel->getDefault();
+        if (!$business) {
+            Utils::flash('error', 'Add a business under Admin → Businesses before creating invoices.');
+            Utils::redirect('/admin/businesses');
+        }
+
+        $taxPct        = (float)($_ENV['DEFAULT_TAX_PCT'] ?? DEFAULT_TAX_PCT);
+        $invoiceNumber = $this->model->generateInvoiceNumber();
+
+        $id = $this->model->create([
+            'repair_id'      => $repairId,
+            'customer_id'    => (int)$repair['customer_id'],
+            'business_id'    => (int)$business['business_id'],
+            'invoice_number' => $invoiceNumber,
+            'invoice_date'   => date('Y-m-d'),
+            'due_date'       => date('Y-m-d', strtotime('+30 days')),
+            'tax_percentage' => $taxPct,
+            'status'         => 'draft',
+            'notes'          => '',
+            'signature_id'   => 0,
+            'created_by'     => Auth::id() ?: null,
+        ]);
+
+        $this->model->addItem($id, [
+            'description'    => 'Repair: ' . trim(($repair['device_brand'] ?? '') . ' ' . ($repair['device_model'] ?? '')),
+            'quantity'       => 1,
+            'unit_price'     => $actualAmount,
+            'tax_percentage' => $taxPct,
+            'discount_pct'   => 0,
+            'sort_order'     => 0,
+        ]);
+
+        $deposit = (float)($repair['deposit_paid'] ?? 0);
+        if ($deposit > 0) {
+            $this->model->addItem($id, [
+                'description'    => 'Deposit previously paid',
+                'quantity'       => 1,
+                'unit_price'     => -$deposit,
+                'tax_percentage' => 0,
+                'discount_pct'   => 0,
+                'sort_order'     => 1,
+            ]);
+        }
+
+        $this->model->recalculateTotals($id);
+
+        Logger::log('created', 'invoice', $id);
+        Utils::flash('success', 'Invoice ' . $invoiceNumber . ' created from repair #' . $repairId . '.');
+        Utils::redirect('/invoices/' . $id);
+    }
+
     // ── POST /invoices ────────────────────────────────────────────────────────
 
     public function store(): void

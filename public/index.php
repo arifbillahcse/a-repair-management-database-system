@@ -178,6 +178,7 @@ $router->post('/invoices/:id/paid',        'InvoiceController@markPaid');
 $router->post('/invoices/:id/send',        'InvoiceController@markSent');
 $router->post('/invoices/:id/delete',      'InvoiceController@destroy');
 $router->get( '/repairs/:id/invoice',      'InvoiceController@createFromRepair');
+$router->post('/repairs/:id/quick-invoice','InvoiceController@quickCreateFromRepair');
 
 // Products & Stock
 $router->get( '/products',                 'ProductController@index');

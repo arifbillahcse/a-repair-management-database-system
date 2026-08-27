@@ -48,7 +48,8 @@ class Repair extends BaseModel
                     c.vat_number    AS customer_vat,
                     CONCAT(s.first_name,' ',s.last_name)  AS technician_name,
                     CONCAT(u.first_name,' ',u.last_name)  AS created_by_name,
-                    DATEDIFF(COALESCE(r.date_out, NOW()), r.date_in) AS days_in_lab
+                    DATEDIFF(COALESCE(r.date_out, NOW()), r.date_in) AS days_in_lab,
+                    (SELECT i.invoice_id FROM invoices i WHERE i.repair_id = r.repair_id ORDER BY i.invoice_id DESC LIMIT 1) AS invoice_id
              FROM repairs r
              LEFT JOIN customers c ON c.customer_id = r.customer_id
              LEFT JOIN staff s ON s.staff_id = r.staff_id
@@ -88,7 +89,8 @@ class Repair extends BaseModel
                     c.phone_mobile AS customer_phone,
                     c.client_type  AS customer_type,
                     CONCAT(s.first_name,' ',s.last_name) AS technician_name,
-                    DATEDIFF(COALESCE(r.date_out, NOW()), r.date_in) AS days_in_lab
+                    DATEDIFF(COALESCE(r.date_out, NOW()), r.date_in) AS days_in_lab,
+                    (SELECT i.invoice_id FROM invoices i WHERE i.repair_id = r.repair_id ORDER BY i.invoice_id DESC LIMIT 1) AS invoice_id
              FROM repairs r
              LEFT JOIN customers c ON c.customer_id = r.customer_id
              LEFT JOIN staff s ON s.staff_id = r.staff_id
