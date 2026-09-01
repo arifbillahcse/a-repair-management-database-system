@@ -5,7 +5,7 @@ require VIEWS_PATH . '/layouts/header.php';
 $c = fn(float $v): string => Utils::formatCurrency($v);
 
 // Selected-year monthly totals (footer row)
-$mt = ['colleague_repairs'=>0,'private_repairs'=>0,'colleague_billed'=>0.0,'colleague_paid'=>0.0,'private_billed'=>0.0,'private_paid'=>0.0];
+$mt = ['colleague_repairs'=>0,'private_repairs'=>0,'colleague_income'=>0.0,'private_income'=>0.0,'colleague_billed'=>0.0,'colleague_paid'=>0.0,'private_billed'=>0.0,'private_paid'=>0.0];
 foreach ($byMonth as $row) {
     foreach ($mt as $k => $_) { $mt[$k] += $row[$k]; }
 }
@@ -74,13 +74,23 @@ foreach ($byMonth as $row) {
         <div class="stat-sub"><?= $year ?></div>
     </div>
     <div class="stat-card">
+        <div class="stat-value"><?= $c((float)$yearTotals['private_income']) ?></div>
+        <div class="stat-label">Private Repair Income</div>
+        <div class="stat-sub">From repairs' Actual Amount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" style="color:#a855f7"><?= $c((float)$yearTotals['colleague_income']) ?></div>
+        <div class="stat-label">Colleague Repair Income</div>
+        <div class="stat-sub">From repairs' Actual Amount</div>
+    </div>
+    <div class="stat-card">
         <div class="stat-value" style="color:var(--success)"><?= $c((float)$yearTotals['colleague_billed']) ?></div>
-        <div class="stat-label">Colleague Revenue</div>
+        <div class="stat-label">Colleague Invoiced</div>
         <div class="stat-sub">Collected <?= $c((float)$yearTotals['colleague_paid']) ?></div>
     </div>
     <div class="stat-card">
         <div class="stat-value"><?= $c((float)$yearTotals['private_billed']) ?></div>
-        <div class="stat-label">Private Revenue</div>
+        <div class="stat-label">Private Invoiced</div>
         <div class="stat-sub">Collected <?= $c((float)$yearTotals['private_paid']) ?></div>
     </div>
 </div>
@@ -94,11 +104,14 @@ foreach ($byMonth as $row) {
                 <tr>
                     <th rowspan="2" style="vertical-align:bottom">Month</th>
                     <th colspan="2" style="text-align:center">Repairs</th>
-                    <th colspan="2" style="text-align:center" class="col-div">Colleague Revenue</th>
-                    <th colspan="2" style="text-align:center" class="col-div">Private Revenue</th>
+                    <th colspan="2" style="text-align:center" class="col-div">Repair Income</th>
+                    <th colspan="2" style="text-align:center" class="col-div">Colleague Invoiced</th>
+                    <th colspan="2" style="text-align:center" class="col-div">Private Invoiced</th>
                 </tr>
                 <tr>
                     <th>Private</th>
+                    <th>Colleague</th>
+                    <th class="col-div">Private</th>
                     <th>Colleague</th>
                     <th class="col-div">Billed</th>
                     <th>Collected</th>
@@ -108,11 +121,13 @@ foreach ($byMonth as $row) {
             </thead>
             <tbody>
             <?php foreach ($byMonth as $row): ?>
-                <?php $empty = !$row['private_repairs'] && !$row['colleague_repairs'] && !$row['colleague_billed'] && !$row['private_billed']; ?>
+                <?php $empty = !$row['private_repairs'] && !$row['colleague_repairs'] && !$row['colleague_billed'] && !$row['private_billed'] && !$row['colleague_income'] && !$row['private_income']; ?>
                 <tr<?= $empty ? ' class="muted"' : '' ?>>
                     <td><?= Utils::e($row['label']) ?></td>
                     <td><?= (int)$row['private_repairs'] ?></td>
                     <td class="grp-col" style="color:#a855f7"><?= (int)$row['colleague_repairs'] ?></td>
+                    <td class="col-div"><?= $c((float)$row['private_income']) ?></td>
+                    <td class="grp-col" style="color:#a855f7"><?= $c((float)$row['colleague_income']) ?></td>
                     <td class="col-div"><?= $c((float)$row['colleague_billed']) ?></td>
                     <td class="muted"><?= $c((float)$row['colleague_paid']) ?></td>
                     <td class="col-div"><?= $c((float)$row['private_billed']) ?></td>
@@ -125,6 +140,8 @@ foreach ($byMonth as $row) {
                     <td>Total <?= $year ?></td>
                     <td><?= (int)$mt['private_repairs'] ?></td>
                     <td><?= (int)$mt['colleague_repairs'] ?></td>
+                    <td class="col-div"><?= $c($mt['private_income']) ?></td>
+                    <td><?= $c($mt['colleague_income']) ?></td>
                     <td class="col-div"><?= $c($mt['colleague_billed']) ?></td>
                     <td><?= $c($mt['colleague_paid']) ?></td>
                     <td class="col-div"><?= $c($mt['private_billed']) ?></td>
@@ -133,7 +150,7 @@ foreach ($byMonth as $row) {
             </tfoot>
         </table>
     </div>
-    <div class="legend">Revenue is taken from invoices (excluding cancelled). Repairs are counted by check-in date.</div>
+    <div class="legend">Repair Income is each repair's Actual Amount, counted as soon as it's priced — no invoice required. Invoiced columns are taken from invoices (excluding cancelled). Repairs are counted by check-in date.</div>
 </div>
 
 <!-- Yearly summary across all years -->
@@ -145,11 +162,14 @@ foreach ($byMonth as $row) {
                 <tr>
                     <th rowspan="2" style="vertical-align:bottom">Year</th>
                     <th colspan="2" style="text-align:center">Repairs</th>
-                    <th colspan="2" style="text-align:center" class="col-div">Colleague Revenue</th>
-                    <th colspan="2" style="text-align:center" class="col-div">Private Revenue</th>
+                    <th colspan="2" style="text-align:center" class="col-div">Repair Income</th>
+                    <th colspan="2" style="text-align:center" class="col-div">Colleague Invoiced</th>
+                    <th colspan="2" style="text-align:center" class="col-div">Private Invoiced</th>
                 </tr>
                 <tr>
                     <th>Private</th>
+                    <th>Colleague</th>
+                    <th class="col-div">Private</th>
                     <th>Colleague</th>
                     <th class="col-div">Billed</th>
                     <th>Collected</th>
@@ -159,7 +179,7 @@ foreach ($byMonth as $row) {
             </thead>
             <tbody>
             <?php if (empty($byYear)): ?>
-                <tr><td colspan="7" class="muted" style="text-align:center;padding:1.5rem">No data yet.</td></tr>
+                <tr><td colspan="9" class="muted" style="text-align:center;padding:1.5rem">No data yet.</td></tr>
             <?php else: ?>
                 <?php foreach ($byYear as $y => $row): ?>
                 <tr<?= $y === $year ? ' style="background:var(--accent-dim)"' : '' ?>>
@@ -168,6 +188,8 @@ foreach ($byMonth as $row) {
                     </td>
                     <td><?= (int)$row['private_repairs'] ?></td>
                     <td style="color:#a855f7;font-weight:600"><?= (int)$row['colleague_repairs'] ?></td>
+                    <td class="col-div"><?= $c((float)$row['private_income']) ?></td>
+                    <td style="color:#a855f7;font-weight:600"><?= $c((float)$row['colleague_income']) ?></td>
                     <td class="col-div"><?= $c((float)$row['colleague_billed']) ?></td>
                     <td class="muted"><?= $c((float)$row['colleague_paid']) ?></td>
                     <td class="col-div"><?= $c((float)$row['private_billed']) ?></td>

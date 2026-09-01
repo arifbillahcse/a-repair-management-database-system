@@ -194,10 +194,14 @@ class ReportController
         if (!in_array($year, $availYears, true)) { $year = $availYears[0]; }
 
         // ── Repairs per month (selected year), split by type ──────────────────
+        // Income here is the repair's own Actual Amount — it counts as soon as
+        // the repair is priced, whether or not an invoice was ever issued for it.
         $repMonthRows = $db->fetchAll(
             "SELECT MONTH(r.date_in) AS mo,
                     SUM(c.client_type =  'colleague') AS colleague_repairs,
-                    SUM(c.client_type <> 'colleague') AS private_repairs
+                    SUM(c.client_type <> 'colleague') AS private_repairs,
+                    COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
+                    COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
              WHERE YEAR(r.date_in) = ?
@@ -225,6 +229,7 @@ class ReportController
             $byMonth[$m] = [
                 'label'             => date('M', mktime(0, 0, 0, $m, 1)),
                 'colleague_repairs' => 0, 'private_repairs' => 0,
+                'colleague_income'  => 0, 'private_income'  => 0,
                 'colleague_billed'  => 0, 'colleague_paid'  => 0,
                 'private_billed'    => 0, 'private_paid'    => 0,
             ];
@@ -234,6 +239,8 @@ class ReportController
             if (!isset($byMonth[$m])) { continue; }
             $byMonth[$m]['colleague_repairs'] = (int)$r['colleague_repairs'];
             $byMonth[$m]['private_repairs']   = (int)$r['private_repairs'];
+            $byMonth[$m]['colleague_income']  = (float)$r['colleague_income'];
+            $byMonth[$m]['private_income']    = (float)$r['private_income'];
         }
         foreach ($revMonthRows as $r) {
             $m = (int)$r['mo'];
@@ -248,7 +255,9 @@ class ReportController
         $repYearRows = $db->fetchAll(
             "SELECT YEAR(r.date_in) AS yr,
                     SUM(c.client_type =  'colleague') AS colleague_repairs,
-                    SUM(c.client_type <> 'colleague') AS private_repairs
+                    SUM(c.client_type <> 'colleague') AS private_repairs,
+                    COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
+                    COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
              WHERE r.date_in IS NOT NULL
@@ -272,6 +281,7 @@ class ReportController
         $byYear = [];
         $blank  = [
             'colleague_repairs' => 0, 'private_repairs' => 0,
+            'colleague_income'  => 0, 'private_income'  => 0,
             'colleague_billed'  => 0, 'colleague_paid'  => 0,
             'private_billed'    => 0, 'private_paid'    => 0,
         ];
@@ -280,6 +290,8 @@ class ReportController
             $byYear[$y] = ($byYear[$y] ?? $blank);
             $byYear[$y]['colleague_repairs'] = (int)$r['colleague_repairs'];
             $byYear[$y]['private_repairs']   = (int)$r['private_repairs'];
+            $byYear[$y]['colleague_income']  = (float)$r['colleague_income'];
+            $byYear[$y]['private_income']    = (float)$r['private_income'];
         }
         foreach ($revYearRows as $r) {
             $y = (int)$r['yr'];
