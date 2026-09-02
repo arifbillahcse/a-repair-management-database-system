@@ -160,162 +160,20 @@ class ReportController
         require VIEWS_PATH . '/reports/index.php';
     }
 
-    // ── GET /reports/client-types ─────────────────────────────────────────────
-    /**
-     * Colleague vs Private breakdown: repairs (count) and revenue (€) split by
-     * customer type, shown monthly (for a chosen year) and yearly (all years).
-     *
-     * "Private" = every customer that is NOT a colleague (individual + company).
-     *
-     * Repairs and invoices are aggregated in SEPARATE queries and merged in PHP
-     * by period — joining both onto customers in one query would cross-multiply
-     * the figures (the same fan-out bug fixed earlier in Customer::getStats()).
-     */
-    public function clientTypes(): void
-    {
-        Auth::requireRole('manager');
-        $db = Database::getInstance();
-
-        // Years that actually have data (repairs or non-cancelled invoices)
-        $yearRows = $db->fetchAll(
-            "SELECT yr FROM (
-                SELECT YEAR(date_in) AS yr FROM repairs WHERE date_in IS NOT NULL
-                UNION
-                SELECT YEAR(invoice_date) AS yr FROM invoices
-                    WHERE invoice_date IS NOT NULL AND status != 'cancelled'
-             ) t
-             WHERE yr IS NOT NULL
-             ORDER BY yr DESC"
-        );
-        $availYears = array_map('intval', array_column($yearRows, 'yr'));
-        if (!$availYears) { $availYears = [(int)date('Y')]; }
-
-        $year = (int)($_GET['year'] ?? date('Y'));
-        if (!in_array($year, $availYears, true)) { $year = $availYears[0]; }
-
-        // ── Repairs per month (selected year), split by type ──────────────────
-        // Income here is the repair's own Actual Amount — it counts as soon as
-        // the repair is priced, whether or not an invoice was ever issued for it.
-        $repMonthRows = $db->fetchAll(
-            "SELECT MONTH(r.date_in) AS mo,
-                    SUM(c.client_type =  'colleague') AS colleague_repairs,
-                    SUM(c.client_type <> 'colleague') AS private_repairs,
-                    COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
-                    COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
-             FROM repairs r
-             JOIN customers c ON c.customer_id = r.customer_id
-             WHERE YEAR(r.date_in) = ?
-             GROUP BY MONTH(r.date_in)",
-            [$year]
-        );
-
-        // ── Revenue per month (selected year), split by type ──────────────────
-        $revMonthRows = $db->fetchAll(
-            "SELECT MONTH(i.invoice_date) AS mo,
-                    COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN i.total_amount END),0) AS colleague_billed,
-                    COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN i.amount_paid  END),0) AS colleague_paid,
-                    COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN i.total_amount END),0) AS private_billed,
-                    COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN i.amount_paid  END),0) AS private_paid
-             FROM invoices i
-             JOIN customers c ON c.customer_id = i.customer_id
-             WHERE YEAR(i.invoice_date) = ? AND i.status != 'cancelled'
-             GROUP BY MONTH(i.invoice_date)",
-            [$year]
-        );
-
-        // Merge into a 12-month table (Jan..Dec) for the selected year
-        $byMonth = [];
-        for ($m = 1; $m <= 12; $m++) {
-            $byMonth[$m] = [
-                'label'             => date('M', mktime(0, 0, 0, $m, 1)),
-                'colleague_repairs' => 0, 'private_repairs' => 0,
-                'colleague_income'  => 0, 'private_income'  => 0,
-                'colleague_billed'  => 0, 'colleague_paid'  => 0,
-                'private_billed'    => 0, 'private_paid'    => 0,
-            ];
-        }
-        foreach ($repMonthRows as $r) {
-            $m = (int)$r['mo'];
-            if (!isset($byMonth[$m])) { continue; }
-            $byMonth[$m]['colleague_repairs'] = (int)$r['colleague_repairs'];
-            $byMonth[$m]['private_repairs']   = (int)$r['private_repairs'];
-            $byMonth[$m]['colleague_income']  = (float)$r['colleague_income'];
-            $byMonth[$m]['private_income']    = (float)$r['private_income'];
-        }
-        foreach ($revMonthRows as $r) {
-            $m = (int)$r['mo'];
-            if (!isset($byMonth[$m])) { continue; }
-            $byMonth[$m]['colleague_billed'] = (float)$r['colleague_billed'];
-            $byMonth[$m]['colleague_paid']   = (float)$r['colleague_paid'];
-            $byMonth[$m]['private_billed']   = (float)$r['private_billed'];
-            $byMonth[$m]['private_paid']     = (float)$r['private_paid'];
-        }
-
-        // ── Repairs per year (all years), split by type ───────────────────────
-        $repYearRows = $db->fetchAll(
-            "SELECT YEAR(r.date_in) AS yr,
-                    SUM(c.client_type =  'colleague') AS colleague_repairs,
-                    SUM(c.client_type <> 'colleague') AS private_repairs,
-                    COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
-                    COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
-             FROM repairs r
-             JOIN customers c ON c.customer_id = r.customer_id
-             WHERE r.date_in IS NOT NULL
-             GROUP BY YEAR(r.date_in)"
-        );
-
-        // ── Revenue per year (all years), split by type ───────────────────────
-        $revYearRows = $db->fetchAll(
-            "SELECT YEAR(i.invoice_date) AS yr,
-                    COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN i.total_amount END),0) AS colleague_billed,
-                    COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN i.amount_paid  END),0) AS colleague_paid,
-                    COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN i.total_amount END),0) AS private_billed,
-                    COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN i.amount_paid  END),0) AS private_paid
-             FROM invoices i
-             JOIN customers c ON c.customer_id = i.customer_id
-             WHERE i.invoice_date IS NOT NULL AND i.status != 'cancelled'
-             GROUP BY YEAR(i.invoice_date)"
-        );
-
-        // Merge yearly repairs + revenue keyed by year
-        $byYear = [];
-        $blank  = [
-            'colleague_repairs' => 0, 'private_repairs' => 0,
-            'colleague_income'  => 0, 'private_income'  => 0,
-            'colleague_billed'  => 0, 'colleague_paid'  => 0,
-            'private_billed'    => 0, 'private_paid'    => 0,
-        ];
-        foreach ($repYearRows as $r) {
-            $y = (int)$r['yr'];
-            $byYear[$y] = ($byYear[$y] ?? $blank);
-            $byYear[$y]['colleague_repairs'] = (int)$r['colleague_repairs'];
-            $byYear[$y]['private_repairs']   = (int)$r['private_repairs'];
-            $byYear[$y]['colleague_income']  = (float)$r['colleague_income'];
-            $byYear[$y]['private_income']    = (float)$r['private_income'];
-        }
-        foreach ($revYearRows as $r) {
-            $y = (int)$r['yr'];
-            $byYear[$y] = ($byYear[$y] ?? $blank);
-            $byYear[$y]['colleague_billed'] = (float)$r['colleague_billed'];
-            $byYear[$y]['colleague_paid']   = (float)$r['colleague_paid'];
-            $byYear[$y]['private_billed']   = (float)$r['private_billed'];
-            $byYear[$y]['private_paid']     = (float)$r['private_paid'];
-        }
-        krsort($byYear);
-
-        // Totals for the selected year's KPI cards
-        $yearTotals = $byYear[$year] ?? $blank;
-
-        require VIEWS_PATH . '/reports/client-types.php';
-    }
-
     // ── GET /reports/colleagues ─────────────────────────────────────────────
     /**
-     * Per-colleague performance: for a chosen period (last 30 days / current
-     * month / previous month), how many repairs each individual colleague
-     * brought in and how much income that represents.
+     * Colleague Report: colleague-only data for a chosen period (last 30 days
+     * / current month / previous month) — never mixes in private/individual
+     * customers. Two sections:
+     *   1. Per-colleague summary — repairs, bills generated, and income for
+     *      each individual colleague (e.g. "Arif: 50 repairs, 12 bills").
+     *   2. Full itemized list of every colleague repair in the period.
+     *
+     * Repairs and invoices are aggregated in SEPARATE queries and merged in
+     * PHP by colleague — joining both in one query would cross-multiply the
+     * figures (the same fan-out bug fixed earlier in Customer::getStats()).
      */
-    public function colleaguePerformance(): void
+    public function colleagueReport(): void
     {
         Auth::requireRole('manager');
         $db = Database::getInstance();
@@ -339,7 +197,8 @@ class ReportController
                 $label  = 'Last 30 Days';
         }
 
-        $rows = $db->fetchAll(
+        // ── Repairs per colleague in the period ────────────────────────────
+        $repRows = $db->fetchAll(
             "SELECT c.customer_id, c.full_name, c.phone_mobile,
                     COUNT(r.repair_id)                AS repairs_count,
                     COALESCE(SUM(r.actual_amount), 0) AS total_income,
@@ -348,17 +207,74 @@ class ReportController
              JOIN customers c ON c.customer_id = r.customer_id
              WHERE c.client_type = 'colleague'
                AND DATE(r.date_in) BETWEEN ? AND ?
-             GROUP BY c.customer_id, c.full_name, c.phone_mobile
-             ORDER BY repairs_count DESC, total_income DESC",
+             GROUP BY c.customer_id, c.full_name, c.phone_mobile",
             [$start, $end]
         );
 
-        $totals = ['repairs_count' => 0, 'total_income' => 0.0, 'colleagues' => count($rows)];
-        foreach ($rows as $r) {
-            $totals['repairs_count'] += (int)$r['repairs_count'];
-            $totals['total_income']  += (float)$r['total_income'];
+        // ── Bills (invoices) generated per colleague in the period ─────────
+        $billRows = $db->fetchAll(
+            "SELECT c.customer_id, c.full_name, c.phone_mobile,
+                    COUNT(DISTINCT i.invoice_id) AS bills_generated
+             FROM invoices i
+             JOIN customers c ON c.customer_id = i.customer_id
+             WHERE c.client_type = 'colleague'
+               AND DATE(i.invoice_date) BETWEEN ? AND ?
+               AND i.status != 'cancelled'
+             GROUP BY c.customer_id, c.full_name, c.phone_mobile",
+            [$start, $end]
+        );
+
+        // Merge into one row per colleague (a colleague may have bills but no
+        // repair check-in in this exact window, or vice versa).
+        $byColleague = [];
+        foreach ($repRows as $r) {
+            $id = (int)$r['customer_id'];
+            $byColleague[$id] = [
+                'customer_id'     => $id,
+                'full_name'       => $r['full_name'],
+                'phone_mobile'    => $r['phone_mobile'],
+                'repairs_count'   => (int)$r['repairs_count'],
+                'total_income'    => (float)$r['total_income'],
+                'bills_generated' => 0,
+                'last_repair'     => $r['last_repair'],
+            ];
+        }
+        foreach ($billRows as $r) {
+            $id = (int)$r['customer_id'];
+            if (!isset($byColleague[$id])) {
+                $byColleague[$id] = [
+                    'customer_id'     => $id,
+                    'full_name'       => $r['full_name'],
+                    'phone_mobile'    => $r['phone_mobile'],
+                    'repairs_count'   => 0,
+                    'total_income'    => 0.0,
+                    'bills_generated' => 0,
+                    'last_repair'     => null,
+                ];
+            }
+            $byColleague[$id]['bills_generated'] = (int)$r['bills_generated'];
+        }
+        usort($byColleague, fn($a, $b) => $b['repairs_count'] <=> $a['repairs_count'] ?: $b['total_income'] <=> $a['total_income']);
+
+        $totals = ['repairs_count' => 0, 'total_income' => 0.0, 'bills_generated' => 0, 'colleagues' => count($byColleague)];
+        foreach ($byColleague as $r) {
+            $totals['repairs_count']   += $r['repairs_count'];
+            $totals['total_income']    += $r['total_income'];
+            $totals['bills_generated'] += $r['bills_generated'];
         }
 
-        require VIEWS_PATH . '/reports/colleague-performance.php';
+        // ── Full itemized list of every colleague repair in the period ─────
+        $repairRows = $db->fetchAll(
+            "SELECT r.repair_id, r.device_model, r.actual_amount, r.estimate_amount, r.status, r.date_in,
+                    c.full_name AS customer_name
+             FROM repairs r
+             JOIN customers c ON c.customer_id = r.customer_id
+             WHERE c.client_type = 'colleague'
+               AND DATE(r.date_in) BETWEEN ? AND ?
+             ORDER BY r.date_in DESC",
+            [$start, $end]
+        );
+
+        require VIEWS_PATH . '/reports/colleague-report.php';
     }
 }

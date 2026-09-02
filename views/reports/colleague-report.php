@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Colleague Performance';
+$pageTitle = 'Colleague Report';
 require VIEWS_PATH . '/layouts/header.php';
 
 $c = fn(float $v): string => Utils::formatCurrency($v);
@@ -34,8 +34,8 @@ $periods = [
 
 <div class="page-header">
     <div>
-        <h1 class="page-title">Colleague Performance</h1>
-        <p class="page-subtitle">How many repairs each colleague brought in, and the income from them</p>
+        <h1 class="page-title">Colleague Report</h1>
+        <p class="page-subtitle">Colleague repairs only — no private/individual customer data on this page</p>
     </div>
     <a href="<?= BASE_URL ?>/reports" class="btn btn-secondary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -59,6 +59,11 @@ $periods = [
         <div class="stat-sub"><?= Utils::e($label) ?></div>
     </div>
     <div class="stat-card">
+        <div class="stat-value"><?= (int)$totals['bills_generated'] ?></div>
+        <div class="stat-label">Bills Generated</div>
+        <div class="stat-sub"><?= Utils::e($label) ?></div>
+    </div>
+    <div class="stat-card">
         <div class="stat-value" style="color:#a855f7"><?= $c($totals['total_income']) ?></div>
         <div class="stat-label">Total Colleague Income</div>
         <div class="stat-sub"><?= Utils::e($label) ?></div>
@@ -66,11 +71,11 @@ $periods = [
     <div class="stat-card">
         <div class="stat-value"><?= (int)$totals['colleagues'] ?></div>
         <div class="stat-label">Active Colleagues</div>
-        <div class="stat-sub">Brought in at least 1 repair</div>
+        <div class="stat-sub">Brought in at least 1 repair or bill</div>
     </div>
 </div>
 
-<!-- Per-colleague breakdown -->
+<!-- Section A: per-colleague summary -->
 <div class="card">
     <div class="card-header"><h2 class="card-title">By colleague — <?= Utils::e($label) ?></h2></div>
     <div class="table-responsive">
@@ -79,17 +84,18 @@ $periods = [
                 <tr>
                     <th>Colleague</th>
                     <th>Repairs</th>
+                    <th>Bills Generated</th>
                     <th>Total Income</th>
                     <th>Avg / Repair</th>
                     <th>Last Repair</th>
                 </tr>
             </thead>
             <tbody>
-            <?php if (empty($rows)): ?>
-                <tr><td colspan="5" style="text-align:center;padding:1.5rem" class="muted">No colleague repairs in this period.</td></tr>
+            <?php if (empty($byColleague)): ?>
+                <tr><td colspan="6" style="text-align:center;padding:1.5rem" class="muted">No colleague activity in this period.</td></tr>
             <?php else: ?>
-                <?php foreach ($rows as $i => $r): ?>
-                <?php $avg = (int)$r['repairs_count'] > 0 ? ((float)$r['total_income'] / (int)$r['repairs_count']) : 0.0; ?>
+                <?php foreach ($byColleague as $i => $r): ?>
+                <?php $avg = $r['repairs_count'] > 0 ? ($r['total_income'] / $r['repairs_count']) : 0.0; ?>
                 <tr>
                     <td>
                         <span class="cp-rank"><?= $i + 1 ?></span>
@@ -99,7 +105,8 @@ $periods = [
                         <?php endif; ?>
                     </td>
                     <td><?= (int)$r['repairs_count'] ?></td>
-                    <td style="font-weight:600"><?= $c((float)$r['total_income']) ?></td>
+                    <td><?= (int)$r['bills_generated'] ?></td>
+                    <td style="font-weight:600"><?= $c($r['total_income']) ?></td>
                     <td class="muted"><?= $c($avg) ?></td>
                     <td class="muted"><?= $r['last_repair'] ? Utils::formatDate($r['last_repair']) : '—' ?></td>
                 </tr>
@@ -108,7 +115,51 @@ $periods = [
             </tbody>
         </table>
     </div>
-    <div class="legend">Income is each repair's Actual Amount. Repairs are counted by check-in date (not invoice date).</div>
+    <div class="legend">Repairs / Income are counted by repair check-in date. Bills Generated counts invoices by their invoice date (excluding cancelled) — a repair invoiced outside this window won't add to that count here.</div>
+</div>
+
+<!-- Section B: itemized list of every colleague repair -->
+<div class="card">
+    <div class="card-header"><h2 class="card-title">All colleague repairs — <?= Utils::e($label) ?></h2></div>
+    <div class="table-responsive">
+        <table class="cp-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th style="text-align:left">Colleague</th>
+                    <th style="text-align:left">Device</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Date In</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php if (empty($repairRows)): ?>
+                <tr><td colspan="6" style="text-align:center;padding:1.5rem" class="muted">No colleague repairs in this period.</td></tr>
+            <?php else: ?>
+                <?php foreach ($repairRows as $rr): ?>
+                <tr>
+                    <td><a href="<?= BASE_URL ?>/repairs/<?= (int)$rr['repair_id'] ?>" style="color:var(--text-primary);text-decoration:none;font-weight:600">#<?= (int)$rr['repair_id'] ?></a></td>
+                    <td style="text-align:left"><?= Utils::e($rr['customer_name'] ?? '—') ?></td>
+                    <td style="text-align:left"><?= Utils::e($rr['device_model'] ?? '—') ?></td>
+                    <td>
+                        <?php if (!empty($rr['actual_amount'])): ?>
+                            <?= $c((float)$rr['actual_amount']) ?>
+                        <?php elseif (!empty($rr['estimate_amount'])): ?>
+                            <span class="muted">~<?= $c((float)$rr['estimate_amount']) ?></span>
+                        <?php else: ?>
+                            <span class="muted">—</span>
+                        <?php endif; ?>
+                    </td>
+                    <td><span class="badge <?= REPAIR_STATUS_CLASS[$rr['status']] ?? 'badge-gray' ?>"><?= Utils::e(REPAIR_STATUS[$rr['status']] ?? $rr['status']) ?></span></td>
+                    <td class="muted"><?= Utils::formatDate($rr['date_in']) ?></td>
+                </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    <div class="legend"><?= count($repairRows) ?> repair<?= count($repairRows) === 1 ? '' : 's' ?> — click any row's # to open that repair.</div>
 </div>
 
 <?php require VIEWS_PATH . '/layouts/footer.php'; ?>
