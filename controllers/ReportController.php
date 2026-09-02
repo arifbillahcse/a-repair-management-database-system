@@ -306,6 +306,64 @@ class ReportController
         // Totals for the selected year's KPI cards
         $yearTotals = $byYear[$year] ?? $blank;
 
+        // ── Daily drill-down for one month of the selected year ───────────────
+        $month = (int)($_GET['month'] ?? 0);
+        $byDay = [];
+        if ($month >= 1 && $month <= 12) {
+            $daysInMonth = (int)date('t', mktime(0, 0, 0, $month, 1, $year));
+
+            $repDayRows = $db->fetchAll(
+                "SELECT DAY(r.date_in) AS d,
+                        SUM(c.client_type =  'colleague') AS colleague_repairs,
+                        SUM(c.client_type <> 'colleague') AS private_repairs,
+                        COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
+                        COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
+                 FROM repairs r
+                 JOIN customers c ON c.customer_id = r.customer_id
+                 WHERE YEAR(r.date_in) = ? AND MONTH(r.date_in) = ?
+                 GROUP BY DAY(r.date_in)",
+                [$year, $month]
+            );
+
+            $revDayRows = $db->fetchAll(
+                "SELECT DAY(i.invoice_date) AS d,
+                        COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN i.total_amount END),0) AS colleague_billed,
+                        COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN i.amount_paid  END),0) AS colleague_paid,
+                        COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN i.total_amount END),0) AS private_billed,
+                        COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN i.amount_paid  END),0) AS private_paid
+                 FROM invoices i
+                 JOIN customers c ON c.customer_id = i.customer_id
+                 WHERE YEAR(i.invoice_date) = ? AND MONTH(i.invoice_date) = ? AND i.status != 'cancelled'
+                 GROUP BY DAY(i.invoice_date)",
+                [$year, $month]
+            );
+
+            for ($d = 1; $d <= $daysInMonth; $d++) {
+                $byDay[$d] = [
+                    'colleague_repairs' => 0, 'private_repairs' => 0,
+                    'colleague_income'  => 0, 'private_income'  => 0,
+                    'colleague_billed'  => 0, 'colleague_paid'  => 0,
+                    'private_billed'    => 0, 'private_paid'    => 0,
+                ];
+            }
+            foreach ($repDayRows as $r) {
+                $d = (int)$r['d'];
+                if (!isset($byDay[$d])) { continue; }
+                $byDay[$d]['colleague_repairs'] = (int)$r['colleague_repairs'];
+                $byDay[$d]['private_repairs']   = (int)$r['private_repairs'];
+                $byDay[$d]['colleague_income']  = (float)$r['colleague_income'];
+                $byDay[$d]['private_income']    = (float)$r['private_income'];
+            }
+            foreach ($revDayRows as $r) {
+                $d = (int)$r['d'];
+                if (!isset($byDay[$d])) { continue; }
+                $byDay[$d]['colleague_billed'] = (float)$r['colleague_billed'];
+                $byDay[$d]['colleague_paid']   = (float)$r['colleague_paid'];
+                $byDay[$d]['private_billed']   = (float)$r['private_billed'];
+                $byDay[$d]['private_paid']     = (float)$r['private_paid'];
+            }
+        }
+
         require VIEWS_PATH . '/reports/client-types.php';
     }
 }

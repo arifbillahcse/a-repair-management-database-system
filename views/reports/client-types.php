@@ -9,6 +9,13 @@ $mt = ['colleague_repairs'=>0,'private_repairs'=>0,'colleague_income'=>0.0,'priv
 foreach ($byMonth as $row) {
     foreach ($mt as $k => $_) { $mt[$k] += $row[$k]; }
 }
+
+// Selected-month daily totals (footer row), only relevant when $byDay is populated
+$dt = ['colleague_repairs'=>0,'private_repairs'=>0,'colleague_income'=>0.0,'private_income'=>0.0,'colleague_billed'=>0.0,'colleague_paid'=>0.0,'private_billed'=>0.0,'private_paid'=>0.0];
+foreach ($byDay as $row) {
+    foreach ($dt as $k => $_) { $dt[$k] += $row[$k]; }
+}
+$monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
 ?>
 <style>
 .ct-bar{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.75rem 1.1rem;margin-bottom:1.5rem;box-shadow:var(--shadow-sm)}
@@ -120,10 +127,10 @@ foreach ($byMonth as $row) {
                 </tr>
             </thead>
             <tbody>
-            <?php foreach ($byMonth as $row): ?>
+            <?php foreach ($byMonth as $mNum => $row): ?>
                 <?php $empty = !$row['private_repairs'] && !$row['colleague_repairs'] && !$row['colleague_billed'] && !$row['private_billed'] && !$row['colleague_income'] && !$row['private_income']; ?>
-                <tr<?= $empty ? ' class="muted"' : '' ?>>
-                    <td><?= Utils::e($row['label']) ?></td>
+                <tr<?= $empty ? ' class="muted"' : '' ?><?= $mNum === $month ? ' style="background:var(--accent-dim)"' : '' ?>>
+                    <td><a href="<?= BASE_URL ?>/reports/client-types?year=<?= $year ?>&month=<?= $mNum ?>" class="yr-link" title="View daily breakdown"><?= Utils::e($row['label']) ?></a></td>
                     <td><?= (int)$row['private_repairs'] ?></td>
                     <td class="grp-col" style="color:#a855f7"><?= (int)$row['colleague_repairs'] ?></td>
                     <td class="col-div"><?= $c((float)$row['private_income']) ?></td>
@@ -150,8 +157,71 @@ foreach ($byMonth as $row) {
             </tfoot>
         </table>
     </div>
-    <div class="legend">Repair Income is each repair's Actual Amount, counted as soon as it's priced — no invoice required. Invoiced columns are taken from invoices (excluding cancelled). Repairs are counted by check-in date.</div>
+    <div class="legend">Repair Income is each repair's Actual Amount, counted as soon as it's priced — no invoice required. Invoiced columns are taken from invoices (excluding cancelled). Repairs are counted by check-in date. Click any month to see its daily breakdown below.</div>
 </div>
+
+<?php if ($month >= 1 && $month <= 12): ?>
+<!-- Daily drill-down for the selected month -->
+<div class="card">
+    <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+        <h2 class="card-title">Daily breakdown — <?= Utils::e($monthNames[$month]) ?> <?= $year ?></h2>
+        <a href="<?= BASE_URL ?>/reports/client-types?year=<?= $year ?>" class="btn btn-secondary btn-sm">Back to monthly</a>
+    </div>
+    <div class="table-responsive">
+        <table class="ct-table">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="vertical-align:bottom">Day</th>
+                    <th colspan="2" style="text-align:center">Repairs</th>
+                    <th colspan="2" style="text-align:center" class="col-div">Repair Income</th>
+                    <th colspan="2" style="text-align:center" class="col-div">Colleague Invoiced</th>
+                    <th colspan="2" style="text-align:center" class="col-div">Private Invoiced</th>
+                </tr>
+                <tr>
+                    <th>Private</th>
+                    <th>Colleague</th>
+                    <th class="col-div">Private</th>
+                    <th>Colleague</th>
+                    <th class="col-div">Billed</th>
+                    <th>Collected</th>
+                    <th class="col-div">Billed</th>
+                    <th>Collected</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($byDay as $dNum => $row): ?>
+                <?php $emptyDay = !$row['private_repairs'] && !$row['colleague_repairs'] && !$row['colleague_billed'] && !$row['private_billed'] && !$row['colleague_income'] && !$row['private_income']; ?>
+                <tr<?= $emptyDay ? ' class="muted"' : '' ?>>
+                    <td><?= $dNum ?></td>
+                    <td><?= (int)$row['private_repairs'] ?></td>
+                    <td class="grp-col" style="color:#a855f7"><?= (int)$row['colleague_repairs'] ?></td>
+                    <td class="col-div"><?= $c((float)$row['private_income']) ?></td>
+                    <td class="grp-col" style="color:#a855f7"><?= $c((float)$row['colleague_income']) ?></td>
+                    <td class="col-div"><?= $c((float)$row['colleague_billed']) ?></td>
+                    <td class="muted"><?= $c((float)$row['colleague_paid']) ?></td>
+                    <td class="col-div"><?= $c((float)$row['private_billed']) ?></td>
+                    <td class="muted"><?= $c((float)$row['private_paid']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Total</td>
+                    <td><?= (int)$dt['private_repairs'] ?></td>
+                    <td><?= (int)$dt['colleague_repairs'] ?></td>
+                    <td class="col-div"><?= $c($dt['private_income']) ?></td>
+                    <td><?= $c($dt['colleague_income']) ?></td>
+                    <td class="col-div"><?= $c($dt['colleague_billed']) ?></td>
+                    <td><?= $c($dt['colleague_paid']) ?></td>
+                    <td class="col-div"><?= $c($dt['private_billed']) ?></td>
+                    <td><?= $c($dt['private_paid']) ?></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="legend">Same figures as the monthly table, broken down day by day for <?= Utils::e($monthNames[$month]) ?> <?= $year ?>.</div>
+</div>
+<?php endif; ?>
 
 <!-- Yearly summary across all years -->
 <div class="card">
