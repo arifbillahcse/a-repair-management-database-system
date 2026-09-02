@@ -308,4 +308,57 @@ class ReportController
 
         require VIEWS_PATH . '/reports/client-types.php';
     }
+
+    // ── GET /reports/colleagues ─────────────────────────────────────────────
+    /**
+     * Per-colleague performance: for a chosen period (last 30 days / current
+     * month / previous month), how many repairs each individual colleague
+     * brought in and how much income that represents.
+     */
+    public function colleaguePerformance(): void
+    {
+        Auth::requireRole('manager');
+        $db = Database::getInstance();
+
+        $period = $_GET['period'] ?? '30days';
+        switch ($period) {
+            case 'current_month':
+                $start = date('Y-m-01');
+                $end   = date('Y-m-t');
+                $label = 'Current Month (' . date('F Y') . ')';
+                break;
+            case 'previous_month':
+                $start = date('Y-m-01', strtotime('first day of last month'));
+                $end   = date('Y-m-t',  strtotime('last day of last month'));
+                $label = 'Previous Month (' . date('F Y', strtotime('last month')) . ')';
+                break;
+            default:
+                $period = '30days';
+                $start  = date('Y-m-d', strtotime('-29 days'));
+                $end    = date('Y-m-d');
+                $label  = 'Last 30 Days';
+        }
+
+        $rows = $db->fetchAll(
+            "SELECT c.customer_id, c.full_name, c.phone_mobile,
+                    COUNT(r.repair_id)                AS repairs_count,
+                    COALESCE(SUM(r.actual_amount), 0) AS total_income,
+                    MAX(r.date_in)                     AS last_repair
+             FROM repairs r
+             JOIN customers c ON c.customer_id = r.customer_id
+             WHERE c.client_type = 'colleague'
+               AND DATE(r.date_in) BETWEEN ? AND ?
+             GROUP BY c.customer_id, c.full_name, c.phone_mobile
+             ORDER BY repairs_count DESC, total_income DESC",
+            [$start, $end]
+        );
+
+        $totals = ['repairs_count' => 0, 'total_income' => 0.0, 'colleagues' => count($rows)];
+        foreach ($rows as $r) {
+            $totals['repairs_count'] += (int)$r['repairs_count'];
+            $totals['total_income']  += (float)$r['total_income'];
+        }
+
+        require VIEWS_PATH . '/reports/colleague-performance.php';
+    }
 }
