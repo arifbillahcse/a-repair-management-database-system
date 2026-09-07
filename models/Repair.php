@@ -30,6 +30,22 @@ class Repair extends BaseModel
                 $pdo->exec("ALTER TABLE `repairs` ADD COLUMN `{$col}` {$def}");
             }
         }
+        $this->ensureWithdrawnStatus();
+    }
+
+    /** Add 'withdrawn' to the status ENUM on databases created before it existed. */
+    private function ensureWithdrawnStatus(): void
+    {
+        $pdo = $this->db->getPdo();
+        $col = $pdo->query("SHOW COLUMNS FROM `repairs` WHERE Field = 'status'")->fetch(PDO::FETCH_ASSOC);
+        if ($col && !str_contains($col['Type'], "'withdrawn'")) {
+            $pdo->exec(
+                "ALTER TABLE `repairs` MODIFY COLUMN `status` ENUM(
+                    'in_progress','on_hold','waiting_for_parts','ready_for_pickup',
+                    'completed','collected','cancelled','withdrawn'
+                ) NOT NULL DEFAULT 'in_progress'"
+            );
+        }
     }
 
     // ── Full record with joins ────────────────────────────────────────────────

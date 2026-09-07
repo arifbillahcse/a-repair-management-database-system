@@ -289,7 +289,8 @@ CREATE TABLE IF NOT EXISTS `repairs` (
                              'ready_for_pickup',
                              'completed',
                              'collected',
-                             'cancelled'
+                             'cancelled',
+                             'withdrawn'
                          )               NOT NULL DEFAULT 'in_progress',
     `priority`           VARCHAR(10)     NOT NULL DEFAULT 'normal',
     `photo_path`         VARCHAR(500)             DEFAULT NULL, -- Path/URL to image(s)

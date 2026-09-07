@@ -62,19 +62,26 @@ define('REPAIR_STATUS', [
     'completed'         => 'Completed',
     'collected'         => 'Collected',
     'cancelled'         => 'Cancelled',
+    'withdrawn'         => 'Withdrawn – Not Accepted',
 ]);
 
 // Allowed status transitions.
-// 'collected' and 'cancelled' can be reopened to any other status so a
-// mistaken final status can be corrected — they are not full dead ends.
+// 'collected', 'cancelled' and 'withdrawn' can be reopened to any other
+// status so a mistaken final status can be corrected — they are not full
+// dead ends.
+// 'withdrawn' = customer took the device back after refusing the estimate,
+// without ever accepting/paying for a repair. Reachable only from the
+// diagnosis-stage statuses (before the repair is actually done), not from
+// completed/ready_for_pickup/collected.
 define('REPAIR_STATUS_FLOW', [
-    'in_progress'       => ['on_hold', 'waiting_for_parts', 'completed', 'cancelled'],
-    'on_hold'           => ['in_progress', 'waiting_for_parts', 'cancelled'],
-    'waiting_for_parts' => ['in_progress', 'on_hold', 'cancelled'],
+    'in_progress'       => ['on_hold', 'waiting_for_parts', 'completed', 'cancelled', 'withdrawn'],
+    'on_hold'           => ['in_progress', 'waiting_for_parts', 'cancelled', 'withdrawn'],
+    'waiting_for_parts' => ['in_progress', 'on_hold', 'cancelled', 'withdrawn'],
     'completed'         => ['ready_for_pickup', 'in_progress'],
     'ready_for_pickup'  => ['collected', 'on_hold', 'in_progress'],
     'collected'         => ['ready_for_pickup', 'in_progress', 'on_hold', 'cancelled'],
     'cancelled'         => ['in_progress', 'on_hold', 'waiting_for_parts'],
+    'withdrawn'         => ['in_progress', 'on_hold', 'waiting_for_parts'],
 ]);
 
 // Status badge CSS classes (mapped to style.css)
@@ -86,6 +93,7 @@ define('REPAIR_STATUS_CLASS', [
     'completed'         => 'badge-green',
     'collected'         => 'badge-green-dim',
     'cancelled'         => 'badge-dark',
+    'withdrawn'         => 'badge-purple',
 ]);
 
 // ── Invoice statuses ────────────────────────────────────────────────────────────

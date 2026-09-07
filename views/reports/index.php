@@ -298,6 +298,7 @@ $qs = fn(string $r) => BASE_URL . '/reports?range=' . $r;
             'completed'         => '#10b981',
             'collected'         => '#059669',
             'cancelled'         => '#ef4444',
+            'withdrawn'         => '#a855f7',
         ];
         ?>
         <div class="status-wrap">
