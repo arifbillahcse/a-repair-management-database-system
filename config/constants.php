@@ -70,17 +70,17 @@ define('REPAIR_STATUS', [
 // status so a mistaken final status can be corrected — they are not full
 // dead ends.
 // 'withdrawn' = customer took the device back after refusing the estimate,
-// without ever accepting/paying for a repair. Reachable only from the
-// diagnosis-stage statuses (before the repair is actually done), not from
-// completed/ready_for_pickup/collected.
+// without ever accepting/paying for a repair. Reachable from every status,
+// since the buyer may realize the customer withdrew even after marking a
+// repair completed/ready/collected by mistake.
 define('REPAIR_STATUS_FLOW', [
     'in_progress'       => ['on_hold', 'waiting_for_parts', 'completed', 'cancelled', 'withdrawn'],
     'on_hold'           => ['in_progress', 'waiting_for_parts', 'cancelled', 'withdrawn'],
     'waiting_for_parts' => ['in_progress', 'on_hold', 'cancelled', 'withdrawn'],
-    'completed'         => ['ready_for_pickup', 'in_progress'],
-    'ready_for_pickup'  => ['collected', 'on_hold', 'in_progress'],
-    'collected'         => ['ready_for_pickup', 'in_progress', 'on_hold', 'cancelled'],
-    'cancelled'         => ['in_progress', 'on_hold', 'waiting_for_parts'],
+    'completed'         => ['ready_for_pickup', 'in_progress', 'withdrawn'],
+    'ready_for_pickup'  => ['collected', 'on_hold', 'in_progress', 'withdrawn'],
+    'collected'         => ['ready_for_pickup', 'in_progress', 'on_hold', 'cancelled', 'withdrawn'],
+    'cancelled'         => ['in_progress', 'on_hold', 'waiting_for_parts', 'withdrawn'],
     'withdrawn'         => ['in_progress', 'on_hold', 'waiting_for_parts'],
 ]);
 
