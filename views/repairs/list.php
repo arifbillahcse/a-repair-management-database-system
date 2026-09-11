@@ -300,7 +300,7 @@ function rep_sortIcon(string $col): string
                         <?= Utils::formatDate($r['date_in']) ?>
                     </td>
                     <td class="hide-t" style="font-size:.82rem;color:var(--text-secondary);white-space:nowrap">
-                        <?= Utils::formatDate($r['date_out'] ?? $r['date_expected_out'] ?? '—') ?>
+                        <?= Utils::formatDate($r['date_out'] ?? $r['collection_date'] ?? '—') ?>
                     </td>
                     <td class="hide-t" style="text-align:right;font-size:.83rem">
                         <?php if (!empty($r['actual_amount'])): ?>

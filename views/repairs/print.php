@@ -188,10 +188,10 @@
                     <div class="field-label">Date In</div>
                     <div class="field-value"><?= Utils::formatDate($repair['date_in']) ?></div>
                 </div>
-                <?php if (!empty($repair['date_expected_out'])): ?>
+                <?php if (!empty($repair['collection_date'])): ?>
                 <div class="field">
                     <div class="field-label">Expected Out</div>
-                    <div class="field-value"><?= Utils::formatDate($repair['date_expected_out']) ?></div>
+                    <div class="field-value"><?= Utils::formatDate($repair['collection_date']) ?></div>
                 </div>
                 <?php endif; ?>
                 <?php if (!empty($repair['date_out'])): ?>
