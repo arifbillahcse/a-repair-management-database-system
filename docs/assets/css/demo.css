@@ -588,3 +588,32 @@ tr.row-error td { background: var(--error-bg); }
 /* The "no photos" message is a grid item, so it inherited a 120px track
    and wrapped to four words a line. Let it span the row. */
 .photo-grid > p { grid-column: 1 / -1; }
+
+/* ── First-visit role-switcher hint ───────────────────────────────────────── */
+
+.role-hint {
+    position: fixed; z-index: 140; width: 272px; padding: .8rem .9rem;
+    background: var(--bg-primary); border: 1px solid var(--accent);
+    border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    animation: hintIn .25s ease;
+}
+@keyframes hintIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.role-hint-arrow {
+    position: absolute; top: -7px; right: 26px; width: 12px; height: 12px;
+    background: var(--bg-primary); border-left: 1px solid var(--accent);
+    border-top: 1px solid var(--accent); transform: rotate(45deg);
+}
+.role-hint strong { display: block; font-size: .86rem; color: var(--text-primary); margin-bottom: .25rem; }
+.role-hint p { font-size: .78rem; color: var(--text-secondary); line-height: 1.5; margin: 0 0 .6rem; }
+.role-hint-ok {
+    background: var(--accent); color: #fff; border: none; cursor: pointer;
+    border-radius: var(--radius); padding: .32rem .8rem; font-size: .78rem;
+    font-weight: 600; font-family: inherit;
+}
+.role-hint-ok:hover { background: var(--accent-hover); }
+:root[data-theme="dark"] .role-hint-ok { color: #0c1b16; }
+
+@media (max-width: 480px) {
+    .role-hint { width: auto; left: 12px; right: 12px !important; }
+    .role-hint-arrow { right: 18px; }
+}

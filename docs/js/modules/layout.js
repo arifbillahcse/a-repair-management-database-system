@@ -274,8 +274,63 @@ const Layout = {
         // Global search
         this.bindGlobalSearch();
 
+        // First-visit hint pointing at the role switcher
+        this.maybeShowRoleHint();
+
         // Close the mobile sidebar whenever a route changes
         window.addEventListener('hashchange', close);
+    },
+
+    /**
+     * Visitors reliably miss the role switcher, which means they miss the
+     * permission gates entirely — the most interesting thing in the demo.
+     * Point at it once per browser, then never again.
+     */
+    HINT_KEY: DEMO_PREFIX + 'role_hint_seen',
+
+    maybeShowRoleHint() {
+        let seen = false;
+        try { seen = localStorage.getItem(this.HINT_KEY) === '1'; } catch { seen = true; }
+        if (seen || document.getElementById('roleHint')) return;
+
+        const dismiss = () => {
+            document.getElementById('roleHint')?.remove();
+            try { localStorage.setItem(this.HINT_KEY, '1'); } catch { /* private mode */ }
+        };
+
+        setTimeout(() => {
+            // The visitor may have navigated or logged out in the meantime.
+            if (!Auth.check() || document.getElementById('roleHint')) return;
+
+            const anchor = document.getElementById('userMenuBtn');
+            if (!anchor) return;
+
+            const tip = document.createElement('div');
+            tip.id = 'roleHint';
+            tip.className = 'role-hint';
+            tip.setAttribute('role', 'status');
+            tip.innerHTML = `
+                <div class="role-hint-arrow"></div>
+                <strong>Try switching roles</strong>
+                <p>Open this menu to view the app as a Manager, Technician or front-desk Staff
+                   member. Reports, Staff and Settings appear and disappear with the role.</p>
+                <button class="role-hint-ok">Got it</button>`;
+            document.body.appendChild(tip);
+
+            const place = () => {
+                const r = anchor.getBoundingClientRect();
+                tip.style.top  = `${r.bottom + 10}px`;
+                tip.style.right = `${Math.max(12, window.innerWidth - r.right)}px`;
+            };
+            place();
+            window.addEventListener('resize', place);
+
+            tip.querySelector('.role-hint-ok').onclick = dismiss;
+            anchor.addEventListener('click', dismiss, { once: true });
+            setTimeout(dismiss, 15000);
+        // Wait out the sign-in toast (4s + fade), which occupies the same
+        // top-right corner and would sit on top of the hint.
+        }, 4800);
     },
 
     showPickupQueue(ready) {

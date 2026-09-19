@@ -6,6 +6,11 @@ from GitHub Pages.
 
 **Live:** https://arifbillahcse.github.io/a-repair-management-database-system/
 
+![Dashboard](assets/screenshots/01-dashboard.png)
+
+Screenshots of every module are in the
+[main README](../README.md#screenshots).
+
 ---
 
 ## What it demonstrates

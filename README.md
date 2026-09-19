@@ -13,6 +13,52 @@ in one click. Source in [`docs/`](docs/), notes in
 
 ---
 
+## Screenshots
+
+### Dashboard
+Open jobs, 12-month revenue, overdue-pickup alerts and technician workload at a glance.
+
+![Dashboard](docs/assets/screenshots/01-dashboard.png)
+
+### Repair job
+Full lifecycle with a status pipeline that only offers legal transitions, plus device photos and a scannable QR tag.
+
+![Repair detail](docs/assets/screenshots/03-repair-detail.png)
+
+### Repairs list
+Search, status filters, sortable columns and pagination across every job.
+
+![Repairs list](docs/assets/screenshots/02-repairs-list.png)
+
+### Invoicing
+Line items with live VAT maths, partial payments, overdue detection — and a print-ready invoice.
+
+| Invoice | Print / PDF |
+|---|---|
+| ![Invoice](docs/assets/screenshots/05-invoice-detail.png) | ![Invoice print](docs/assets/screenshots/07-invoice-print.png) |
+
+### Reports
+Revenue, job volume, technician output and top clients. Every chart is backed by a table, so the numbers never depend on colour alone.
+
+![Reports](docs/assets/screenshots/06-reports.png)
+
+### CSV import
+Real files, parsed in the browser, with per-row validation and a preview before anything is written.
+
+![CSV import](docs/assets/screenshots/08-csv-import.png)
+
+### Clients
+![Clients list](docs/assets/screenshots/04-clients-list.png)
+
+### Dark mode &amp; mobile
+The layout works down to phone width, and dark mode is a deliberate second set of tokens rather than an inverted copy.
+
+| Dark mode | Mobile | Sign in |
+|---|---|---|
+| ![Dark mode](docs/assets/screenshots/09-dashboard-dark.png) | ![Mobile](docs/assets/screenshots/10-mobile-dashboard.png) | ![Login](docs/assets/screenshots/00-login.png) |
+
+---
+
 ## Features
 
 ### Repair Tickets
