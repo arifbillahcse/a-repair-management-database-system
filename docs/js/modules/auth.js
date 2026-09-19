@@ -14,9 +14,9 @@ const AuthView = {
             <div class="login-page">
                 <div class="login-card">
                     <div class="login-brand">
-                        ${Icon.wrench('login-logo')}
+                        ${Icon.brand('login-logo')}
                         <h1>${Utils.e(DB.setting('company_name', APP_NAME))}</h1>
-                        <p>Repair &amp; service management — interactive demo</p>
+                        <p>${Utils.e(VARIANT.industry)} — interactive demo</p>
                     </div>
 
                     <form id="loginForm" class="login-form" novalidate>
@@ -82,8 +82,8 @@ const AuthView = {
         return {
             admin:      'Everything, incl. settings & import',
             manager:    'Reports and staff management',
-            technician: 'Repairs and clients only',
-            staff:      'Front desk — clients & invoices',
+            technician: `${L.jobMany} and ${L.clientMany.toLowerCase()} only`,
+            staff:      `Front desk — ${L.clientMany.toLowerCase()} & invoices`,
         }[role] ?? '';
     },
 

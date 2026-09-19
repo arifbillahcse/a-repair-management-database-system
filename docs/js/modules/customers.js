@@ -20,13 +20,13 @@ const Customers = {
         const counts = Customer.getCounts();
 
         Layout.render(`
-            ${UI.pageHeader('Clients',
+            ${UI.pageHeader(L.clientMany,
                 `${Utils.numberFormat(counts.total)} total &nbsp;·&nbsp;
                  <span style="color:var(--success)">${Utils.numberFormat(counts.active)} active</span>
                  ${counts.inactive ? `&nbsp;·&nbsp; <span class="text-muted">${counts.inactive} inactive</span>` : ''}
                  ${counts.colleagues ? `&nbsp;·&nbsp; <span style="color:#7c3aed">${counts.colleagues} colleagues</span>` : ''}`,
                 `${Auth.can('manager') ? `<button class="btn btn-secondary" id="exportBtn">${Icon.download('')} Export CSV</button>` : ''}
-                 <a href="#/customers/create" class="btn btn-primary">${Icon.plus('')} New Client</a>`
+                 <a href="#/customers/create" class="btn btn-primary">${Icon.plus('')} New ${Utils.e(L.clientOne)}</a>`
             )}
 
             <div class="card">
@@ -71,7 +71,7 @@ const Customers = {
                     ${!c.phone_mobile && !c.email ? '<span class="text-muted">—</span>' : ''}` },
                 { key: 'city', label: 'City', sortable: true, hideOnTablet: true,
                   render: c => Utils.e(c.city ?? '—') },
-                { key: 'customer_since', label: 'Client since', sortable: true, hideOnTablet: true,
+                { key: 'customer_since', label: `${L.clientOne} since`, sortable: true, hideOnTablet: true,
                   render: c => Utils.formatDate(c.customer_since) },
                 { key: 'status', label: 'Status', sortable: true, render: c => Badge.active(c.status) },
             ],
@@ -80,9 +80,11 @@ const Customers = {
                 DataTable.act.edit(`#/customers/${c.customer_id}/edit`) +
                 (Auth.can('manager') ? DataTable.act.del(c.customer_id) : ''),
             empty: {
-                message: filters.search ? `No clients match "${filters.search}".` : 'No clients yet.',
+                message: filters.search
+                    ? `No ${L.clientMany.toLowerCase()} match "${filters.search}".`
+                    : `No ${L.clientMany.toLowerCase()} yet.`,
                 icon: 'users',
-                action: '<a href="#/customers/create" class="btn btn-primary">Add the first client</a>',
+                action: `<a href="#/customers/create" class="btn btn-primary">Add the first ${Utils.e(L.clientOne.toLowerCase())}</a>`,
             },
             onSort: (col, dir) => Router.setQuery({ sort: col, dir, page: 1 }),
             onPage: p => Router.setQuery({ page: p }),
@@ -121,18 +123,18 @@ const Customers = {
         const invoices = Customer.getInvoices(c.customer_id);
 
         Layout.render(`
-            ${UI.backLink('#/customers', 'All clients')}
+            ${UI.backLink('#/customers', `All ${L.clientMany.toLowerCase()}`)}
 
             ${UI.pageHeader(c.full_name,
                 `${Badge.clientType(c.client_type)} ${Badge.active(c.status)}
-                 &nbsp;·&nbsp; Client since ${Utils.formatDate(c.customer_since)}`,
-                `<a href="#/repairs/create?customer_id=${c.customer_id}" class="btn btn-primary">${Icon.plus('')} New Repair</a>
+                 &nbsp;·&nbsp; ${Utils.e(L.clientOne)} since ${Utils.formatDate(c.customer_since)}`,
+                `<a href="#/repairs/create?customer_id=${c.customer_id}" class="btn btn-primary">${Icon.plus('')} ${Utils.e(L.jobNew)}</a>
                  <a href="#/customers/${c.customer_id}/edit" class="btn btn-secondary">${Icon.edit('')} Edit</a>`
             )}
 
             <div class="stats-grid">
-                ${UI.statCard({ label: 'Total repairs', value: Utils.numberFormat(stats.total_repairs), icon: 'wrench', tone: 'accent' })}
-                ${UI.statCard({ label: 'Open jobs',     value: Utils.numberFormat(stats.open_repairs),  icon: 'clock',  tone: 'orange' })}
+                ${UI.statCard({ label: `Total ${L.jobMany.toLowerCase()}`, value: Utils.numberFormat(stats.total_repairs), icon: 'wrench', tone: 'accent' })}
+                ${UI.statCard({ label: `Open ${L.jobMany.toLowerCase()}`, value: Utils.numberFormat(stats.open_repairs), icon: 'clock', tone: 'orange' })}
                 ${UI.statCard({ label: 'Lifetime spend',value: Utils.formatCurrencyShort(stats.total_spent), icon: 'money', tone: 'green' })}
                 ${UI.statCard({ label: 'Outstanding',   value: Utils.formatCurrencyShort(stats.outstanding), icon: 'invoice', tone: 'blue' })}
             </div>
@@ -142,7 +144,7 @@ const Customers = {
 
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Repair history</h2>
+                            <h2 class="card-title">${Utils.e(L.jobOne)} history</h2>
                             <span class="badge badge-gray">${repairs.length}</span>
                         </div>
                         <div id="repairsMount"></div>
@@ -197,8 +199,8 @@ const Customers = {
                     <div class="card card-danger">
                         <div class="card-header"><h2 class="card-title">Danger zone</h2></div>
                         <div class="card-body">
-                            <p class="text-muted small">Deleting a client is permanent.</p>
-                            <button class="btn btn-danger btn-full" id="deleteBtn">${Icon.trash('')} Delete client</button>
+                            <p class="text-muted small">Deleting a ${Utils.e(L.clientOne.toLowerCase())} is permanent.</p>
+                            <button class="btn btn-danger btn-full" id="deleteBtn">${Icon.trash('')} Delete ${Utils.e(L.clientOne.toLowerCase())}</button>
                         </div>
                     </div>` : ''}
                 </aside>
@@ -211,14 +213,14 @@ const Customers = {
             columns: [
                 { key: 'repair_id', label: '#', width: '56px',
                   render: r => `<a class="table-link" href="#/repairs/${r.repair_id}">#${r.repair_id}</a>` },
-                { key: 'device_model', label: 'Device', render: r => Utils.e(Utils.truncate(r.device_model, 28)) },
+                { key: 'device_model', label: L.itemLabel, render: r => Utils.e(Utils.truncate(r.device_model, 28)) },
                 { key: 'date_in', label: 'In', hideOnTablet: true, render: r => Utils.formatDate(r.date_in) },
                 { key: 'actual_amount', label: 'Amount', align: 'right',
                   render: r => r.actual_amount ? Utils.formatCurrency(r.actual_amount) : '<span class="text-muted">—</span>' },
                 { key: 'status', label: 'Status', render: r => Badge.repair(r.status) },
             ],
-            empty: { message: 'No repairs for this client yet.', icon: 'wrench',
-                     action: `<a href="#/repairs/create?customer_id=${c.customer_id}" class="btn btn-primary">Log a repair</a>` },
+            empty: { message: `No ${L.jobMany.toLowerCase()} for this ${L.clientOne.toLowerCase()} yet.`, icon: 'wrench',
+                     action: `<a href="#/repairs/create?customer_id=${c.customer_id}" class="btn btn-primary">Log a ${Utils.e(L.jobLower)}</a>` },
         });
 
         DataTable.render({
@@ -231,7 +233,7 @@ const Customers = {
                 { key: 'total_amount', label: 'Total', align: 'right', render: i => Utils.formatCurrency(i.total_amount) },
                 { key: 'status', label: 'Status', render: i => i.is_overdue ? Badge.invoice('overdue') : Badge.invoice(i.status) },
             ],
-            empty: { message: 'No invoices for this client yet.', icon: 'invoice' },
+            empty: { message: `No invoices for this ${L.clientOne.toLowerCase()} yet.`, icon: 'invoice' },
         });
 
         document.getElementById('deleteBtn')?.addEventListener('click', () => this.destroy(c.customer_id, '/customers'));
@@ -256,9 +258,10 @@ const Customers = {
         const v = (field, fallback = '') => Utils.e(c?.[field] ?? query[field] ?? fallback);
 
         Layout.render(`
-            ${UI.backLink(isEdit ? `#/customers/${c.customer_id}` : '#/customers', isEdit ? 'Back to client' : 'All clients')}
-            ${UI.pageHeader(isEdit ? `Edit ${c.full_name}` : 'New client',
-                isEdit ? 'Update the details for this client.' : 'Add a client to the system.')}
+            ${UI.backLink(isEdit ? `#/customers/${c.customer_id}` : '#/customers',
+                isEdit ? `Back to ${L.clientOne.toLowerCase()}` : `All ${L.clientMany.toLowerCase()}`)}
+            ${UI.pageHeader(isEdit ? `Edit ${c.full_name}` : `New ${L.clientOne.toLowerCase()}`,
+                isEdit ? `Update the details for this ${L.clientOne.toLowerCase()}.` : `Add a ${L.clientOne.toLowerCase()} to the system.`)}
 
             <form id="clientForm" class="card" novalidate>
                 <div class="card-body">
@@ -271,7 +274,7 @@ const Customers = {
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="client_type">Client type</label>
+                            <label class="form-label" for="client_type">${Utils.e(L.clientOne)} type</label>
                             <select class="form-select" id="client_type" name="client_type">
                                 ${Object.entries(CLIENT_TYPES).map(([k, lbl]) =>
                                     `<option value="${k}" ${(c?.client_type ?? 'individual') === k ? 'selected' : ''}>${Utils.e(lbl)}</option>`).join('')}
@@ -337,7 +340,7 @@ const Customers = {
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="customer_since">Client since</label>
+                            <label class="form-label" for="customer_since">${Utils.e(L.clientOne)} since</label>
                             <input class="form-input" id="customer_since" name="customer_since" type="date"
                                    value="${Utils.e(c?.customer_since ?? Utils.toDbDate(new Date()))}">
                         </div>
@@ -365,7 +368,7 @@ const Customers = {
 
                 <div class="form-actions">
                     <a href="${isEdit ? `#/customers/${c.customer_id}` : '#/customers'}" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary">${isEdit ? 'Save changes' : 'Create client'}</button>
+                    <button type="submit" class="btn btn-primary">${isEdit ? 'Save changes' : `Create ${Utils.e(L.clientOne.toLowerCase())}`}</button>
                 </div>
             </form>
         `);
@@ -380,11 +383,11 @@ const Customers = {
 
             if (isEdit) {
                 Customer.update(c.customer_id, data);
-                Toast.success('Client updated.');
+                Toast.success(`${L.clientOne} updated.`);
                 Router.go(`/customers/${c.customer_id}`);
             } else {
                 const id = Customer.create(data);
-                Toast.success('Client created.');
+                Toast.success(`${L.clientOne} created.`);
                 Router.go(`/customers/${id}`);
             }
         };
@@ -398,7 +401,7 @@ const Customers = {
 
         if (!check.ok) {
             Modal.open({
-                title: 'Cannot delete this client',
+                title: `Cannot delete this ${L.clientOne.toLowerCase()}`,
                 body: `<p class="confirm-text">${Utils.e(check.reason)}</p>`,
                 footer: '<button class="btn btn-secondary" onclick="Modal.close()">Close</button>',
             });
@@ -406,13 +409,13 @@ const Customers = {
         }
 
         const ok = await Modal.confirm({
-            title: 'Delete client',
+            title: `Delete ${L.clientOne.toLowerCase()}`,
             message: `Delete "${c?.full_name}"? This cannot be undone.`,
         });
         if (!ok) return;
 
         Customer.delete(id);
-        Toast.success('Client deleted.');
+        Toast.success(`${L.clientOne} deleted.`);
         redirectTo ? Router.go(redirectTo) : Router.reload();
     },
 
@@ -432,10 +435,10 @@ const Customers = {
             { label: 'BIN',          key: 'vat_number' },
             { label: 'NID/TIN',      key: 'tax_id' },
             { label: 'Status',       key: 'status' },
-            { label: 'Client since', value: r => Utils.formatDate(r.customer_since) },
+            { label: `${L.clientOne} since`, value: r => Utils.formatDate(r.customer_since) },
         ]);
-        Utils.download(`clients-${Utils.toDbDate(new Date())}.csv`, csv);
-        DB.log('exported', 'customer', null, `${rows.length} clients exported to CSV`);
-        Toast.success(`${rows.length} clients exported.`);
+        Utils.download(`${Utils.slugify(L.clientMany)}-${Utils.toDbDate(new Date())}.csv`, csv);
+        DB.log('exported', 'customer', null, `${rows.length} ${L.clientMany.toLowerCase()} exported to CSV`);
+        Toast.success(`${rows.length} ${L.clientMany.toLowerCase()} exported.`);
     },
 };

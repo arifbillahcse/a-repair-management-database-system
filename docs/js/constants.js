@@ -7,28 +7,21 @@
  */
 'use strict';
 
-const APP_NAME    = 'Repair Management System';
+const APP_NAME    = VARIANT.company;
 const APP_VERSION = '1.3.0';
 
 /* ── Demo storage ─────────────────────────────────────────────────────────── */
-const DEMO_PREFIX       = 'rms_demo_';
-const DEMO_SEED_VERSION = 3;                       // bump to force a reseed
-const DEMO_SEED_URL     = 'assets/data/seed.json';
+// Namespaced per variant so the four demos never share a dataset or a session.
+const DEMO_PREFIX       = `rms_${VARIANT.id}_`;
+const DEMO_SEED_VERSION = 4;                       // bump to force a reseed
+const DEMO_SEED_URL     = `../assets/data/${VARIANT.seed}`;
 
 /* ── Pagination ───────────────────────────────────────────────────────────── */
 const PAGE_SIZE         = 20;
 const PAGE_SIZE_REPAIRS = 30;
 
 /* ── Repair statuses ──────────────────────────────────────────────────────── */
-const REPAIR_STATUS = {
-    in_progress:       'In Progress',
-    on_hold:           'On Hold',
-    waiting_for_parts: 'Waiting for Parts',
-    ready_for_pickup:  'Ready for Pickup',
-    completed:         'Completed',
-    collected:         'Collected',
-    cancelled:         'Cancelled',
-};
+const REPAIR_STATUS = VARIANT.statuses;
 
 // Allowed forward-only status transitions
 const REPAIR_STATUS_FLOW = {

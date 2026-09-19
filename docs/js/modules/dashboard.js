@@ -20,15 +20,15 @@ const Dashboard = {
         Layout.render(`
             ${UI.pageHeader(
                 `${this._greeting()}, ${Utils.e(this._firstName(user.full_name))}`,
-                `${Utils.numberFormat(stats.open)} open jobs · ${Utils.numberFormat(stats.in_today)} received today · ${Utils.formatCurrency(invStats.outstanding)} outstanding`,
-                `<a href="#/repairs/create" class="btn btn-primary">${Icon.plus('')} New Repair</a>
-                 <a href="#/customers/create" class="btn btn-secondary">${Icon.plus('')} New Client</a>`
+                `${Utils.numberFormat(stats.open)} open ${L.jobMany.toLowerCase()} · ${Utils.numberFormat(stats.in_today)} received today · ${Utils.formatCurrency(invStats.outstanding)} outstanding`,
+                `<a href="#/repairs/create" class="btn btn-primary">${Icon.plus('')} ${Utils.e(L.jobNew)}</a>
+                 <a href="#/customers/create" class="btn btn-secondary">${Icon.plus('')} New ${Utils.e(L.clientOne)}</a>`
             )}
 
             <div class="stats-grid">
-                ${UI.statCard({ label: 'Open Repairs',    value: Utils.numberFormat(stats.open),               icon: 'wrench',  tone: 'accent', link: '#/repairs?open=1' })}
-                ${UI.statCard({ label: 'Ready for Pickup',value: Utils.numberFormat(stats.ready_for_pickup),   icon: 'box',     tone: 'blue',   link: '#/repairs?status=ready_for_pickup' })}
-                ${UI.statCard({ label: 'Waiting on Parts',value: Utils.numberFormat(stats.waiting_for_parts),  icon: 'clock',   tone: 'orange', link: '#/repairs?status=waiting_for_parts' })}
+                ${UI.statCard({ label: `Open ${L.jobMany}`, value: Utils.numberFormat(stats.open), icon: 'wrench', tone: 'accent', link: '#/repairs?open=1' })}
+                ${UI.statCard({ label: REPAIR_STATUS.ready_for_pickup, value: Utils.numberFormat(stats.ready_for_pickup), icon: 'box', tone: 'blue', link: '#/repairs?status=ready_for_pickup' })}
+                ${UI.statCard({ label: REPAIR_STATUS.waiting_for_parts, value: Utils.numberFormat(stats.waiting_for_parts), icon: 'clock', tone: 'orange', link: '#/repairs?status=waiting_for_parts' })}
                 ${UI.statCard({ label: 'Revenue (month)', value: Utils.formatCurrencyShort(stats.revenue_month),icon: 'money',  tone: 'green',  link: '#/reports' })}
             </div>
 
@@ -47,8 +47,8 @@ const Dashboard = {
 
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Recent repairs</h2>
-                            <a href="#/repairs" class="btn btn-xs btn-secondary">All repairs</a>
+                            <h2 class="card-title">Recent ${Utils.e(L.jobMany.toLowerCase())}</h2>
+                            <a href="#/repairs" class="btn btn-xs btn-secondary">All ${Utils.e(L.jobMany.toLowerCase())}</a>
                         </div>
                         <div id="recentMount"></div>
                     </div>
@@ -60,7 +60,7 @@ const Dashboard = {
                     ${overdue.length ? `
                     <div class="card card-danger">
                         <div class="card-header">
-                            <h2 class="card-title">${Icon.alert('inline-ico')} Overdue pickups</h2>
+                            <h2 class="card-title">${Icon.alert('inline-ico')} Overdue</h2>
                             <span class="badge badge-red">${overdue.length}</span>
                         </div>
                         <div class="card-body">
@@ -79,7 +79,7 @@ const Dashboard = {
 
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Repairs by status</h2>
+                            <h2 class="card-title">${Utils.e(L.jobMany)} by status</h2>
                         </div>
                         <div class="card-body">
                             <div class="chart-wrap"><canvas id="statusChart" height="170"></canvas></div>
@@ -102,7 +102,7 @@ const Dashboard = {
                     ${Auth.can('manager') ? `
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Technician workload</h2>
+                            <h2 class="card-title">${Utils.e(L.staffOne)} workload</h2>
                             <a href="#/staff" class="btn btn-xs btn-secondary">Staff</a>
                         </div>
                         <div class="card-body">
@@ -126,7 +126,7 @@ const Dashboard = {
                             <ul class="activity-list">
                                 ${(DB.recentActivity(6).length
                                     ? DB.recentActivity(6)
-                                    : [{ description: 'Nothing yet — add a client or repair and it shows up here.', created_at: Utils.now() }]
+                                    : [{ description: `Nothing yet — add a ${L.clientOne.toLowerCase()} or ${L.jobLower} and it shows up here.`, created_at: Utils.now() }]
                                   ).map(a => `
                                     <li class="activity-item">
                                         <span class="activity-text">${Utils.e(a.description)}</span>
@@ -147,15 +147,15 @@ const Dashboard = {
             columns: [
                 { key: 'repair_id', label: '#', width: '52px',
                   render: r => `<a class="table-link" href="#/repairs/${r.repair_id}">#${r.repair_id}</a>` },
-                { key: 'customer_name', label: 'Client',
+                { key: 'customer_name', label: L.clientOne,
                   render: r => `<a class="table-link" href="#/customers/${r.customer_id}">${Utils.e(Utils.truncate(r.customer_name, 24))}</a>` },
-                { key: 'device_model', label: 'Device', hideOnTablet: true,
+                { key: 'device_model', label: L.itemLabel, hideOnTablet: true,
                   render: r => Utils.e(Utils.truncate(r.device_model, 26)) },
                 { key: 'date_in', label: 'In', hideOnTablet: true, render: r => Utils.formatDate(r.date_in) },
                 { key: 'status', label: 'Status', render: r => Badge.repair(r.status) },
             ],
-            empty: { message: 'No repairs logged yet.', icon: 'wrench',
-                     action: '<a href="#/repairs/create" class="btn btn-primary">Log the first repair</a>' },
+            empty: { message: `No ${L.jobMany.toLowerCase()} logged yet.`, icon: 'wrench',
+                     action: `<a href="#/repairs/create" class="btn btn-primary">Log the first ${Utils.e(L.jobLower)}</a>` },
         });
 
         Charts.revenueLine('revenueChart', revenue);

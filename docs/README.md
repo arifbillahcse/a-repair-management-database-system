@@ -1,10 +1,36 @@
-# Live Demo — Repair Management System
+# Live Demos — Service Management System
 
 A front-end prototype of the PHP/MySQL application in the repository root.
 No server, no database: it runs entirely in the browser and is served free
 from GitHub Pages.
 
 **Live:** https://demo.arifs.work/
+
+## Four demos, one codebase
+
+| Path | Demo | Vocabulary |
+|---|---|---|
+| `/repair/` | Repair Shop    | Clients → Repairs · Device · Technician |
+| `/dental/` | Dental Clinic  | Patients → Treatments · Procedure · Dentist |
+| `/auto/`   | Auto Service   | Customers → Job cards · Vehicle · Mechanic |
+| `/ac/`     | AC & Appliance | Clients → Service calls · Unit · Engineer |
+
+Every variant loads the same `js/` tree. Each `<variant>/index.html` sets
+`window.DEMO_VARIANT` before the scripts run; `js/variants.js` then supplies
+the labels, the status vocabulary, the company identity and the seed file,
+and `js/constants.js` consumes it.
+
+Storage is namespaced per variant (`rms_dental_…`), so the four datasets and
+sessions never collide.
+
+Adding a fifth industry:
+
+1. Add an entry to `VARIANTS` in `js/variants.js`
+2. Add a profile to the seed generator and produce `assets/data/seed-<id>.json`
+3. Copy any `<variant>/index.html` and change the one `DEMO_VARIANT` line
+4. Add a card to the landing page
+
+No application code changes.
 
 ![Dashboard](assets/screenshots/01-dashboard.png)
 
@@ -39,9 +65,9 @@ tab logs you out and the demo always opens clean.
 Nothing is sent anywhere. **"Reset demo data"** in the top bar restores the
 original dataset at any time.
 
-Seed data: 57 clients, 71 repairs across all seven statuses, 34 invoices,
-22 catalogue items, 6 staff — localised for Bangladesh (৳ BDT, 15% VAT,
-`dd/mm/yyyy`, local names, cities and devices).
+Seed data per variant: 57 clients, 71 jobs across all seven statuses, ~35
+invoices, 22 catalogue items, 6 staff — localised for Bangladesh (৳ BDT,
+15% VAT, `dd/mm/yyyy`, local names, cities and realistic industry data).
 
 ## Sign in
 

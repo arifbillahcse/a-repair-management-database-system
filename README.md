@@ -3,17 +3,43 @@
 **Version 1.3.0** — A full-featured repair shop management system built with raw PHP 8.1+ and MySQL.
 No frameworks. Dark theme. PDO prepared statements throughout.
 
-### ▶ [Try the live demo — demo.arifs.work](https://demo.arifs.work/)
+### ▶ [Try the live demos — demo.arifs.work](https://demo.arifs.work/)
 
 An interactive front-end prototype of this system, running entirely in the
-browser — no install, no login required. Add clients, log repairs, raise
+browser — no install, no login required. Add clients, log jobs, raise
 invoices and print them; everything is saved in your browser and can be reset
-in one click. Source in [`docs/`](docs/), notes in
-[`docs/README.md`](docs/README.md).
+in one click.
+
+**The same engine, pointed at four different trades:**
+
+| Demo | Industry | Vocabulary |
+|---|---|---|
+| [Repair Shop](https://demo.arifs.work/repair/) | Electronics & computer repair | Clients → Repairs · Device · Technician |
+| [Dental Clinic](https://demo.arifs.work/dental/) | Dental practice | Patients → Treatments · Procedure · Dentist |
+| [Auto Service](https://demo.arifs.work/auto/) | Vehicle workshop | Customers → Job cards · Vehicle · Mechanic |
+| [AC & Appliance](https://demo.arifs.work/ac/) | Appliance servicing | Clients → Service calls · Unit · Engineer |
+
+The application code is identical across all four. A single config file
+([`docs/js/variants.js`](docs/js/variants.js)) supplies the on-screen wording,
+the status labels and which dataset to load — adding a fifth trade is a config
+entry and a seed file, not a rewrite.
+
+Source in [`docs/`](docs/), notes in [`docs/README.md`](docs/README.md).
 
 ---
 
 ## Screenshots
+
+### Pick a demo
+![Landing](docs/assets/screenshots/12-landing.png)
+
+### One engine, four vocabularies
+The same dashboard, router, models and components — only the config differs.
+
+| Dental Clinic | Auto Service |
+|---|---|
+| ![Dental](docs/assets/screenshots/13-variant-dental.png) | ![Auto](docs/assets/screenshots/14-variant-auto.png) |
+
 
 ### Dashboard
 Open jobs, 12-month revenue, overdue-pickup alerts and technician workload at a glance.

@@ -59,7 +59,7 @@ const StaffView = {
                     ${s.email ? `<a class="em-lnk" href="mailto:${Utils.e(s.email)}">${Utils.e(Utils.truncate(s.email, 24))}</a>` : ''}` },
                 { key: 'open_repairs', label: 'Open', sortable: true, align: 'right',
                   render: s => `<span class="badge ${s.open_repairs > 6 ? 'badge-orange' : 'badge-gray'}">${s.open_repairs}</span>` },
-                { key: 'total_repairs', label: 'Total jobs', sortable: true, align: 'right',
+                { key: 'total_repairs', label: `Total ${L.jobMany.toLowerCase()}`, sortable: true, align: 'right',
                   render: s => Utils.numberFormat(s.total_repairs) },
                 { key: 'revenue', label: 'Revenue', sortable: true, align: 'right', hideOnTablet: true,
                   render: s => Utils.formatCurrency(s.revenue) },
@@ -81,7 +81,7 @@ const StaffView = {
         DataTable.bindDelete('#listMount', {
             message: id => {
                 const s = Staff.findById(id);
-                return `Remove ${s?.full_name}? Their repairs stay on record but become unassigned.`;
+                return `Remove ${s?.full_name}? Their ${L.jobMany.toLowerCase()} stay on record but become unassigned.`;
             },
             onConfirm: id => { Staff.delete(id); Toast.success('Staff member removed.'); Router.reload(); },
         });
@@ -107,8 +107,8 @@ const StaffView = {
                 `<a href="#/staff/${s.staff_id}/edit" class="btn btn-secondary">${Icon.edit('')} Edit</a>`)}
 
             <div class="stats-grid">
-                ${UI.statCard({ label: 'Total jobs',  value: Utils.numberFormat(stats.total_repairs), icon: 'wrench', tone: 'accent' })}
-                ${UI.statCard({ label: 'Open jobs',   value: Utils.numberFormat(stats.open_repairs),  icon: 'clock',  tone: 'orange' })}
+                ${UI.statCard({ label: `Total ${L.jobMany.toLowerCase()}`, value: Utils.numberFormat(stats.total_repairs), icon: 'wrench', tone: 'accent' })}
+                ${UI.statCard({ label: `Open ${L.jobMany.toLowerCase()}`, value: Utils.numberFormat(stats.open_repairs), icon: 'clock', tone: 'orange' })}
                 ${UI.statCard({ label: 'Completed',   value: Utils.numberFormat(stats.completed),     icon: 'check',  tone: 'green' })}
                 ${UI.statCard({ label: 'Revenue',     value: Utils.formatCurrencyShort(stats.revenue),icon: 'money',  tone: 'blue' })}
             </div>
@@ -116,7 +116,7 @@ const StaffView = {
             <div class="dashboard-grid">
                 <div class="dashboard-main">
                     <div class="card">
-                        <div class="card-header"><h2 class="card-title">Assigned repairs</h2></div>
+                        <div class="card-header"><h2 class="card-title">Assigned ${Utils.e(L.jobMany.toLowerCase())}</h2></div>
                         <div id="jobsMount"></div>
                     </div>
                 </div>
@@ -142,12 +142,12 @@ const StaffView = {
             columns: [
                 { key: 'repair_id', label: '#', width: '56px',
                   render: r => `<a class="table-link" href="#/repairs/${r.repair_id}">#${r.repair_id}</a>` },
-                { key: 'customer_name', label: 'Client', render: r => Utils.e(Utils.truncate(r.customer_name ?? '—', 22)) },
-                { key: 'device_model', label: 'Device', hideOnTablet: true, render: r => Utils.e(Utils.truncate(r.device_model, 26)) },
+                { key: 'customer_name', label: L.clientOne, render: r => Utils.e(Utils.truncate(r.customer_name ?? '—', 22)) },
+                { key: 'device_model', label: L.itemLabel, hideOnTablet: true, render: r => Utils.e(Utils.truncate(r.device_model, 26)) },
                 { key: 'date_in', label: 'In', hideOnTablet: true, render: r => Utils.formatDate(r.date_in) },
                 { key: 'status', label: 'Status', render: r => Badge.repair(r.status) },
             ],
-            empty: { message: 'No repairs assigned to this person yet.', icon: 'wrench' },
+            empty: { message: `No ${L.jobMany.toLowerCase()} assigned to this person yet.`, icon: 'wrench' },
         });
     },
 
@@ -209,7 +209,7 @@ const StaffView = {
                         <div class="form-group">
                             <label class="form-label" for="specialization">Specialisation</label>
                             <input class="form-input" id="specialization" name="specialization" value="${v('specialization')}"
-                                   placeholder="e.g. Laptop & Motherboard">
+                                   placeholder="${Utils.e(L.specialisation)}">
                         </div>
 
                         <div class="form-group">

@@ -23,35 +23,35 @@ const Repairs = {
         const techs  = Staff.technicians();
 
         Layout.render(`
-            ${UI.pageHeader('Repairs',
+            ${UI.pageHeader(L.jobMany,
                 `${Utils.numberFormat(counts.total)} total &nbsp;·&nbsp;
                  <span style="color:var(--accent)">${Utils.numberFormat(counts.open)} open</span> &nbsp;·&nbsp;
-                 ${Utils.numberFormat(counts.ready_for_pickup)} ready for pickup`,
+                 ${Utils.numberFormat(counts.ready_for_pickup)} ${Utils.e(L.queueLabel.toLowerCase())}`,
                 `<button class="btn btn-secondary" id="qrBtn">${Icon.search('')} QR lookup</button>
-                 <a href="#/repairs/create" class="btn btn-primary">${Icon.plus('')} New Repair</a>`
+                 <a href="#/repairs/create" class="btn btn-primary">${Icon.plus('')} ${Utils.e(L.jobNew)}</a>`
             )}
 
             <div class="card">
                 ${UI.filterPills([
                     { value: '',                  label: 'All',        count: counts.total },
-                    { value: 'in_progress',       label: 'In Progress',count: counts.in_progress },
-                    { value: 'waiting_for_parts', label: 'Waiting',    count: counts.waiting_for_parts, cls: 'sf-btn-orange' },
-                    { value: 'on_hold',           label: 'On Hold',    count: counts.on_hold },
-                    { value: 'ready_for_pickup',  label: 'Ready',      count: counts.ready_for_pickup },
-                    { value: 'completed',         label: 'Completed',  count: counts.completed },
-                    { value: 'collected',         label: 'Collected',  count: counts.collected },
-                    { value: 'cancelled',         label: 'Cancelled',  count: counts.cancelled },
+                    { value: 'in_progress',       label: REPAIR_STATUS.in_progress, count: counts.in_progress },
+                    { value: 'waiting_for_parts', label: REPAIR_STATUS.waiting_for_parts, count: counts.waiting_for_parts, cls: 'sf-btn-orange' },
+                    { value: 'on_hold',           label: REPAIR_STATUS.on_hold,    count: counts.on_hold },
+                    { value: 'ready_for_pickup',  label: REPAIR_STATUS.ready_for_pickup, count: counts.ready_for_pickup },
+                    { value: 'completed',         label: REPAIR_STATUS.completed,  count: counts.completed },
+                    { value: 'collected',         label: REPAIR_STATUS.collected,  count: counts.collected },
+                    { value: 'cancelled',         label: REPAIR_STATUS.cancelled,  count: counts.cancelled },
                 ], filters.status, v => Router.setQuery({ status: v, open: '', page: 1 }))}
 
                 <div class="filter-bar">
                     <div class="search-input-wrap">
                         ${Icon.search('search-input-icon')}
                         <input class="form-input" id="searchInput" type="search"
-                               placeholder="Search device, serial, problem, QR, client…"
+                               placeholder="${Utils.e(`Search ${L.itemLabel.toLowerCase()}, ${L.serialLabel.toLowerCase()}, problem, QR, ${L.clientOne.toLowerCase()}…`)}"
                                value="${Utils.e(filters.search)}" autocomplete="off">
                     </div>
                     <select class="form-select filter-select" id="techFilter">
-                        <option value="">All technicians</option>
+                        <option value="">All ${Utils.e(L.staffMany.toLowerCase())}</option>
                         ${techs.map(t => `<option value="${t.staff_id}" ${Utils.intVal(filters.staff_id) === t.staff_id ? 'selected' : ''}>${Utils.e(t.full_name)}</option>`).join('')}
                     </select>
                     ${filters.search || filters.status || filters.staff_id || filters.open
@@ -70,16 +70,16 @@ const Repairs = {
             columns: [
                 { key: 'repair_id', label: '#', sortable: true, width: '62px',
                   render: r => `<a class="table-link" href="#/repairs/${r.repair_id}">#${r.repair_id}</a>` },
-                { key: 'customer_name', label: 'Client', sortable: true, render: r => `
+                { key: 'customer_name', label: L.clientOne, sortable: true, render: r => `
                     <a class="cust-name-link" href="#/customers/${r.customer_id}">${Utils.e(Utils.truncate(r.customer_name ?? '—', 22))}</a>
                     ${r.customer_phone ? `<span class="vat-sub">${Utils.e(r.customer_phone)}</span>` : ''}` },
-                { key: 'device_model', label: 'Device', sortable: true, render: r => `
+                { key: 'device_model', label: L.itemLabel, sortable: true, render: r => `
                     ${Utils.e(Utils.truncate(r.device_model, 26))}
-                    ${r.device_serial_number ? `<span class="vat-sub">SN ${Utils.e(r.device_serial_number)}</span>` : ''}` },
-                { key: 'technician_name', label: 'Technician', hideOnTablet: true,
+                    ${r.device_serial_number ? `<span class="vat-sub">${Utils.e(r.device_serial_number)}</span>` : ''}` },
+                { key: 'technician_name', label: L.staffOne, hideOnTablet: true,
                   render: r => r.technician_name ? Utils.e(Utils.truncate(r.technician_name, 18)) : '<span class="text-muted">Unassigned</span>' },
                 { key: 'date_in', label: 'In', sortable: true, hideOnTablet: true,
-                  render: r => `${Utils.formatDate(r.date_in)}<span class="vat-sub">${r.days_in_lab}d in lab</span>` },
+                  render: r => `${Utils.formatDate(r.date_in)}<span class="vat-sub">${r.days_in_lab}d</span>` },
                 { key: 'actual_amount', label: 'Amount', sortable: true, align: 'right',
                   render: r => r.actual_amount
                     ? Utils.formatCurrency(r.actual_amount)
@@ -93,9 +93,11 @@ const Repairs = {
                 DataTable.act.print(`#/repairs/${r.repair_id}/print`) +
                 (Auth.can('manager') ? DataTable.act.del(r.repair_id) : ''),
             empty: {
-                message: filters.search ? `No repairs match "${filters.search}".` : 'No repairs logged yet.',
+                message: filters.search
+                    ? `No ${L.jobMany.toLowerCase()} match "${filters.search}".`
+                    : `No ${L.jobMany.toLowerCase()} logged yet.`,
                 icon: 'wrench',
-                action: '<a href="#/repairs/create" class="btn btn-primary">Log the first repair</a>',
+                action: `<a href="#/repairs/create" class="btn btn-primary">Log the first ${Utils.e(L.jobLower)}</a>`,
             },
             onSort: (col, dir) => Router.setQuery({ sort: col, dir, page: 1 }),
             onPage: p => Router.setQuery({ page: p }),
@@ -109,7 +111,7 @@ const Repairs = {
         UI.bindFilterPills();
 
         DataTable.bindDelete('#listMount', {
-            message: id => `Delete repair #${id}? This cannot be undone.`,
+            message: id => `Delete ${L.jobLower} #${id}? This cannot be undone.`,
             onConfirm: id => this.destroy(id),
         });
 
@@ -129,12 +131,12 @@ const Repairs = {
         const next     = Repair.allowedTransitions(r.status);
 
         Layout.render(`
-            ${UI.backLink('#/repairs', 'All repairs')}
+            ${UI.backLink('#/repairs', `All ${L.jobMany.toLowerCase()}`)}
 
-            ${UI.pageHeader(`Repair #${r.repair_id}`,
+            ${UI.pageHeader(`${L.jobOne} #${r.repair_id}`,
                 `${Badge.repair(r.status)} &nbsp;·&nbsp; ${Utils.e(r.device_model)}
-                 &nbsp;·&nbsp; ${r.days_in_lab} days in lab`,
-                `<a href="#/repairs/${r.repair_id}/print" class="btn btn-secondary">${Icon.print('')} Job sheet</a>
+                 &nbsp;·&nbsp; ${r.days_in_lab} ${Utils.e(L.dwellLabel)}`,
+                `<a href="#/repairs/${r.repair_id}/print" class="btn btn-secondary">${Icon.print('')} ${Utils.e(L.jobSheet)}</a>
                  <a href="#/repairs/${r.repair_id}/edit" class="btn btn-secondary">${Icon.edit('')} Edit</a>
                  ${!invoices.length && ['completed','ready_for_pickup','collected'].includes(r.status)
                     ? `<a href="#/repairs/${r.repair_id}/invoice" class="btn btn-primary">${Icon.invoice('')} Create invoice</a>` : ''}`
@@ -144,32 +146,32 @@ const Repairs = {
                 <div class="dashboard-main">
 
                     <div class="card">
-                        <div class="card-header"><h2 class="card-title">Job details</h2></div>
+                        <div class="card-header"><h2 class="card-title">${Utils.e(L.jobOne)} details</h2></div>
                         <div class="card-body">
-                            ${UI.field('Device', r.device_model)}
-                            ${UI.field('Serial number', r.device_serial_number)}
+                            ${UI.field(L.itemLabel, r.device_model)}
+                            ${UI.field(L.serialLabel, r.device_serial_number)}
                             ${UI.field('Received', Utils.formatDateTime(r.date_in))}
                             ${UI.field('Completed', r.date_out ? Utils.formatDateTime(r.date_out) : '')}
                             ${UI.field('Expected pickup', r.collection_date ? Utils.formatDate(r.collection_date) : '')}
-                            ${UI.field('Technician', r.technician_name
+                            ${UI.field(L.staffOne, r.technician_name
                                 ? `<a class="table-link" href="#/staff/${r.staff_id}">${Utils.e(r.technician_name)}</a>`
                                 : '<span class="text-muted">Unassigned</span>', true)}
                         </div>
                     </div>
 
                     <div class="card">
-                        <div class="card-header"><h2 class="card-title">Diagnosis &amp; work</h2></div>
+                        <div class="card-header"><h2 class="card-title">${Utils.e(L.diagnosisLabel)} &amp; work</h2></div>
                         <div class="card-body">
                             <div class="detail-block">
-                                <h3 class="detail-block-title">Reported problem</h3>
+                                <h3 class="detail-block-title">${Utils.e(L.problemLabel)}</h3>
                                 <p class="note-text">${Utils.e(r.problem_description ?? '—')}</p>
                             </div>
                             <div class="detail-block">
-                                <h3 class="detail-block-title">Technician diagnosis</h3>
+                                <h3 class="detail-block-title">${Utils.e(L.diagnosisLabel)}</h3>
                                 <p class="note-text">${r.diagnosis ? Utils.e(r.diagnosis) : '<span class="text-muted">Not diagnosed yet.</span>'}</p>
                             </div>
                             <div class="detail-block">
-                                <h3 class="detail-block-title">Work carried out</h3>
+                                <h3 class="detail-block-title">${Utils.e(L.workLabel)}</h3>
                                 <p class="note-text">${r.work_done ? Utils.e(r.work_done) : '<span class="text-muted">Not completed yet.</span>'}</p>
                             </div>
                             ${r.notes ? `
@@ -194,7 +196,7 @@ const Repairs = {
                                             <img src="${src}" alt="Repair photo ${i + 1}" loading="lazy">
                                             <button class="photo-del" data-photo="${i}" aria-label="Remove photo">&times;</button>
                                         </figure>`).join('')
-                                    : '<p class="text-muted small">No photos attached. Add one to show the device condition on intake.</p>'}
+                                    : `<p class="text-muted small">No photos attached. Add one to show the ${Utils.e(L.itemLabel.toLowerCase())} condition on intake.</p>`}
                             </div>
                         </div>
                     </div>
@@ -215,12 +217,12 @@ const Repairs = {
                                             ${Utils.e(REPAIR_STATUS[s])}
                                         </button>`).join('')}
                                 </div>`
-                                : '<p class="text-muted small">This job is closed — no further transitions.</p>'}
+                                : `<p class="text-muted small">This ${Utils.e(L.jobLower)} is closed — no further transitions.</p>`}
                         </div>
                     </div>
 
                     <div class="card">
-                        <div class="card-header"><h2 class="card-title">Client</h2></div>
+                        <div class="card-header"><h2 class="card-title">${Utils.e(L.clientOne)}</h2></div>
                         <div class="card-body">
                             ${UI.field('Name', `<a class="table-link" href="#/customers/${r.customer_id}">${Utils.e(r.customer_name)}</a>`, true)}
                             ${UI.field('Mobile', r.customer_phone ? `<a class="ph-lnk" href="tel:${Utils.e(r.customer_phone)}">${Utils.e(r.customer_phone)}</a>` : '', true)}
@@ -232,7 +234,7 @@ const Repairs = {
                     <div class="card">
                         <div class="card-header"><h2 class="card-title">Pricing</h2></div>
                         <div class="card-body">
-                            ${UI.field('Estimate', r.estimate_amount ? Utils.formatCurrency(r.estimate_amount) : '')}
+                            ${UI.field(L.estimateLabel, r.estimate_amount ? Utils.formatCurrency(r.estimate_amount) : '')}
                             ${UI.field('Final amount', r.actual_amount
                                 ? `<strong>${Utils.formatCurrency(r.actual_amount)}</strong>` : '', true)}
                             ${r.estimate_amount && r.actual_amount ? UI.field('Difference',
@@ -247,7 +249,7 @@ const Repairs = {
                             <div class="qr-code-img" id="qrBox" role="img"
                                  aria-label="QR code for repair ${r.repair_id}"></div>
                             <p class="qr-code-text">${Utils.e(r.qr_code ?? '—')}</p>
-                            <p class="text-muted small">Stick this on the device bag — scan it to pull the job up instantly.</p>
+                            <p class="text-muted small">Scan it to pull this ${Utils.e(L.jobLower)} up instantly.</p>
                         </div>
                     </div>
 
@@ -267,7 +269,7 @@ const Repairs = {
                     <div class="card card-danger">
                         <div class="card-header"><h2 class="card-title">Danger zone</h2></div>
                         <div class="card-body">
-                            <button class="btn btn-danger btn-full" id="deleteBtn">${Icon.trash('')} Delete repair</button>
+                            <button class="btn btn-danger btn-full" id="deleteBtn">${Icon.trash('')} Delete ${Utils.e(L.jobLower)}</button>
                         </div>
                     </div>` : ''}
 
@@ -284,9 +286,9 @@ const Repairs = {
                 const to = b.dataset.status;
                 if (to === 'cancelled') {
                     const ok = await Modal.confirm({
-                        title: 'Cancel repair',
-                        message: `Cancel repair #${r.repair_id}? The job stays on record but is closed.`,
-                        confirmLabel: 'Cancel job',
+                        title: `Cancel ${L.jobLower}`,
+                        message: `Cancel ${L.jobLower} #${r.repair_id}? It stays on record but is closed.`,
+                        confirmLabel: `Cancel ${L.jobLower}`,
                     });
                     if (!ok) return;
                 }
@@ -328,7 +330,7 @@ const Repairs = {
         const flow = ['in_progress', 'completed', 'ready_for_pickup', 'collected'];
         if (['cancelled', 'on_hold', 'waiting_for_parts'].includes(current)) {
             return `<div class="timeline-alt">${Badge.repair(current)}
-                <p class="text-muted small">This job is off the main pipeline.</p></div>`;
+                <p class="text-muted small">This ${Utils.e(L.jobLower)} is off the main pipeline.</p></div>`;
         }
         const at = flow.indexOf(current);
         return `<ol class="timeline">${flow.map((s, i) => `
@@ -359,47 +361,48 @@ const Repairs = {
         const v      = f => Utils.e(r?.[f] ?? '');
 
         Layout.render(`
-            ${UI.backLink(isEdit ? `#/repairs/${r.repair_id}` : '#/repairs', isEdit ? 'Back to repair' : 'All repairs')}
-            ${UI.pageHeader(isEdit ? `Edit repair #${r.repair_id}` : 'New repair job',
-                isEdit ? 'Update the job details.' : 'Log a device that just came in.')}
+            ${UI.backLink(isEdit ? `#/repairs/${r.repair_id}` : '#/repairs',
+                isEdit ? `Back to ${L.jobLower}` : `All ${L.jobMany.toLowerCase()}`)}
+            ${UI.pageHeader(isEdit ? `Edit ${L.jobLower} #${r.repair_id}` : L.jobNew,
+                isEdit ? `Update the ${L.jobLower} details.` : L.jobIntake)}
 
             <form id="repairForm" class="card" novalidate>
                 <div class="card-body">
                     <div class="form-grid-2">
 
                         <div class="form-group form-col-full">
-                            <label class="form-label required" for="customer_search">Client</label>
+                            <label class="form-label required" for="customer_search">${Utils.e(L.clientOne)}</label>
                             <div class="search-input-wrap">
                                 <input class="form-input" id="customer_search" autocomplete="off"
                                        placeholder="Type a name, phone or email…">
                                 <input type="hidden" id="customer_id" name="customer_id" value="${Utils.e(r?.customer_id ?? preset?.customer_id ?? '')}">
                                 <div class="ac-dropdown" id="customer_ac" hidden></div>
                             </div>
-                            <span class="form-hint">Not on file? <a href="#/customers/create">Add a client first</a>.</span>
+                            <span class="form-hint">Not on file? <a href="#/customers/create">Add a ${Utils.e(L.clientOne.toLowerCase())} first</a>.</span>
                             <span class="field-error" id="err-customer_id"></span>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label required" for="device_model">Device model</label>
+                            <label class="form-label required" for="device_model">${Utils.e(L.itemField)}</label>
                             <input class="form-input" id="device_model" name="device_model" value="${v('device_model')}"
-                                   placeholder="e.g. Dell Latitude 5420" required>
+                                   placeholder="${Utils.e(L.itemPlaceholder)}" required>
                             <span class="field-error" id="err-device_model"></span>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="device_serial_number">Serial number</label>
+                            <label class="form-label" for="device_serial_number">${Utils.e(L.serialLabel)}</label>
                             <input class="form-input" id="device_serial_number" name="device_serial_number" value="${v('device_serial_number')}">
                         </div>
 
                         <div class="form-group form-col-full">
-                            <label class="form-label required" for="problem_description">Reported problem</label>
+                            <label class="form-label required" for="problem_description">${Utils.e(L.problemLabel)}</label>
                             <textarea class="form-textarea" id="problem_description" name="problem_description" rows="3"
-                                      placeholder="What did the customer say is wrong?" required>${Utils.e(r?.problem_description ?? '')}</textarea>
+                                      placeholder="${Utils.e(L.problemHint)}" required>${Utils.e(r?.problem_description ?? '')}</textarea>
                             <span class="field-error" id="err-problem_description"></span>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="staff_id">Assign technician</label>
+                            <label class="form-label" for="staff_id">Assign ${Utils.e(L.staffOne.toLowerCase())}</label>
                             <select class="form-select" id="staff_id" name="staff_id">
                                 <option value="">Unassigned</option>
                                 ${techs.map(t => `<option value="${t.staff_id}" ${Utils.intVal(r?.staff_id) === t.staff_id ? 'selected' : ''}>
@@ -413,11 +416,11 @@ const Repairs = {
                                 ${Object.entries(REPAIR_STATUS).map(([k, lbl]) =>
                                     `<option value="${k}" ${(r?.status ?? 'in_progress') === k ? 'selected' : ''}>${Utils.e(lbl)}</option>`).join('')}
                             </select>
-                            ${isEdit ? '' : '<span class="form-hint">New jobs always start as In Progress.</span>'}
+                            ${isEdit ? '' : `<span class="form-hint">New ${Utils.e(L.jobMany.toLowerCase())} always start as "${Utils.e(REPAIR_STATUS.in_progress)}".</span>`}
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="estimate_amount">Estimate (${CURRENCY_SYMBOL})</label>
+                            <label class="form-label" for="estimate_amount">${Utils.e(L.estimateLabel)} (${CURRENCY_SYMBOL})</label>
                             <input class="form-input" id="estimate_amount" name="estimate_amount" type="number" min="0" step="1"
                                    value="${v('estimate_amount')}">
                             <span class="field-error" id="err-estimate_amount"></span>
@@ -443,12 +446,12 @@ const Repairs = {
                         </div>
 
                         <div class="form-group form-col-full">
-                            <label class="form-label" for="diagnosis">Diagnosis</label>
+                            <label class="form-label" for="diagnosis">${Utils.e(L.diagnosisLabel)}</label>
                             <textarea class="form-textarea" id="diagnosis" name="diagnosis" rows="2">${Utils.e(r?.diagnosis ?? '')}</textarea>
                         </div>
 
                         <div class="form-group form-col-full">
-                            <label class="form-label" for="work_done">Work carried out</label>
+                            <label class="form-label" for="work_done">${Utils.e(L.workLabel)}</label>
                             <textarea class="form-textarea" id="work_done" name="work_done" rows="2">${Utils.e(r?.work_done ?? '')}</textarea>
                         </div>
 
@@ -462,7 +465,7 @@ const Repairs = {
 
                 <div class="form-actions">
                     <a href="${isEdit ? `#/repairs/${r.repair_id}` : '#/repairs'}" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary">${isEdit ? 'Save changes' : 'Create repair job'}</button>
+                    <button type="submit" class="btn btn-primary">${isEdit ? 'Save changes' : `Create ${Utils.e(L.jobLower)}`}</button>
                 </div>
             </form>
         `);
@@ -487,11 +490,11 @@ const Repairs = {
 
             if (isEdit) {
                 Repair.update(r.repair_id, data);
-                Toast.success('Repair updated.');
+                Toast.success(`${L.jobOne} updated.`);
                 Router.go(`/repairs/${r.repair_id}`);
             } else {
                 const id = Repair.create(data);
-                Toast.success(`Repair #${id} created.`);
+                Toast.success(`${L.jobOne} #${id} created.`);
                 Router.go(`/repairs/${id}`);
             }
         };
@@ -501,9 +504,9 @@ const Repairs = {
 
     qrLookup() {
         Modal.open({
-            title: 'QR / job lookup',
+            title: `QR / ${L.jobLower} lookup`,
             body: `
-                <p class="confirm-text">Scan or type the code printed on the device tag.</p>
+                <p class="confirm-text">Scan or type the code printed on the ${Utils.e(L.itemLabel.toLowerCase())} tag.</p>
                 <input class="form-input" id="qrInput" placeholder="RMS-000042 or just 42" autocomplete="off">
                 <div id="qrResult" class="qr-result"></div>`,
             footer: '<button class="btn btn-secondary" onclick="Modal.close()">Close</button>',
@@ -521,7 +524,7 @@ const Repairs = {
                      <strong>#${r.repair_id} — ${Utils.e(r.device_model)}</strong>
                      <span>${Utils.e(r.customer_name)} · ${Utils.e(REPAIR_STATUS[r.status])}</span>
                    </a>`
-                : '<p class="text-muted small">No repair matches that code.</p>';
+                : `<p class="text-muted small">No ${Utils.e(L.jobLower)} matches that code.</p>`;
         };
 
         input.oninput = UI.debounce(run, 150);
@@ -534,19 +537,19 @@ const Repairs = {
         const check = Repair.canDelete(id);
         if (!check.ok) {
             Modal.open({
-                title: 'Cannot delete this repair',
+                title: `Cannot delete this ${L.jobLower}`,
                 body: `<p class="confirm-text">${Utils.e(check.reason)}</p>`,
                 footer: '<button class="btn btn-secondary" onclick="Modal.close()">Close</button>',
             });
             return;
         }
         const ok = await Modal.confirm({
-            title: 'Delete repair',
-            message: `Delete repair #${id}? This cannot be undone.`,
+            title: `Delete ${L.jobLower}`,
+            message: `Delete ${L.jobLower} #${id}? This cannot be undone.`,
         });
         if (!ok) return;
         Repair.delete(id);
-        Toast.success('Repair deleted.');
+        Toast.success(`${L.jobOne} deleted.`);
         redirectTo ? Router.go(redirectTo) : Router.reload();
     },
 

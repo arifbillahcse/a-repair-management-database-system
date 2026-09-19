@@ -50,7 +50,7 @@ const Invoices = {
                 <div class="filter-bar">
                     <div class="search-input-wrap">
                         ${Icon.search('search-input-icon')}
-                        <input class="form-input" id="searchInput" type="search" placeholder="Search invoice number or client…"
+                        <input class="form-input" id="searchInput" type="search" placeholder="${Utils.e(`Search invoice number or ${L.clientOne.toLowerCase()}…`)}"
                                value="${Utils.e(filters.search)}" autocomplete="off">
                     </div>
                     ${filters.search || filters.status ? '<button class="btn btn-secondary btn-sm" id="clearFilters">Clear</button>' : ''}
@@ -68,7 +68,7 @@ const Invoices = {
             columns: [
                 { key: 'invoice_number', label: 'Invoice', sortable: true,
                   render: i => `<a class="table-link" href="#/invoices/${i.invoice_id}">${Utils.e(i.invoice_number)}</a>` },
-                { key: 'customer_name', label: 'Client', sortable: true,
+                { key: 'customer_name', label: L.clientOne, sortable: true,
                   render: i => `<a class="cust-name-link" href="#/customers/${i.customer_id}">${Utils.e(Utils.truncate(i.customer_name ?? '—', 24))}</a>` },
                 { key: 'invoice_date', label: 'Date', sortable: true, hideOnTablet: true,
                   render: i => Utils.formatDate(i.invoice_date) },
@@ -181,7 +181,7 @@ const Invoices = {
 
                 <aside class="dashboard-aside">
                     <div class="card">
-                        <div class="card-header"><h2 class="card-title">Client</h2></div>
+                        <div class="card-header"><h2 class="card-title">${Utils.e(L.clientOne)}</h2></div>
                         <div class="card-body">
                             ${UI.field('Name', `<a class="table-link" href="#/customers/${inv.customer_id}">${Utils.e(inv.customer_name)}</a>`, true)}
                             ${UI.field('Mobile', inv.customer_phone)}
@@ -196,7 +196,7 @@ const Invoices = {
                         <div class="card-body">
                             ${UI.field('Issued', Utils.formatDate(inv.invoice_date))}
                             ${UI.field('Due', inv.due_date ? Utils.formatDate(inv.due_date) : '')}
-                            ${UI.field('Repair job', inv.repair_id
+                            ${UI.field(L.jobOne, inv.repair_id
                                 ? `<a class="table-link" href="#/repairs/${inv.repair_id}">#${inv.repair_id} — ${Utils.e(inv.device_model ?? '')}</a>` : '', true)}
                             ${UI.field('Status', inv.is_overdue ? Badge.invoice('overdue') : Badge.invoice(inv.status), true)}
                         </div>
@@ -272,14 +272,14 @@ const Invoices = {
         Layout.render(`
             ${UI.backLink('#/invoices', 'All invoices')}
             ${UI.pageHeader('New invoice',
-                draft?.repair_id ? `Prefilled from repair #${draft.repair_id}.` : 'Raise an invoice for a client.')}
+                draft?.repair_id ? `Prefilled from ${L.jobLower} #${draft.repair_id}.` : `Raise an invoice for a ${L.clientOne.toLowerCase()}.`)}
 
             <form id="invoiceForm" class="card" novalidate>
                 <div class="card-body">
                     <div class="form-grid-2">
 
                         <div class="form-group form-col-full">
-                            <label class="form-label required" for="customer_search">Client</label>
+                            <label class="form-label required" for="customer_search">${Utils.e(L.clientOne)}</label>
                             <div class="search-input-wrap">
                                 <input class="form-input" id="customer_search" autocomplete="off" placeholder="Type a name, phone or email…">
                                 <input type="hidden" id="customer_id" name="customer_id" value="${Utils.e(draft?.customer_id ?? '')}">
@@ -426,9 +426,9 @@ const Invoices = {
 
             Forms.clearErrors(e.target);
             if (!Utils.intVal(data.customer_id)) {
-                Forms.showErrors({ customer_id: 'Select a client.' });
+                Forms.showErrors({ customer_id: `Select a ${L.clientOne.toLowerCase()}.` });
                 document.getElementById('customer_search').classList.add('input-error');
-                return Toast.error('Select a client for this invoice.');
+                return Toast.error(`Select a ${L.clientOne.toLowerCase()} for this invoice.`);
             }
             if (!items.length) return Toast.error('Add at least one line item.');
 
@@ -465,7 +465,7 @@ const Invoices = {
         const rows = Invoice.withRelations(DB.table('invoices'));
         const csv  = Utils.toCsv(Utils.sortBy(rows, 'invoice_date', 'DESC'), [
             { label: 'Invoice',   key: 'invoice_number' },
-            { label: 'Client',    key: 'customer_name' },
+            { label: L.clientOne, key: 'customer_name' },
             { label: 'Date',      value: r => Utils.formatDate(r.invoice_date) },
             { label: 'Due',       value: r => r.due_date ? Utils.formatDate(r.due_date) : '' },
             { label: 'Subtotal',  key: 'subtotal' },

@@ -17,17 +17,17 @@ const Layout = {
         return [
             { label: 'Dashboard', icon: 'dashboard', href: '#/', match: /^\/$/ },
             {
-                label: 'Repairs', icon: 'wrench', match: /^\/repairs/,
+                label: L.jobMany, icon: 'wrench', match: /^\/repairs/,
                 children: [
-                    { label: '+ New Repair', href: '#/repairs/create', match: /^\/repairs\/create$/ },
-                    { label: 'All Repairs',  href: '#/repairs',        match: /^\/repairs$/ },
+                    { label: `+ ${L.jobNew}`,    href: '#/repairs/create', match: /^\/repairs\/create$/ },
+                    { label: `All ${L.jobMany}`, href: '#/repairs',        match: /^\/repairs$/ },
                 ],
             },
             {
-                label: 'Clients', icon: 'users', match: /^\/customers/,
+                label: L.clientMany, icon: 'users', match: /^\/customers/,
                 children: [
-                    { label: '+ New Client', href: '#/customers/create', match: /^\/customers\/create$/ },
-                    { label: 'All Clients',  href: '#/customers',        match: /^\/customers$/ },
+                    { label: `+ New ${L.clientOne}`, href: '#/customers/create', match: /^\/customers\/create$/ },
+                    { label: `All ${L.clientMany}`,  href: '#/customers',        match: /^\/customers$/ },
                 ],
             },
             { label: 'Invoices', icon: 'invoice', href: '#/invoices', match: /^\/invoices/ },
@@ -86,7 +86,7 @@ const Layout = {
                 </button>
 
                 <a href="#/" class="topbar-brand">
-                    ${Icon.wrench('brand-icon')}
+                    ${Icon.brand('brand-icon')}
                     <span class="brand-name">${Utils.e(DB.setting('company_name', APP_NAME))}</span>
                 </a>
 
@@ -94,7 +94,7 @@ const Layout = {
                     <div class="global-search-wrap">
                         ${Icon.search('gs-icon')}
                         <input type="search" id="globalSearch" class="global-search"
-                               placeholder="Search clients, repairs, invoices…" autocomplete="off"
+                               placeholder="${Utils.e(`Search ${L.clientMany.toLowerCase()}, ${L.jobMany.toLowerCase()}, invoices…`)}" autocomplete="off"
                                aria-label="Global search">
                         <div class="ac-dropdown" id="globalSearchResults" hidden></div>
                     </div>
@@ -103,7 +103,7 @@ const Layout = {
                         ${Icon.theme('')}
                     </button>
 
-                    <button class="topbar-icon-btn" id="notifBtn" aria-label="Notifications" title="Ready for pickup">
+                    <button class="topbar-icon-btn" id="notifBtn" aria-label="Notifications" title="${Utils.e(L.queueLabel)}">
                         ${Icon.bell('')}
                         <span class="notif-dot" id="notifDot" hidden></span>
                     </button>
@@ -186,7 +186,7 @@ const Layout = {
                     <a href="https://github.com/arifbillahcse/a-repair-management-database-system" target="_blank" rel="noopener">
                         Source on GitHub
                     </a>
-                    · ${DB.table('customers').length} clients · ${DB.table('repairs').length} repairs
+                    · ${DB.table('customers').length} ${Utils.e(L.clientMany.toLowerCase())} · ${DB.table('repairs').length} ${Utils.e(L.jobMany.toLowerCase())}
                 </span>
             </footer>`;
     },
@@ -312,8 +312,8 @@ const Layout = {
             tip.innerHTML = `
                 <div class="role-hint-arrow"></div>
                 <strong>Try switching roles</strong>
-                <p>Open this menu to view the app as a Manager, Technician or front-desk Staff
-                   member. Reports, Staff and Settings appear and disappear with the role.</p>
+                <p>Open this menu to view the app as a Manager, ${Utils.e(L.staffOne)} or front-desk
+                   Staff member. Reports, Staff and Settings appear and disappear with the role.</p>
                 <button class="role-hint-ok">Got it</button>`;
             document.body.appendChild(tip);
 
@@ -345,10 +345,10 @@ const Layout = {
                         ${Utils.daysBetween(r.date_out || r.date_in)}d waiting
                     </span>
                 </li>`).join('')}</ul>`
-            : '<p class="confirm-text">Nothing is waiting for pickup right now.</p>';
+            : `<p class="confirm-text">Nothing is in the ${Utils.e(L.queueLabel.toLowerCase())} queue right now.</p>`;
 
         Modal.open({
-            title: `Ready for pickup (${ready.length})`,
+            title: `${L.queueLabel} (${ready.length})`,
             body,
             footer: `<a href="#/repairs?status=ready_for_pickup" class="btn btn-primary" onclick="Modal.close()">View all</a>`,
         });
@@ -379,12 +379,12 @@ const Layout = {
                 ? `<div class="ac-group">${title}</div>` + rows.map(fn).join('') : '';
 
             box.innerHTML =
-                section('Clients', clients, c => `
+                section(L.clientMany, clients, c => `
                     <a class="ac-item" href="#/customers/${c.customer_id}">
                         <span class="ac-name">${Utils.e(c.full_name)}</span>
                         <span class="ac-meta">${Utils.e(c.phone_mobile ?? '')} · ${Utils.e(c.city ?? '')}</span>
                     </a>`) +
-                section('Repairs', repairs, r => `
+                section(L.jobMany, repairs, r => `
                     <a class="ac-item" href="#/repairs/${r.repair_id}">
                         <span class="ac-name">#${r.repair_id} — ${Utils.e(r.device_model)}</span>
                         <span class="ac-meta">${Utils.e(r.customer_name ?? '')} · ${Utils.e(REPAIR_STATUS[r.status])}</span>

@@ -11,7 +11,7 @@ const Imports = {
 
     TYPES: {
         customers: {
-            label: 'Clients',
+            label: L.clientMany,
             columns: ['full_name', 'client_type', 'phone_mobile', 'email', 'address', 'city', 'postal_code', 'vat_number', 'notes'],
             required: ['full_name'],
             sample: [
@@ -21,7 +21,7 @@ const Imports = {
             ],
         },
         repairs: {
-            label: 'Repairs',
+            label: L.jobMany,
             columns: ['customer_phone', 'device_model', 'device_serial_number', 'problem_description', 'estimate_amount', 'status'],
             required: ['customer_phone', 'device_model'],
             sample: [
@@ -39,7 +39,7 @@ const Imports = {
 
         Layout.render(`
             ${UI.pageHeader('Import data',
-                'Bulk-load clients or repairs from a CSV file. Everything is parsed in your browser.')}
+                `Bulk-load ${L.clientMany.toLowerCase()} or ${L.jobMany.toLowerCase()} from a CSV file. Everything is parsed in your browser.`)}
 
             <div class="card">
                 <div class="card-header"><h2 class="card-title">1. Choose what to import</h2></div>
@@ -154,9 +154,9 @@ const Imports = {
                 const check = Customer.validate(row);
                 if (!check.ok) error = Object.values(check.errors)[0];
             } else {
-                if (!row.customer_phone) error = 'Client phone is required.';
-                else if (!Customer.findByPhone(row.customer_phone)) error = 'No client with that phone number.';
-                else if (!row.device_model) error = 'Device model is required.';
+                if (!row.customer_phone) error = `${L.clientOne} phone is required.`;
+                else if (!Customer.findByPhone(row.customer_phone)) error = `No ${L.clientOne.toLowerCase()} with that phone number.`;
+                else if (!row.device_model) error = `${L.itemField} is required.`;
             }
             return { line: i + 2, row, error };
         });

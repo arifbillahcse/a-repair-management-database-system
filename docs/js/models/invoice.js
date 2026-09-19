@@ -198,7 +198,7 @@ const Invoice = {
             customer_id: r.customer_id,
             customer_name: r.customer_name,
             items: [{
-                description: `Repair #${r.repair_id} — ${r.device_model}${r.work_done ? ' (' + Utils.truncate(r.work_done, 60) + ')' : ''}`,
+                description: `${L.jobOne} #${r.repair_id} — ${r.device_model}${r.work_done ? ' (' + Utils.truncate(r.work_done, 60) + ')' : ''}`,
                 quantity: 1, unit_price: amount, discount_pct: 0,
             }],
         };

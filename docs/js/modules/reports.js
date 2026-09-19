@@ -50,7 +50,7 @@ const Reports = {
 
             <div class="stats-grid">
                 ${UI.statCard({ label: 'Revenue (all time)', value: Utils.formatCurrencyShort(stats.revenue_total), icon: 'money',   tone: 'green' })}
-                ${UI.statCard({ label: 'Jobs completed',     value: Utils.numberFormat(counts.collected + counts.completed), icon: 'check', tone: 'accent' })}
+                ${UI.statCard({ label: `${L.jobMany} completed`, value: Utils.numberFormat(counts.collected + counts.completed), icon: 'check', tone: 'accent' })}
                 ${UI.statCard({ label: 'Avg. turnaround',    value: `${stats.avg_turnaround} days`, icon: 'clock', tone: 'orange' })}
                 ${UI.statCard({ label: 'Outstanding',        value: Utils.formatCurrencyShort(invStat.outstanding), icon: 'invoice', tone: 'blue' })}
             </div>
@@ -58,7 +58,7 @@ const Reports = {
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Revenue by month</h2>
-                    <span class="text-muted small">Completed jobs, ${CURRENCY_CODE}</span>
+                    <span class="text-muted small">Completed ${Utils.e(L.jobMany.toLowerCase())}, ${CURRENCY_CODE}</span>
                 </div>
                 <div class="card-body">
                     <div class="chart-wrap tall"><canvas id="revChart" height="120"></canvas></div>
@@ -68,21 +68,21 @@ const Reports = {
             <div class="report-grid">
 
                 <div class="card">
-                    <div class="card-header"><h2 class="card-title">Jobs received per month</h2></div>
+                    <div class="card-header"><h2 class="card-title">${Utils.e(L.jobMany)} received per month</h2></div>
                     <div class="card-body">
                         <div class="chart-wrap"><canvas id="jobsChart" height="150"></canvas></div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <div class="card-header"><h2 class="card-title">Repairs by status</h2></div>
+                    <div class="card-header"><h2 class="card-title">${Utils.e(L.jobMany)} by status</h2></div>
                     <div class="card-body">
                         <div class="chart-wrap"><canvas id="statusChart" height="150"></canvas></div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <div class="card-header"><h2 class="card-title">Technician output</h2></div>
+                    <div class="card-header"><h2 class="card-title">${Utils.e(L.staffOne)} output</h2></div>
                     <div class="card-body">
                         <div class="chart-wrap"><canvas id="techChart" height="150"></canvas></div>
                     </div>
@@ -90,14 +90,14 @@ const Reports = {
                 </div>
 
                 <div class="card">
-                    <div class="card-header"><h2 class="card-title">Top clients by revenue</h2></div>
+                    <div class="card-header"><h2 class="card-title">Top ${Utils.e(L.clientMany.toLowerCase())} by revenue</h2></div>
                     <div class="card-body">
                         <div class="chart-wrap"><canvas id="clientChart" height="150"></canvas></div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <div class="card-header"><h2 class="card-title">Most-serviced brands</h2></div>
+                    <div class="card-header"><h2 class="card-title">Most-serviced ${Utils.e(L.itemLabel.toLowerCase())}s</h2></div>
                     <div class="card-body">
                         <div class="chart-wrap"><canvas id="deviceChart" height="150"></canvas></div>
                     </div>
@@ -139,25 +139,25 @@ const Reports = {
             rows: [...revenue].reverse(),
             columns: [
                 { key: 'label', label: 'Month' },
-                { key: 'jobs',  label: 'Jobs completed', align: 'right', render: r => Utils.numberFormat(r.jobs) },
+                { key: 'jobs',  label: `${L.jobMany} completed`, align: 'right', render: r => Utils.numberFormat(r.jobs) },
                 { key: 'revenue', label: 'Revenue', align: 'right', render: r => Utils.formatCurrency(r.revenue) },
-                { key: 'avg', label: 'Avg. per job', align: 'right',
+                { key: 'avg', label: `Avg. per ${L.jobLower}`, align: 'right',
                   render: r => r.jobs ? Utils.formatCurrency(r.revenue / r.jobs) : '—' },
             ],
-            empty: { message: 'No completed jobs in this range.', icon: 'chart' },
+            empty: { message: `No completed ${L.jobMany.toLowerCase()} in this range.`, icon: 'chart' },
         });
 
         DataTable.render({
             mount: '#techTable',
             rows: techs,
             columns: [
-                { key: 'full_name', label: 'Technician', render: t => `<a class="table-link" href="#/staff/${t.staff_id}">${Utils.e(t.full_name)}</a>` },
+                { key: 'full_name', label: L.staffOne, render: t => `<a class="table-link" href="#/staff/${t.staff_id}">${Utils.e(t.full_name)}</a>` },
                 { key: 'open_repairs',  label: 'Open',  align: 'right' },
                 { key: 'total_repairs', label: 'Total', align: 'right' },
                 { key: 'avg_days', label: 'Avg. days', align: 'right', hideOnTablet: true,
                   render: t => t.avg_days ? `${t.avg_days}d` : '—' },
             ],
-            empty: { message: 'No technicians on record.', icon: 'user' },
+            empty: { message: `No ${L.staffMany.toLowerCase()} on record.`, icon: 'user' },
         });
 
         document.getElementById('rangeSelect').onchange = e => Router.setQuery({ months: e.target.value });
@@ -179,9 +179,9 @@ const Reports = {
     export(revenue) {
         const csv = Utils.toCsv(revenue, [
             { label: 'Month',   key: 'label' },
-            { label: 'Jobs completed', key: 'jobs' },
+            { label: `${L.jobMany} completed`, key: 'jobs' },
             { label: 'Revenue', key: 'revenue' },
-            { label: 'Avg per job', value: r => r.jobs ? Utils.round2(r.revenue / r.jobs) : 0 },
+            { label: `Avg per ${L.jobLower}`, value: r => r.jobs ? Utils.round2(r.revenue / r.jobs) : 0 },
         ]);
         Utils.download(`revenue-summary-${Utils.toDbDate(new Date())}.csv`, csv);
         Toast.success('Summary exported.');

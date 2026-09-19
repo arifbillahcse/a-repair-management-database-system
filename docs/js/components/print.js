@@ -58,62 +58,62 @@ const Print = {
         return `
             ${this._toolbar(`#/repairs/${r.repair_id}`)}
             <article class="pr-page">
-                ${this._header('Repair Job Sheet', `Job #${r.repair_id}`)}
+                ${this._header(L.jobSheet, `${L.jobOne} #${r.repair_id}`)}
 
                 <section class="pr-two-col">
                     <div>
-                        <h3 class="pr-section-title">Client</h3>
+                        <h3 class="pr-section-title">${Utils.e(L.clientOne)}</h3>
                         <p class="pr-strong">${Utils.e(r.customer_name)}</p>
                         <p>${Utils.e(r.customer_phone ?? '')}</p>
                         <p>${Utils.e(r.customer_email ?? '')}</p>
                         <p>${Utils.e(r.customer_city ?? '')}</p>
                     </div>
                     <div>
-                        <h3 class="pr-section-title">Job</h3>
+                        <h3 class="pr-section-title">${Utils.e(L.jobOne)}</h3>
                         <p><span class="pr-label">Received:</span> ${Utils.formatDateTime(r.date_in)}</p>
                         <p><span class="pr-label">Expected:</span> ${r.collection_date ? Utils.formatDate(r.collection_date) : '—'}</p>
-                        <p><span class="pr-label">Technician:</span> ${Utils.e(r.technician_name ?? 'Unassigned')}</p>
+                        <p><span class="pr-label">${Utils.e(L.staffOne)}:</span> ${Utils.e(r.technician_name ?? 'Unassigned')}</p>
                         <p><span class="pr-label">Status:</span> ${Utils.e(REPAIR_STATUS[r.status])}</p>
                     </div>
                 </section>
 
                 <section>
-                    <h3 class="pr-section-title">Device</h3>
+                    <h3 class="pr-section-title">${Utils.e(L.itemLabel)}</h3>
                     <table class="pr-table">
                         <tbody>
-                            <tr><th>Model</th><td>${Utils.e(r.device_model)}</td></tr>
-                            <tr><th>Serial number</th><td>${Utils.e(r.device_serial_number ?? '—')}</td></tr>
+                            <tr><th>${Utils.e(L.itemField)}</th><td>${Utils.e(r.device_model)}</td></tr>
+                            <tr><th>${Utils.e(L.serialLabel)}</th><td>${Utils.e(r.device_serial_number ?? '—')}</td></tr>
                             <tr><th>Tracking code</th><td>${Utils.e(r.qr_code ?? '—')}</td></tr>
                         </tbody>
                     </table>
                 </section>
 
                 <section>
-                    <h3 class="pr-section-title">Reported problem</h3>
+                    <h3 class="pr-section-title">${Utils.e(L.problemLabel)}</h3>
                     <p class="pr-para">${Utils.e(r.problem_description ?? '—')}</p>
 
-                    <h3 class="pr-section-title">Diagnosis</h3>
+                    <h3 class="pr-section-title">${Utils.e(L.diagnosisLabel)}</h3>
                     <p class="pr-para">${Utils.e(r.diagnosis ?? '—')}</p>
 
-                    <h3 class="pr-section-title">Work carried out</h3>
+                    <h3 class="pr-section-title">${Utils.e(L.workLabel)}</h3>
                     <p class="pr-para">${Utils.e(r.work_done ?? '—')}</p>
                 </section>
 
                 <section class="pr-totals">
                     <table class="pr-table pr-table-right">
                         <tbody>
-                            <tr><th>Estimate</th><td>${r.estimate_amount ? Utils.formatCurrency(r.estimate_amount) : '—'}</td></tr>
+                            <tr><th>${Utils.e(L.estimateLabel)}</th><td>${r.estimate_amount ? Utils.formatCurrency(r.estimate_amount) : '—'}</td></tr>
                             <tr class="pr-grand"><th>Amount charged</th><td>${r.actual_amount ? Utils.formatCurrency(r.actual_amount) : '—'}</td></tr>
                         </tbody>
                     </table>
                 </section>
 
                 <section class="pr-signatures">
-                    <div><span class="pr-sig-line"></span><p>Technician signature</p></div>
+                    <div><span class="pr-sig-line"></span><p>${Utils.e(L.staffOne)} signature</p></div>
                     <div><span class="pr-sig-line"></span><p>Customer signature on collection</p></div>
                 </section>
 
-                ${this._footer('Devices not collected within 90 days may be subject to storage charges. Warranty on replaced parts: 90 days from collection.')}
+                ${this._footer(DB.setting('job_sheet_terms', 'Warranty on replaced parts: 90 days.'))}
             </article>`;
     },
 
@@ -138,7 +138,7 @@ const Print = {
                         <h3 class="pr-section-title">Details</h3>
                         <p><span class="pr-label">Invoice date:</span> ${Utils.formatDate(inv.invoice_date)}</p>
                         <p><span class="pr-label">Due date:</span> ${inv.due_date ? Utils.formatDate(inv.due_date) : '—'}</p>
-                        ${inv.repair_id ? `<p><span class="pr-label">Repair job:</span> #${inv.repair_id}</p>` : ''}
+                        ${inv.repair_id ? `<p><span class="pr-label">${Utils.e(L.jobOne)}:</span> #${inv.repair_id}</p>` : ''}
                         <p><span class="pr-label">Status:</span> ${Utils.e(INVOICE_STATUS[inv.status])}</p>
                     </div>
                 </section>
