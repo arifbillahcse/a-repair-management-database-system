@@ -1,7 +1,15 @@
 # Repair Management System
 
-**Version 1.2.0** — A full-featured repair shop management system built with raw PHP 8.1+ and MySQL.
+**Version 1.3.0** — A full-featured repair shop management system built with raw PHP 8.1+ and MySQL.
 No frameworks. Dark theme. PDO prepared statements throughout.
+
+### ▶ [Try the live demo](https://arifbillahcse.github.io/a-repair-management-database-system/)
+
+An interactive front-end prototype of this system, running entirely in the
+browser — no install, no login required. Add clients, log repairs, raise
+invoices and print them; everything is saved in your browser and can be reset
+in one click. Source in [`docs/`](docs/), notes in
+[`docs/README.md`](docs/README.md).
 
 ---
 
