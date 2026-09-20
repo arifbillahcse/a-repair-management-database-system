@@ -58,6 +58,10 @@ Plus: role switching (Admin / Manager / Technician / Staff) to show the
 permission gates live, global search, light & dark themes, and full
 responsive layout down to phone width.
 
+Blocked pages do not dead-end. A 403 names the role the page needs, offers
+a one-click switch to a role that has it, and returns you to the page you
+were trying to reach — query string intact.
+
 ## How the data works
 
 Everything you add or change is written to **`localStorage`** and survives a

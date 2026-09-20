@@ -100,10 +100,26 @@ const Auth = {
         return false;
     },
 
+    /**
+     * Record what was blocked before redirecting, so the 403 page can name the
+     * role required and offer a way back in rather than dead-ending.
+     */
     requireRole(minRole) {
         if (!this.requireAuth()) return false;
         if (this.can(minRole)) return true;
+        this.denied = { path: Router.parse().path, query: Router.parse().query, minRole };
         location.hash = '#/403';
         return false;
+    },
+
+    denied: null,
+
+    /** Roles that would satisfy the blocked page, strongest first. */
+    rolesFor(minRole) {
+        const need = ROLE_HIERARCHY[minRole] ?? 999;
+        return Object.keys(USER_ROLES)
+            .filter(r => (ROLE_HIERARCHY[r] ?? 0) >= need)
+            .filter(r => DB.table('users').some(u => u.role === r && u.status === 'active'))
+            .sort((a, b) => (ROLE_HIERARCHY[b] ?? 0) - (ROLE_HIERARCHY[a] ?? 0));
     },
 };

@@ -93,19 +93,51 @@ const AuthView = {
         Router.go('/login');
     },
 
+    /**
+     * A plain 403 is a dead end: the visitor is told no and left there. This
+     * one names the role the page needs and switches to it in one click, then
+     * returns to the page that was blocked — which is also the clearest way to
+     * demonstrate that the permission gates are real.
+     */
     forbidden() {
+        const denied  = Auth.denied;
+        const minRole = denied?.minRole ?? 'admin';
+        const options = Auth.rolesFor(minRole);
+        const target  = denied ? { path: denied.path, query: denied.query ?? {} } : { path: '/', query: {} };
+
         Layout.render(`
             <div class="error-page">
                 <div class="error-code">403</div>
-                <h1 class="error-title">Access denied</h1>
+                <h1 class="error-title">That page needs a different role</h1>
                 <p class="error-message">
-                    Your role (${Utils.e(USER_ROLES[Auth.role()] ?? 'Guest')}) cannot open this page.
-                    Use the role switcher in the top-right to try it as an Admin or Manager.
+                    You are signed in as <strong>${Utils.e(USER_ROLES[Auth.role()] ?? 'Guest')}</strong>.
+                    ${denied ? `<code>${Utils.e(denied.path)}</code> is limited to` : 'This page is limited to'}
+                    <strong>${Utils.e(USER_ROLES[minRole] ?? minRole)}</strong> and above.
                 </p>
+                <p class="error-message text-muted small">
+                    This is the app's real permission system, not a demo limitation — switch role
+                    and you will be taken straight to the page.
+                </p>
+
                 <div class="error-actions">
-                    <a href="#/" class="btn btn-primary">Back to dashboard</a>
+                    ${options.map((r, i) => `
+                        <button class="btn ${i === 0 ? 'btn-primary' : 'btn-secondary'}" data-as="${r}">
+                            ${Icon.user('')} View as ${Utils.e(USER_ROLES[r])}
+                        </button>`).join('')}
+                    <a href="#/" class="btn btn-secondary">Back to dashboard</a>
                 </div>
             </div>`);
+
+        document.querySelectorAll('[data-as]').forEach(b => {
+            b.onclick = () => {
+                if (!Auth.switchRole(b.dataset.as)) return Toast.error('That demo account is unavailable.');
+                Auth.denied = null;
+                Toast.success(`Now viewing as ${USER_ROLES[b.dataset.as]}.`);
+                Layout.mounted = false;
+                Layout.mount();
+                Router.go(target.path, target.query);
+            };
+        });
     },
 
     notFound(path) {
