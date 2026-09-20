@@ -38,6 +38,9 @@ const VARIANTS = {
             queueLabel: 'Ready for pickup',
             estimateLabel: 'Estimate',
             specialisation: 'e.g. Laptop & Motherboard',
+            catalogueOne: 'Part or Service', catalogueMany: 'Parts & Services',
+            catalogueExample: 'e.g. Laptop Battery (OEM)',
+            saleOne: 'Sale', saleMany: 'Sales', saleNew: 'New Sale',
         },
         statuses: {
             in_progress: 'In Progress',       on_hold: 'On Hold',
@@ -73,6 +76,9 @@ const VARIANTS = {
             queueLabel: 'Ready for review',
             estimateLabel: 'Quoted fee',
             specialisation: 'e.g. Orthodontics',
+            catalogueOne: 'Procedure or Material', catalogueMany: 'Procedures & Materials',
+            catalogueExample: 'e.g. Zirconia Crown',
+            saleOne: 'Sale', saleMany: 'Counter Sales', saleNew: 'New Sale',
         },
         statuses: {
             in_progress: 'In Treatment',      on_hold: 'On Hold',
@@ -108,6 +114,9 @@ const VARIANTS = {
             queueLabel: 'Ready for handover',
             estimateLabel: 'Estimate',
             specialisation: 'e.g. Engine & Transmission',
+            catalogueOne: 'Part or Labour', catalogueMany: 'Parts & Labour',
+            catalogueExample: 'e.g. Front Brake Pad Set',
+            saleOne: 'Sale', saleMany: 'Parts Sales', saleNew: 'New Parts Sale',
         },
         statuses: {
             in_progress: 'In Workshop',       on_hold: 'On Hold',
@@ -143,6 +152,9 @@ const VARIANTS = {
             queueLabel: 'Ready to close',
             estimateLabel: 'Quoted amount',
             specialisation: 'e.g. Split & VRF Systems',
+            catalogueOne: 'Part or Service', catalogueMany: 'Parts & Services',
+            catalogueExample: 'e.g. Run Capacitor',
+            saleOne: 'Sale', saleMany: 'Counter Sales', saleNew: 'New Sale',
         },
         statuses: {
             in_progress: 'In Progress',       on_hold: 'On Hold',

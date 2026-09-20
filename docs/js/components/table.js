@@ -123,16 +123,36 @@ const DataTable = {
         },
     },
 
-    /** Bind every [data-del] in a container to one confirm+delete handler. */
-    bindDelete(root, { message, onConfirm }) {
+    /**
+     * Bind every [data-del] in a container to one confirm+delete handler.
+     *
+     * `guard(id)` runs BEFORE the confirm and returns { ok, reason }. Without
+     * it the user gets asked to confirm a delete that the model then refuses —
+     * a confirm-then-refuse sequence that reads like the app is broken.
+     */
+    bindDelete(root, { message, onConfirm, guard = null, blockedTitle = 'Cannot delete this' }) {
         (typeof root === 'string' ? document.querySelector(root) : root)
             ?.querySelectorAll('[data-del]').forEach(btn => {
                 btn.onclick = async () => {
+                    const id = Utils.intVal(btn.dataset.del);
+
+                    if (guard) {
+                        const check = guard(id);
+                        if (!check.ok) {
+                            Modal.open({
+                                title: blockedTitle,
+                                body: `<p class="confirm-text">${Utils.e(check.reason)}</p>`,
+                                footer: '<button class="btn btn-secondary" onclick="Modal.close()">Close</button>',
+                            });
+                            return;
+                        }
+                    }
+
                     const ok = await Modal.confirm({
                         title: 'Confirm delete',
                         message: typeof message === 'function' ? message(btn.dataset.del) : message,
                     });
-                    if (ok) onConfirm(Utils.intVal(btn.dataset.del));
+                    if (ok) onConfirm(id);
                 };
             });
     },

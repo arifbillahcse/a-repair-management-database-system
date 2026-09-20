@@ -30,6 +30,8 @@ const Layout = {
                     { label: `All ${L.clientMany}`,  href: '#/customers',        match: /^\/customers$/ },
                 ],
             },
+            { label: L.saleMany,      icon: 'money', href: '#/sales',    match: /^\/sales/ },
+            { label: L.catalogueMany, icon: 'box',   href: '#/products', match: /^\/products/ },
             { label: 'Invoices', icon: 'invoice', href: '#/invoices', match: /^\/invoices/ },
             { label: 'Reports',  icon: 'chart',   href: '#/reports',  match: /^\/reports/,  role: 'manager' },
             { label: 'Staff',    icon: 'user',    href: '#/staff',    match: /^\/staff/,    role: 'manager' },

@@ -617,3 +617,14 @@ tr.row-error td { background: var(--error-bg); }
     .role-hint { width: auto; left: 12px; right: 12px !important; }
     .role-hint-arrow { right: 18px; }
 }
+
+/* style.css's .required colours its element red — it was written for a bare
+   "*" marker. Applied to a whole <label> it turns every required field label
+   red, which reads as a validation error before anything is typed. Keep the
+   label in normal ink and add the asterisk after it. */
+.form-label.required { color: var(--text-secondary); }
+.form-label.required::after {
+    content: ' *';
+    color: var(--error);
+    font-weight: 700;
+}

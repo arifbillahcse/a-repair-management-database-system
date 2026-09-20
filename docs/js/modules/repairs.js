@@ -111,8 +111,10 @@ const Repairs = {
         UI.bindFilterPills();
 
         DataTable.bindDelete('#listMount', {
+            guard: id => Repair.canDelete(id),
+            blockedTitle: `Cannot delete this ${L.jobLower}`,
             message: id => `Delete ${L.jobLower} #${id}? This cannot be undone.`,
-            onConfirm: id => this.destroy(id),
+            onConfirm: id => { Repair.delete(id); Toast.success(`${L.jobOne} deleted.`); Router.reload(); },
         });
 
         if (filters.search) { search.focus(); search.setSelectionRange(search.value.length, search.value.length); }

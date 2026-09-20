@@ -46,6 +46,8 @@ Screenshots of every module are in the
 | **Dashboard** | KPI cards, 12-month revenue chart, recent repairs, overdue-pickup alerts, technician workload, activity log |
 | **Clients** | List with search / filter / sort / pagination, detail view with lifetime stats, create, edit, delete (FK-guarded), CSV export |
 | **Repairs** | Full job lifecycle, status pipeline with legal-transition enforcement, technician assignment, photo attachments, locally generated QR tags, printable job sheet |
+| **Catalogue** | Parts and services with cost, selling price, live margin, stock levels, low-stock and out-of-stock flags, restocking, CSV export, and a delete guard for items already invoiced |
+| **Counter sales** | Sell catalogue items directly with no job attached — basket with live VAT, stock checked before the sale commits, stock decremented on completion and restored if the sale is reversed |
 | **Invoices** | Create from a repair or from scratch, line-item editor with live VAT maths, mark sent, record full or partial payment, overdue detection, printable invoice |
 | **Reports** | Revenue by month, jobs received, repairs by status, technician output, top clients, most-serviced brands — every chart backed by a table |
 | **Staff** | Directory with per-technician workload and revenue, create, edit, remove |
@@ -85,6 +87,8 @@ The structure is a deliberate one-to-one translation, not a rewrite:
 | `models/*.php` | `js/models/*.js` — SQL `WHERE`/`ORDER BY`/`GROUP BY` become filter/sort/reduce |
 | `controllers/*.php` + `views/*.php` | `js/modules/*.js` |
 | `src/Auth.php` | `js/auth.js` — the real role hierarchy and `can()` gates |
+| *(no PHP equivalent)* | `js/models/product.js` + `js/modules/products.js` — the `products` table existed in `schema.sql` but nothing ever managed it |
+| *(no PHP equivalent)* | `js/models/sale.js` + `js/modules/sales.js` — counter sales, written as invoices with a null `repair_id` |
 | `src/Utils.php` | `js/utils.js` |
 | `config/constants.php` | `js/constants.js` |
 | `public/css/style.css` | `assets/css/style.css` — **copied unchanged** |

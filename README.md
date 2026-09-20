@@ -68,6 +68,13 @@ Revenue, job volume, technician output and top clients. Every chart is backed by
 
 ![Reports](docs/assets/screenshots/06-reports.png)
 
+### Catalogue &amp; counter sales
+Manage the parts and services that jobs and sales draw from — with cost, margin, stock levels and low-stock flags. Counter sales ring up items directly, move stock and produce a receipt.
+
+| Catalogue | Counter sale |
+|---|---|
+| ![Catalogue](docs/assets/screenshots/15-catalogue.png) | ![Counter sale](docs/assets/screenshots/16-counter-sale.png) |
+
 ### CSV import
 Real files, parsed in the browser, with per-row validation and a preview before anything is written.
 

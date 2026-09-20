@@ -56,6 +56,15 @@ const App = {
         Router.add('/customers/:id',      ctx => Customers.show(ctx));
         Router.add('/customers/:id/edit', ctx => Customers.edit(ctx));
 
+        /* ── Counter sales ────────────────────────────────────────────────── */
+        Router.add('/sales',     ctx => Sales.index(ctx));
+        Router.add('/sales/new', ctx => Sales.create(ctx));
+
+        /* ── Catalogue ────────────────────────────────────────────────────── */
+        Router.add('/products',          ctx => Products.index(ctx));
+        Router.add('/products/create',   ctx => Products.create(ctx));
+        Router.add('/products/:id/edit', ctx => Products.edit(ctx));
+
         /* ── Invoices ─────────────────────────────────────────────────────── */
         Router.add('/invoices',           ctx => Invoices.index(ctx));
         Router.add('/invoices/create',    ctx => Invoices.create(ctx));

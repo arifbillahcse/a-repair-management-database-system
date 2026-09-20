@@ -99,11 +99,10 @@ const Customers = {
         document.getElementById('exportBtn')?.addEventListener('click', () => this.export(filters.status));
 
         DataTable.bindDelete('#listMount', {
-            message: id => {
-                const c = Customer.findById(id);
-                return `Delete "${c?.full_name}"? This cannot be undone.`;
-            },
-            onConfirm: id => this.destroy(id),
+            guard: id => Customer.canDelete(id),
+            blockedTitle: `Cannot delete this ${L.clientOne.toLowerCase()}`,
+            message: id => `Delete "${Customer.findById(id)?.full_name}"? This cannot be undone.`,
+            onConfirm: id => { Customer.delete(id); Toast.success(`${L.clientOne} deleted.`); Router.reload(); },
         });
 
         // Keep focus + caret in the search box across re-renders
