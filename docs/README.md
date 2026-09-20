@@ -4,7 +4,7 @@ A front-end prototype of the PHP/MySQL application in the repository root.
 No server, no database: it runs entirely in the browser and is served free
 from GitHub Pages.
 
-**Live:** https://demo.arifs.work/
+**Live:** https://arifbillahcse.github.io/a-repair-management-database-system/
 
 ## Four demos, one codebase
 
@@ -98,16 +98,12 @@ The five PHP list views repeated the same table markup roughly five times;
 ## Hosting
 
 Served by GitHub Pages from this `docs/` folder on the `Version-1.3.0`
-branch, with `CNAME` pointing the custom domain at it.
+branch:
 
-DNS (Cloudflare), proxy **off** so GitHub can issue the certificate:
+**Settings → Pages → Deploy from a branch → `Version-1.3.0` → `/docs`**
 
-```
-CNAME   demo   arifbillahcse.github.io   DNS only
-```
-
-Removing `docs/CNAME` reverts the site to
-`arifbillahcse.github.io/a-repair-management-database-system/`.
+No custom domain — the site is served from the repository's own
+`github.io` address, so nothing outside GitHub has to be configured.
 
 ## Running it locally
 

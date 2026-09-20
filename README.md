@@ -3,7 +3,7 @@
 **Version 1.3.0** — A full-featured repair shop management system built with raw PHP 8.1+ and MySQL.
 No frameworks. Dark theme. PDO prepared statements throughout.
 
-### ▶ [Try the live demos — demo.arifs.work](https://demo.arifs.work/)
+### ▶ [Try the live demos](https://arifbillahcse.github.io/a-repair-management-database-system/)
 
 An interactive front-end prototype of this system, running entirely in the
 browser — no install, no login required. Add clients, log jobs, raise
@@ -14,10 +14,10 @@ in one click.
 
 | Demo | Industry | Vocabulary |
 |---|---|---|
-| [Repair Shop](https://demo.arifs.work/repair/) | Electronics & computer repair | Clients → Repairs · Device · Technician |
-| [Dental Clinic](https://demo.arifs.work/dental/) | Dental practice | Patients → Treatments · Procedure · Dentist |
-| [Auto Service](https://demo.arifs.work/auto/) | Vehicle workshop | Customers → Job cards · Vehicle · Mechanic |
-| [AC & Appliance](https://demo.arifs.work/ac/) | Appliance servicing | Clients → Service calls · Unit · Engineer |
+| [Repair Shop](https://arifbillahcse.github.io/a-repair-management-database-system/repair/) | Electronics & computer repair | Clients → Repairs · Device · Technician |
+| [Dental Clinic](https://arifbillahcse.github.io/a-repair-management-database-system/dental/) | Dental practice | Patients → Treatments · Procedure · Dentist |
+| [Auto Service](https://arifbillahcse.github.io/a-repair-management-database-system/auto/) | Vehicle workshop | Customers → Job cards · Vehicle · Mechanic |
+| [AC & Appliance](https://arifbillahcse.github.io/a-repair-management-database-system/ac/) | Appliance servicing | Clients → Service calls · Unit · Engineer |
 
 The application code is identical across all four. A single config file
 ([`docs/js/variants.js`](docs/js/variants.js)) supplies the on-screen wording,
