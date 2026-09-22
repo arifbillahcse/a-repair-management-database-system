@@ -242,6 +242,38 @@ $qs = fn(string $r) => BASE_URL . '/reports?range=' . $r;
         </div>
     </div>
 
+    <!-- Private Revenue -->
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+        </div>
+        <div class="stat-body">
+            <div class="stat-value"><?= Utils::formatCurrency($privateIncome) ?></div>
+            <div class="stat-label">Private Revenue</div>
+            <div style="font-size:.74rem;color:var(--text-muted);margin-top:.15rem">
+                Invoiced <?= Utils::formatCurrency($privateBilled) ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Colleague Revenue -->
+    <div class="stat-card">
+        <div class="stat-icon" style="background:var(--tint-purple);color:#a855f7">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+        </div>
+        <div class="stat-body">
+            <div class="stat-value" style="color:#a855f7"><?= Utils::formatCurrency($colleagueIncome) ?></div>
+            <div class="stat-label">Colleague Revenue</div>
+            <div style="font-size:.74rem;color:var(--text-muted);margin-top:.15rem">
+                Invoiced <?= Utils::formatCurrency($colleagueBilled) ?>
+            </div>
+        </div>
+    </div>
+
     <!-- Outstanding -->
     <div class="stat-card">
         <div class="stat-icon <?= $outstanding > 0 ? 'stat-icon-orange' : 'stat-icon-green' ?>">
@@ -318,6 +350,70 @@ $qs = fn(string $r) => BASE_URL . '/reports?range=' . $r;
                 <span class="status-count"><?= $cnt ?></span>
             </div>
             <?php endforeach; ?>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Private vs Colleague trend ──────────────────────────────────────────── -->
+<div class="rep-grid-2">
+
+    <!-- Monthly trend, last 12 months -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h2 class="chart-title">Private vs Colleague — Last 12 Months</h2>
+        </div>
+        <div class="table-responsive">
+            <table class="clients-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th style="text-align:right">Private</th>
+                        <th style="text-align:right">Colleague</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($monthlyClientTrend as $row): ?>
+                    <?php $rowEmpty = !$row['private_income'] && !$row['colleague_income']; ?>
+                    <tr<?= $rowEmpty ? ' style="color:var(--text-muted)"' : '' ?>>
+                        <td><?= Utils::e($row['label']) ?></td>
+                        <td style="text-align:right"><?= Utils::formatCurrency($row['private_income']) ?></td>
+                        <td style="text-align:right;color:#a855f7;font-weight:600"><?= Utils::formatCurrency($row['colleague_income']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Yearly summary, all years -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h2 class="chart-title">Private vs Colleague — By Year</h2>
+        </div>
+        <div class="table-responsive">
+            <table class="clients-table">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th style="text-align:right">Private</th>
+                        <th style="text-align:right">Colleague</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php if (empty($yearlyClientTrend)): ?>
+                    <tr><td colspan="3" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No data yet.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($yearlyClientTrend as $yr): ?>
+                    <tr>
+                        <td><?= (int)$yr['yr'] ?></td>
+                        <td style="text-align:right"><?= Utils::formatCurrency((float)$yr['private_income']) ?></td>
+                        <td style="text-align:right;color:#a855f7;font-weight:600"><?= Utils::formatCurrency((float)$yr['colleague_income']) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 
