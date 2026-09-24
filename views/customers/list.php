@@ -5,8 +5,8 @@ require VIEWS_PATH . '/layouts/header.php';
 $search = Utils::e($_GET['search'] ?? '');
 $status = $_GET['status'] ?? '';
 $type   = $_GET['type']   ?? '';
-$sort   = $_GET['sort']   ?? 'full_name';
-$dir    = $_GET['dir']    ?? 'ASC';
+$sort   = $_GET['sort']   ?? ($search !== '' ? 'full_name' : 'customer_id');
+$dir    = $_GET['dir']    ?? ($search !== '' ? 'ASC' : 'DESC');
 $pg     = $pagination;
 
 function cust_sortUrl(string $col): string

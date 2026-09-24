@@ -7,7 +7,7 @@ class Customer extends BaseModel
     // Allowed sort columns (whitelist prevents SQL injection)
     private const SORTABLE = [
         'full_name', 'city', 'province', 'phone_mobile',
-        'email', 'status', 'created_at', 'customer_since',
+        'email', 'status', 'created_at', 'customer_since', 'customer_id',
     ];
 
     public function __construct()

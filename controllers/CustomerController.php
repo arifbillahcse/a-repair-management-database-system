@@ -17,8 +17,10 @@ class CustomerController
         $search = trim($_GET['search'] ?? '');
         $status = $_GET['status'] ?? '';
         $type   = $_GET['type']   ?? '';
-        $sort   = $_GET['sort']   ?? 'full_name';
-        $dir    = $_GET['dir']    ?? 'ASC';
+        // Browsing (no search) defaults to newest-added-first; searching keeps
+        // the relevance-based name-match ordering unless a column is clicked.
+        $sort   = $_GET['sort']   ?? ($search !== '' ? 'full_name' : 'customer_id');
+        $dir    = $_GET['dir']    ?? ($search !== '' ? 'ASC' : 'DESC');
         $page   = Utils::currentPage();
 
         if ($search !== '') {
