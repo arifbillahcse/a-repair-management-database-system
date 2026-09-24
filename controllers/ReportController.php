@@ -91,6 +91,11 @@ class ReportController
         // ── Private vs Colleague revenue, selected period ──────────────────────
         // Income = repair's own Actual Amount (counts as soon as priced, no
         // invoice required) — the same basis used by the Colleague Report.
+        // Attributed by date_out (Out/Delivery date), not date_in — a repair
+        // checked in long ago but only finished/collected in this period
+        // should count as this period's revenue. date_out is only set once a
+        // repair reaches completed/ready_for_pickup, so unfinished repairs
+        // are naturally excluded.
         // Invoiced = formal invoice totals for the same split, shown as a
         // secondary figure. Repairs/invoices aggregated separately and merged
         // to avoid the join fan-out bug.
@@ -100,7 +105,7 @@ class ReportController
                 COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
-             WHERE DATE(r.date_in) BETWEEN ? AND ?",
+             WHERE DATE(r.date_out) BETWEEN ? AND ?",
             [$start, $end]
         ) ?? [];
         $privateIncome   = (float)($clientIncomeRow['private_income']   ?? 0);
@@ -120,12 +125,12 @@ class ReportController
 
         // ── Monthly trend (last 12 months), Private vs Colleague income ────────
         $monthlyClientRows = $db->fetchAll(
-            "SELECT DATE_FORMAT(r.date_in,'%Y-%m') AS ym,
+            "SELECT DATE_FORMAT(r.date_out,'%Y-%m') AS ym,
                     COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
                     COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
-             WHERE r.date_in >= DATE_SUB(CURDATE(), INTERVAL 11 MONTH)
+             WHERE r.date_out >= DATE_SUB(CURDATE(), INTERVAL 11 MONTH)
              GROUP BY ym"
         );
         $monthlyClientTrend = [];
@@ -146,12 +151,12 @@ class ReportController
 
         // ── Yearly summary (all years), Private vs Colleague income ────────────
         $yearlyClientTrend = $db->fetchAll(
-            "SELECT YEAR(r.date_in) AS yr,
+            "SELECT YEAR(r.date_out) AS yr,
                     COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
                     COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
-             WHERE r.date_in IS NOT NULL
+             WHERE r.date_out IS NOT NULL
              GROUP BY yr
              ORDER BY yr DESC"
         );
@@ -266,15 +271,18 @@ class ReportController
         }
 
         // ── Repairs per colleague in the period ────────────────────────────
+        // Attributed by date_out (Out/Delivery date) — a repair checked in
+        // long ago but only finished/collected in this period should count
+        // here, not toward whatever period it happened to be checked in.
         $repRows = $db->fetchAll(
             "SELECT c.customer_id, c.full_name, c.phone_mobile,
                     COUNT(r.repair_id)                AS repairs_count,
                     COALESCE(SUM(r.actual_amount), 0) AS total_income,
-                    MAX(r.date_in)                     AS last_repair
+                    MAX(r.date_out)                    AS last_repair
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
              WHERE c.client_type = 'colleague'
-               AND DATE(r.date_in) BETWEEN ? AND ?
+               AND DATE(r.date_out) BETWEEN ? AND ?
              GROUP BY c.customer_id, c.full_name, c.phone_mobile",
             [$start, $end]
         );
@@ -333,13 +341,13 @@ class ReportController
 
         // ── Full itemized list of every colleague repair in the period ─────
         $repairRows = $db->fetchAll(
-            "SELECT r.repair_id, r.device_model, r.actual_amount, r.estimate_amount, r.status, r.date_in,
+            "SELECT r.repair_id, r.device_model, r.actual_amount, r.estimate_amount, r.status, r.date_in, r.date_out,
                     c.full_name AS customer_name
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
              WHERE c.client_type = 'colleague'
-               AND DATE(r.date_in) BETWEEN ? AND ?
-             ORDER BY r.date_in DESC",
+               AND DATE(r.date_out) BETWEEN ? AND ?
+             ORDER BY r.date_out DESC",
             [$start, $end]
         );
 

@@ -115,7 +115,7 @@ $periods = [
             </tbody>
         </table>
     </div>
-    <div class="legend">Repairs / Income are counted by repair check-in date. Bills Generated counts invoices by their invoice date (excluding cancelled) — a repair invoiced outside this window won't add to that count here.</div>
+    <div class="legend">Repairs / Income are counted by the repair's Out/Delivery date (when it was finished/collected), not when it was checked in. Bills Generated counts invoices by their invoice date (excluding cancelled) — a repair invoiced outside this window won't add to that count here.</div>
 </div>
 
 <!-- Section B: itemized list of every colleague repair -->
@@ -130,7 +130,7 @@ $periods = [
                     <th style="text-align:left">Device</th>
                     <th>Price</th>
                     <th>Status</th>
-                    <th>Date In</th>
+                    <th>Out/Delivery Date</th>
                 </tr>
             </thead>
             <tbody>
@@ -152,7 +152,7 @@ $periods = [
                         <?php endif; ?>
                     </td>
                     <td><span class="badge <?= REPAIR_STATUS_CLASS[$rr['status']] ?? 'badge-gray' ?>"><?= Utils::e(REPAIR_STATUS[$rr['status']] ?? $rr['status']) ?></span></td>
-                    <td class="muted"><?= Utils::formatDate($rr['date_in']) ?></td>
+                    <td class="muted"><?= Utils::formatDate($rr['date_out']) ?></td>
                 </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
