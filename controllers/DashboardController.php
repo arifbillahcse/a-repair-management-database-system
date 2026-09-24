@@ -31,25 +31,35 @@ class DashboardController
         $totalCustomers = $this->customerModel->count();
         $totalInvoices  = $this->invoiceModel->count();
 
-        // Revenue this month split by client type
+        // Revenue this month split Private vs Colleague — same basis as the
+        // Reports page: repair's own Actual Amount (counts as soon as priced,
+        // no invoice required). "Private" = individual + company customers.
+        // Invoiced totals are kept as a secondary figure.
         $db = Database::getInstance();
-        $typeRevRows = $db->fetchAll(
-            "SELECT c.client_type,
-                    COALESCE(SUM(i.total_amount), 0) AS revenue,
-                    COALESCE(SUM(i.amount_paid),  0) AS paid,
-                    COUNT(*) AS cnt
+        $clientIncomeRow = $db->fetchOne(
+            "SELECT
+                COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
+                COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
+             FROM repairs r
+             JOIN customers c ON c.customer_id = r.customer_id
+             WHERE MONTH(r.date_in) = MONTH(NOW()) AND YEAR(r.date_in) = YEAR(NOW())",
+            []
+        ) ?? [];
+        $privateIncome   = (float)($clientIncomeRow['private_income']   ?? 0);
+        $colleagueIncome = (float)($clientIncomeRow['colleague_income'] ?? 0);
+
+        $clientInvoicedRow = $db->fetchOne(
+            "SELECT
+                COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN i.total_amount END),0) AS colleague_billed,
+                COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN i.total_amount END),0) AS private_billed
              FROM invoices i
              JOIN customers c ON c.customer_id = i.customer_id
-             WHERE MONTH(i.invoice_date) = MONTH(NOW())
-               AND YEAR(i.invoice_date)  = YEAR(NOW())
-               AND i.status != 'cancelled'
-             GROUP BY c.client_type",
+             WHERE MONTH(i.invoice_date) = MONTH(NOW()) AND YEAR(i.invoice_date) = YEAR(NOW())
+               AND i.status != 'cancelled'",
             []
-        );
-        $revenueByType = [];
-        foreach ($typeRevRows as $row) {
-            $revenueByType[$row['client_type']] = $row;
-        }
+        ) ?? [];
+        $privateBilled   = (float)($clientInvoicedRow['private_billed']   ?? 0);
+        $colleagueBilled = (float)($clientInvoicedRow['colleague_billed'] ?? 0);
 
         // Stock & sales KPIs
         $stockStats = (new Product())->getStockStats();

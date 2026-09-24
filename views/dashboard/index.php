@@ -17,13 +17,10 @@ $mRevenue  = (float)($monthlyStats['total_revenue'] ?? 0);
 $mPaid     = (float)($monthlyStats['total_paid']    ?? 0);
 $mInvoices = (int)($monthlyStats['invoice_count']   ?? 0);
 
-$revenueByType  = $revenueByType ?? [];
-$indRevenue     = (float)($revenueByType['individual']['revenue'] ?? 0);
-$indPaid        = (float)($revenueByType['individual']['paid']    ?? 0);
-$indCount       = (int)($revenueByType['individual']['cnt']       ?? 0);
-$colRevenue     = (float)($revenueByType['colleague']['revenue']  ?? 0);
-$colPaid        = (float)($revenueByType['colleague']['paid']     ?? 0);
-$colCount       = (int)($revenueByType['colleague']['cnt']        ?? 0);
+$privateIncome   = $privateIncome   ?? 0.0;
+$colleagueIncome = $colleagueIncome ?? 0.0;
+$privateBilled   = $privateBilled   ?? 0.0;
+$colleagueBilled = $colleagueBilled ?? 0.0;
 ?>
 <style>
 /* ── KPI grid ──────────────────────────────────────────── */
@@ -160,15 +157,13 @@ $colCount       = (int)($revenueByType['colleague']['cnt']        ?? 0);
             </svg>
         </div>
         <div class="stat-body">
-            <div class="stat-value" style="color:var(--success)"><?= Utils::formatCurrency($indRevenue) ?></div>
-            <div class="stat-label">Individual Revenue</div>
+            <div class="stat-value" style="color:var(--success)"><?= Utils::formatCurrency($privateIncome) ?></div>
+            <div class="stat-label">Private Revenue</div>
             <div style="font-size:.73rem;color:var(--text-muted);margin-top:.1rem">
-                <?= $indCount > 0
-                    ? $indCount . ' invoice' . ($indCount !== 1 ? 's' : '') . ' · paid ' . Utils::formatCurrency($indPaid)
-                    : 'no invoices this month' ?>
+                Invoiced <?= Utils::formatCurrency($privateBilled) ?>
             </div>
         </div>
-        <a href="<?= BASE_URL ?>/customers?type=individual" class="stat-link" title="View individual clients">&#x2197;</a>
+        <a href="<?= BASE_URL ?>/customers" class="stat-link" title="View clients">&#x2197;</a>
     </div>
 
     <div class="stat-card">
@@ -178,12 +173,10 @@ $colCount       = (int)($revenueByType['colleague']['cnt']        ?? 0);
             </svg>
         </div>
         <div class="stat-body">
-            <div class="stat-value" style="color:var(--accent)"><?= Utils::formatCurrency($colRevenue) ?></div>
+            <div class="stat-value" style="color:var(--accent)"><?= Utils::formatCurrency($colleagueIncome) ?></div>
             <div class="stat-label">Colleague Revenue</div>
             <div style="font-size:.73rem;color:var(--text-muted);margin-top:.1rem">
-                <?= $colCount > 0
-                    ? $colCount . ' invoice' . ($colCount !== 1 ? 's' : '') . ' · paid ' . Utils::formatCurrency($colPaid)
-                    : 'no invoices this month' ?>
+                Invoiced <?= Utils::formatCurrency($colleagueBilled) ?>
             </div>
         </div>
         <a href="<?= BASE_URL ?>/customers?type=colleague" class="stat-link" title="View colleague clients">&#x2197;</a>
