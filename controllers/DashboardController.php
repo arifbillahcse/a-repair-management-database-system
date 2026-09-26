@@ -34,11 +34,14 @@ class DashboardController
         // Revenue this month split Private vs Colleague — same basis as the
         // Reports page: repair's own Actual Amount (counts as soon as priced,
         // no invoice required). "Private" = individual + company customers.
-        // Attributed by date_out (Out/Delivery date) rather than date_in —
-        // a repair checked in months ago but only finished/collected this
-        // month should count as this month's revenue, not the check-in month.
-        // date_out is only set once a repair reaches completed/ready_for_pickup,
-        // so unfinished repairs are naturally excluded.
+        // Attributed by Out/Delivery date rather than date_in — a repair
+        // checked in months ago but only finished/collected this month should
+        // count as this month's revenue, not the check-in month.
+        // Uses COALESCE(date_out, collection_date): date_out is only set by
+        // the app's own status-change flow, but CSV-imported repairs only
+        // ever get collection_date populated — the same fallback already
+        // used by the Repairs list's "Out Date/Delivery" column, so revenue
+        // matches what's actually shown on screen.
         $db = Database::getInstance();
         $clientIncomeRow = $db->fetchOne(
             "SELECT
@@ -46,7 +49,8 @@ class DashboardController
                 COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
-             WHERE MONTH(r.date_out) = MONTH(NOW()) AND YEAR(r.date_out) = YEAR(NOW())",
+             WHERE MONTH(COALESCE(r.date_out, r.collection_date)) = MONTH(NOW())
+               AND YEAR(COALESCE(r.date_out, r.collection_date)) = YEAR(NOW())",
             []
         ) ?? [];
         $privateIncome   = (float)($clientIncomeRow['private_income']   ?? 0);

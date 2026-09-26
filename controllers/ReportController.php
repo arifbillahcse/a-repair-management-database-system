@@ -91,11 +91,14 @@ class ReportController
         // ── Private vs Colleague revenue, selected period ──────────────────────
         // Income = repair's own Actual Amount (counts as soon as priced, no
         // invoice required) — the same basis used by the Colleague Report.
-        // Attributed by date_out (Out/Delivery date), not date_in — a repair
-        // checked in long ago but only finished/collected in this period
-        // should count as this period's revenue. date_out is only set once a
-        // repair reaches completed/ready_for_pickup, so unfinished repairs
-        // are naturally excluded.
+        // Attributed by Out/Delivery date, not date_in — a repair checked in
+        // long ago but only finished/collected in this period should count
+        // as this period's revenue.
+        // Uses COALESCE(date_out, collection_date): date_out is only set by
+        // the app's own status-change flow, but CSV-imported repairs only
+        // ever get collection_date populated — the same fallback already
+        // used by the Repairs list's "Out Date/Delivery" column, so revenue
+        // matches what's actually shown on screen.
         // Invoiced = formal invoice totals for the same split, shown as a
         // secondary figure. Repairs/invoices aggregated separately and merged
         // to avoid the join fan-out bug.
@@ -105,7 +108,7 @@ class ReportController
                 COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
-             WHERE DATE(r.date_out) BETWEEN ? AND ?",
+             WHERE DATE(COALESCE(r.date_out, r.collection_date)) BETWEEN ? AND ?",
             [$start, $end]
         ) ?? [];
         $privateIncome   = (float)($clientIncomeRow['private_income']   ?? 0);
@@ -125,12 +128,12 @@ class ReportController
 
         // ── Monthly trend (last 12 months), Private vs Colleague income ────────
         $monthlyClientRows = $db->fetchAll(
-            "SELECT DATE_FORMAT(r.date_out,'%Y-%m') AS ym,
+            "SELECT DATE_FORMAT(COALESCE(r.date_out, r.collection_date),'%Y-%m') AS ym,
                     COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
                     COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
-             WHERE r.date_out >= DATE_SUB(CURDATE(), INTERVAL 11 MONTH)
+             WHERE COALESCE(r.date_out, r.collection_date) >= DATE_SUB(CURDATE(), INTERVAL 11 MONTH)
              GROUP BY ym"
         );
         $monthlyClientTrend = [];
@@ -151,12 +154,12 @@ class ReportController
 
         // ── Yearly summary (all years), Private vs Colleague income ────────────
         $yearlyClientTrend = $db->fetchAll(
-            "SELECT YEAR(r.date_out) AS yr,
+            "SELECT YEAR(COALESCE(r.date_out, r.collection_date)) AS yr,
                     COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
                     COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
-             WHERE r.date_out IS NOT NULL
+             WHERE COALESCE(r.date_out, r.collection_date) IS NOT NULL
              GROUP BY yr
              ORDER BY yr DESC"
         );
@@ -271,18 +274,22 @@ class ReportController
         }
 
         // ── Repairs per colleague in the period ────────────────────────────
-        // Attributed by date_out (Out/Delivery date) — a repair checked in
-        // long ago but only finished/collected in this period should count
-        // here, not toward whatever period it happened to be checked in.
+        // Attributed by Out/Delivery date — a repair checked in long ago but
+        // only finished/collected in this period should count here, not
+        // toward whatever period it happened to be checked in.
+        // Uses COALESCE(date_out, collection_date): date_out is only set by
+        // the app's own status-change flow, but CSV-imported repairs only
+        // ever get collection_date populated — the same fallback already
+        // used by the Repairs list's "Out Date/Delivery" column.
         $repRows = $db->fetchAll(
             "SELECT c.customer_id, c.full_name, c.phone_mobile,
                     COUNT(r.repair_id)                AS repairs_count,
                     COALESCE(SUM(r.actual_amount), 0) AS total_income,
-                    MAX(r.date_out)                    AS last_repair
+                    MAX(COALESCE(r.date_out, r.collection_date)) AS last_repair
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
              WHERE c.client_type = 'colleague'
-               AND DATE(r.date_out) BETWEEN ? AND ?
+               AND DATE(COALESCE(r.date_out, r.collection_date)) BETWEEN ? AND ?
              GROUP BY c.customer_id, c.full_name, c.phone_mobile",
             [$start, $end]
         );
@@ -341,13 +348,14 @@ class ReportController
 
         // ── Full itemized list of every colleague repair in the period ─────
         $repairRows = $db->fetchAll(
-            "SELECT r.repair_id, r.device_model, r.actual_amount, r.estimate_amount, r.status, r.date_in, r.date_out,
+            "SELECT r.repair_id, r.device_model, r.actual_amount, r.estimate_amount, r.status, r.date_in,
+                    COALESCE(r.date_out, r.collection_date) AS date_out,
                     c.full_name AS customer_name
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
              WHERE c.client_type = 'colleague'
-               AND DATE(r.date_out) BETWEEN ? AND ?
-             ORDER BY r.date_out DESC",
+               AND DATE(COALESCE(r.date_out, r.collection_date)) BETWEEN ? AND ?
+             ORDER BY COALESCE(r.date_out, r.collection_date) DESC",
             [$start, $end]
         );
 
