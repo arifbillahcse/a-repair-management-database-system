@@ -17,10 +17,10 @@ $mRevenue  = (float)($monthlyStats['total_revenue'] ?? 0);
 $mPaid     = (float)($monthlyStats['total_paid']    ?? 0);
 $mInvoices = (int)($monthlyStats['invoice_count']   ?? 0);
 
-$privateIncome   = $privateIncome   ?? 0.0;
-$colleagueIncome = $colleagueIncome ?? 0.0;
-$privateBilled   = $privateBilled   ?? 0.0;
-$colleagueBilled = $colleagueBilled ?? 0.0;
+$individualIncome = $individualIncome ?? 0.0;
+$colleagueIncome  = $colleagueIncome  ?? 0.0;
+$individualBilled = $individualBilled ?? 0.0;
+$colleagueBilled  = $colleagueBilled  ?? 0.0;
 ?>
 <style>
 /* ── KPI grid ──────────────────────────────────────────── */
@@ -157,13 +157,13 @@ $colleagueBilled = $colleagueBilled ?? 0.0;
             </svg>
         </div>
         <div class="stat-body">
-            <div class="stat-value" style="color:var(--success)"><?= Utils::formatCurrency($privateIncome) ?></div>
-            <div class="stat-label">Private Revenue</div>
+            <div class="stat-value" style="color:var(--success)"><?= Utils::formatCurrency($individualIncome) ?></div>
+            <div class="stat-label">Individual Revenue</div>
             <div style="font-size:.73rem;color:var(--text-muted);margin-top:.1rem">
-                Invoiced <?= Utils::formatCurrency($privateBilled) ?>
+                Invoiced <?= Utils::formatCurrency($individualBilled) ?>
             </div>
         </div>
-        <a href="<?= BASE_URL ?>/customers" class="stat-link" title="View clients">&#x2197;</a>
+        <a href="<?= BASE_URL ?>/customers?type=individual" class="stat-link" title="View individual clients">&#x2197;</a>
     </div>
 
     <div class="stat-card">

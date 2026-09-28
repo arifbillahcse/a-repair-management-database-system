@@ -242,7 +242,7 @@ $qs = fn(string $r) => BASE_URL . '/reports?range=' . $r;
         </div>
     </div>
 
-    <!-- Private Revenue -->
+    <!-- Individual Revenue -->
     <div class="stat-card">
         <div class="stat-icon stat-icon-blue">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -250,10 +250,10 @@ $qs = fn(string $r) => BASE_URL . '/reports?range=' . $r;
             </svg>
         </div>
         <div class="stat-body">
-            <div class="stat-value"><?= Utils::formatCurrency($privateIncome) ?></div>
-            <div class="stat-label">Private Revenue</div>
+            <div class="stat-value"><?= Utils::formatCurrency($individualIncome) ?></div>
+            <div class="stat-label">Individual Revenue</div>
             <div style="font-size:.74rem;color:var(--text-muted);margin-top:.15rem">
-                Invoiced <?= Utils::formatCurrency($privateBilled) ?>
+                Invoiced <?= Utils::formatCurrency($individualBilled) ?>
             </div>
         </div>
     </div>
@@ -355,29 +355,29 @@ $qs = fn(string $r) => BASE_URL . '/reports?range=' . $r;
 
 </div>
 
-<!-- ── Private vs Colleague trend ──────────────────────────────────────────── -->
+<!-- ── Individual vs Colleague trend ──────────────────────────────────────────── -->
 <div class="rep-grid-2">
 
     <!-- Monthly trend, last 12 months -->
     <div class="chart-card">
         <div class="chart-header">
-            <h2 class="chart-title">Private vs Colleague — Last 12 Months</h2>
+            <h2 class="chart-title">Individual vs Colleague — Last 12 Months</h2>
         </div>
         <div class="table-responsive">
             <table class="clients-table">
                 <thead>
                     <tr>
                         <th>Month</th>
-                        <th style="text-align:right">Private</th>
+                        <th style="text-align:right">Individual</th>
                         <th style="text-align:right">Colleague</th>
                     </tr>
                 </thead>
                 <tbody>
                 <?php foreach ($monthlyClientTrend as $row): ?>
-                    <?php $rowEmpty = !$row['private_income'] && !$row['colleague_income']; ?>
+                    <?php $rowEmpty = !$row['individual_income'] && !$row['colleague_income']; ?>
                     <tr<?= $rowEmpty ? ' style="color:var(--text-muted)"' : '' ?>>
                         <td><?= Utils::e($row['label']) ?></td>
-                        <td style="text-align:right"><?= Utils::formatCurrency($row['private_income']) ?></td>
+                        <td style="text-align:right"><?= Utils::formatCurrency($row['individual_income']) ?></td>
                         <td style="text-align:right;color:#a855f7;font-weight:600"><?= Utils::formatCurrency($row['colleague_income']) ?></td>
                     </tr>
                 <?php endforeach; ?>
@@ -389,14 +389,14 @@ $qs = fn(string $r) => BASE_URL . '/reports?range=' . $r;
     <!-- Yearly summary, all years -->
     <div class="chart-card">
         <div class="chart-header">
-            <h2 class="chart-title">Private vs Colleague — By Year</h2>
+            <h2 class="chart-title">Individual vs Colleague — By Year</h2>
         </div>
         <div class="table-responsive">
             <table class="clients-table">
                 <thead>
                     <tr>
                         <th>Year</th>
-                        <th style="text-align:right">Private</th>
+                        <th style="text-align:right">Individual</th>
                         <th style="text-align:right">Colleague</th>
                     </tr>
                 </thead>
@@ -407,7 +407,7 @@ $qs = fn(string $r) => BASE_URL . '/reports?range=' . $r;
                     <?php foreach ($yearlyClientTrend as $yr): ?>
                     <tr>
                         <td><?= (int)$yr['yr'] ?></td>
-                        <td style="text-align:right"><?= Utils::formatCurrency((float)$yr['private_income']) ?></td>
+                        <td style="text-align:right"><?= Utils::formatCurrency((float)$yr['individual_income']) ?></td>
                         <td style="text-align:right;color:#a855f7;font-weight:600"><?= Utils::formatCurrency((float)$yr['colleague_income']) ?></td>
                     </tr>
                     <?php endforeach; ?>

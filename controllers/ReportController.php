@@ -88,9 +88,11 @@ class ReportController
             [$start, $end]
         ) ?? [];
 
-        // ── Private vs Colleague revenue, selected period ──────────────────────
+        // ── Individual vs Colleague revenue, selected period ────────────────────
         // Income = repair's own Actual Amount (counts as soon as priced, no
         // invoice required) — the same basis used by the Colleague Report.
+        // "Individual" is strictly client_type = 'individual' — Company
+        // customers are not counted in either bucket here.
         // Attributed strictly by Completed/Out date (date_out), not date_in
         // and NOT collection_date (Expected Out is only a plan, not a fact —
         // a repair without a real date_out yet doesn't count at all).
@@ -99,33 +101,33 @@ class ReportController
         // to avoid the join fan-out bug.
         $clientIncomeRow = $db->fetchOne(
             "SELECT
-                COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
-                COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
+                COALESCE(SUM(CASE WHEN c.client_type = 'colleague'  THEN r.actual_amount END),0) AS colleague_income,
+                COALESCE(SUM(CASE WHEN c.client_type = 'individual' THEN r.actual_amount END),0) AS individual_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
              WHERE DATE(r.date_out) BETWEEN ? AND ?",
             [$start, $end]
         ) ?? [];
-        $privateIncome   = (float)($clientIncomeRow['private_income']   ?? 0);
-        $colleagueIncome = (float)($clientIncomeRow['colleague_income'] ?? 0);
+        $individualIncome = (float)($clientIncomeRow['individual_income'] ?? 0);
+        $colleagueIncome  = (float)($clientIncomeRow['colleague_income']  ?? 0);
 
         $clientInvoicedRow = $db->fetchOne(
             "SELECT
-                COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN i.total_amount END),0) AS colleague_billed,
-                COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN i.total_amount END),0) AS private_billed
+                COALESCE(SUM(CASE WHEN c.client_type = 'colleague'  THEN i.total_amount END),0) AS colleague_billed,
+                COALESCE(SUM(CASE WHEN c.client_type = 'individual' THEN i.total_amount END),0) AS individual_billed
              FROM invoices i
              JOIN customers c ON c.customer_id = i.customer_id
              WHERE DATE(i.invoice_date) BETWEEN ? AND ? AND i.status != 'cancelled'",
             [$start, $end]
         ) ?? [];
-        $privateBilled   = (float)($clientInvoicedRow['private_billed']   ?? 0);
-        $colleagueBilled = (float)($clientInvoicedRow['colleague_billed'] ?? 0);
+        $individualBilled = (float)($clientInvoicedRow['individual_billed'] ?? 0);
+        $colleagueBilled  = (float)($clientInvoicedRow['colleague_billed']  ?? 0);
 
-        // ── Monthly trend (last 12 months), Private vs Colleague income ────────
+        // ── Monthly trend (last 12 months), Individual vs Colleague income ──────
         $monthlyClientRows = $db->fetchAll(
             "SELECT DATE_FORMAT(r.date_out,'%Y-%m') AS ym,
-                    COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
-                    COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
+                    COALESCE(SUM(CASE WHEN c.client_type = 'colleague'  THEN r.actual_amount END),0) AS colleague_income,
+                    COALESCE(SUM(CASE WHEN c.client_type = 'individual' THEN r.actual_amount END),0) AS individual_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
              WHERE r.date_out >= DATE_SUB(CURDATE(), INTERVAL 11 MONTH)
@@ -135,23 +137,23 @@ class ReportController
         for ($i = 11; $i >= 0; $i--) {
             $ym = date('Y-m', strtotime("-{$i} months"));
             $monthlyClientTrend[$ym] = [
-                'label'            => date('M Y', strtotime("-{$i} months")),
-                'private_income'   => 0.0,
-                'colleague_income' => 0.0,
+                'label'             => date('M Y', strtotime("-{$i} months")),
+                'individual_income' => 0.0,
+                'colleague_income'  => 0.0,
             ];
         }
         foreach ($monthlyClientRows as $row) {
             if (isset($monthlyClientTrend[$row['ym']])) {
-                $monthlyClientTrend[$row['ym']]['private_income']   = (float)$row['private_income'];
-                $monthlyClientTrend[$row['ym']]['colleague_income'] = (float)$row['colleague_income'];
+                $monthlyClientTrend[$row['ym']]['individual_income'] = (float)$row['individual_income'];
+                $monthlyClientTrend[$row['ym']]['colleague_income']  = (float)$row['colleague_income'];
             }
         }
 
-        // ── Yearly summary (all years), Private vs Colleague income ────────────
+        // ── Yearly summary (all years), Individual vs Colleague income ──────────
         $yearlyClientTrend = $db->fetchAll(
             "SELECT YEAR(r.date_out) AS yr,
-                    COALESCE(SUM(CASE WHEN c.client_type =  'colleague' THEN r.actual_amount END),0) AS colleague_income,
-                    COALESCE(SUM(CASE WHEN c.client_type <> 'colleague' THEN r.actual_amount END),0) AS private_income
+                    COALESCE(SUM(CASE WHEN c.client_type = 'colleague'  THEN r.actual_amount END),0) AS colleague_income,
+                    COALESCE(SUM(CASE WHEN c.client_type = 'individual' THEN r.actual_amount END),0) AS individual_income
              FROM repairs r
              JOIN customers c ON c.customer_id = r.customer_id
              WHERE r.date_out IS NOT NULL
