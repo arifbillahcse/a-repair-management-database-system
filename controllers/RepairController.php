@@ -361,6 +361,7 @@ class RepairController
             'device_password'      => Utils::sanitize($post['device_password']      ?? ''),
             'date_in'              => $post['date_in'] ?: date('Y-m-d H:i:s'),
             'collection_date'      => !empty($post['date_expected_out']) ? $post['date_expected_out'] : null,
+            'date_out'             => !empty($post['date_out']) ? $post['date_out'] : null,
             'problem_description'  => Utils::sanitize($post['problem_description']  ?? ''),
             'diagnosis'            => Utils::sanitize($post['diagnosis_notes']      ?? ''),
             'internal_notes'       => Utils::sanitize($post['internal_notes']       ?? ''),

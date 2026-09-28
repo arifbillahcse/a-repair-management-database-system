@@ -260,10 +260,17 @@ $statusFlow  = REPAIR_STATUS_FLOW[$repair['status']] ?? [];
                                    data-validate="required" required>
                         </div>
                         <div class="form-group" style="margin-bottom:0">
-                            <label class="form-label" for="dateExpected">Out Date/Delivery</label>
+                            <label class="form-label" for="dateExpected">Expected Out</label>
                             <input type="date" id="dateExpected" name="date_expected_out" class="form-input"
                                    value="<?= Utils::e(substr($fd['date_expected_out'] ?? '', 0, 10)) ?>">
+                            <div class="form-hint" style="font-size:.72rem;color:var(--text-muted);margin-top:.25rem">Estimate only — not the real completion date.</div>
                         </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:1rem">
+                        <label class="form-label" for="dateOut">Completed/Out Date</label>
+                        <input type="date" id="dateOut" name="date_out" class="form-input"
+                               value="<?= Utils::e(substr($fd['date_out'] ?? '', 0, 10)) ?>">
+                        <div class="form-hint" style="font-size:.72rem;color:var(--text-muted);margin-top:.25rem">The real date this repair was finished/collected. Normally set automatically when status becomes Completed or Ready for Pickup — edit here only to correct it.</div>
                     </div>
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label" for="priority">Priority</label>
