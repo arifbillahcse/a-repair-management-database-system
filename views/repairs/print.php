@@ -196,7 +196,7 @@
                 <?php endif; ?>
                 <?php if (!empty($repair['date_out'])): ?>
                 <div class="field">
-                    <div class="field-label">Completed</div>
+                    <div class="field-label">Completed / Out</div>
                     <div class="field-value"><?= Utils::formatDate($repair['date_out']) ?></div>
                 </div>
                 <?php endif; ?>
@@ -232,10 +232,10 @@
                     <tr><td class="label">Estimate</td><td class="val"><?= Utils::formatCurrency($est) ?></td></tr>
                     <?php endif; ?>
                     <?php if ($act > 0): ?>
-                    <tr><td class="label">Amount</td><td class="val"><?= Utils::formatCurrency($act) ?></td></tr>
+                    <tr><td class="label">Actual Amount</td><td class="val"><?= Utils::formatCurrency($act) ?></td></tr>
                     <?php endif; ?>
                     <?php if ($dep > 0): ?>
-                    <tr><td class="label">Deposit</td><td class="val amount-paid">-<?= Utils::formatCurrency($dep) ?></td></tr>
+                    <tr><td class="label">Deposit Paid</td><td class="val amount-paid">-<?= Utils::formatCurrency($dep) ?></td></tr>
                     <?php endif; ?>
                     <tr>
                         <td class="label">Balance Due</td>

@@ -313,7 +313,7 @@ $currentIdx  = array_search($repair['status'], $allStatuses, true);
             $est  = (float)($repair['estimate_amount'] ?? 0);
             $act  = (float)($repair['actual_amount']   ?? 0);
             $dep  = (float)($repair['deposit_paid']    ?? 0);
-            $due  = $act > 0 ? max(0, $act - $dep) : 0;
+            $due  = $act > 0 ? max(0, $act - $dep) : ($est > 0 ? max(0, $est - $dep) : 0);
             ?>
             <?php if ($est > 0): ?>
             <div class="amount-row"><span class="amount-label">Estimate</span><span><?= Utils::formatCurrency($est) ?></span></div>

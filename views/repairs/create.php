@@ -251,6 +251,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                             <label class="form-label" for="dateExpected">Expected Out</label>
                             <input type="date" id="dateExpected" name="date_expected_out" class="form-input"
                                    value="<?= Utils::e($fd['date_expected_out'] ?? '') ?>">
+                            <div class="form-hint" style="font-size:.72rem;color:var(--text-muted);margin-top:.25rem">Estimate only — not the real completion date.</div>
                         </div>
                     </div>
                     <div class="form-group" style="margin-bottom:0">
