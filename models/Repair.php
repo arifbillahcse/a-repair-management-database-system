@@ -343,11 +343,14 @@ class Repair extends BaseModel
     {
         $allowed = [
             'r.repair_id DESC', 'r.repair_id ASC',
+            'r.device_model DESC', 'r.device_model ASC',
             'r.date_in DESC', 'r.date_in ASC',
+            'r.date_out DESC', 'r.date_out ASC',
+            'r.actual_amount DESC', 'r.actual_amount ASC',
             'r.created_at DESC', 'r.created_at ASC',
             'days_in_lab DESC', 'days_in_lab ASC',
             'c.full_name ASC', 'c.full_name DESC',
-            'r.status ASC',
+            'r.status ASC', 'r.status DESC',
         ];
         return in_array($raw, $allowed, true) ? $raw : 'r.repair_id DESC';
     }

@@ -21,6 +21,23 @@ class RepairController
     {
         Auth::requireAuth();
 
+        // The list view's column headers link with ?sort=<key>&dir=<ASC|DESC>
+        // (see rep_sortUrl() in views/repairs/list.php) - map that key to a real
+        // column reference here, rather than expecting a literal ?order_by= param
+        // that the view never actually sends.
+        $sortMap = [
+            'repair_id'     => 'r.repair_id',
+            'device_model'  => 'r.device_model',
+            'customer_name' => 'c.full_name',
+            'status'        => 'r.status',
+            'date_in'       => 'r.date_in',
+            'date_out'      => 'r.date_out',
+            'actual_amount' => 'r.actual_amount',
+        ];
+        $sortKey = $_GET['sort'] ?? 'date_in';
+        $sortDir = strtoupper($_GET['dir'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC';
+        $orderBy = isset($sortMap[$sortKey]) ? $sortMap[$sortKey] . ' ' . $sortDir : 'r.date_in DESC';
+
         $filters = [
             'status'      => $_GET['status']      ?? '',
             'staff_id'    => $_GET['staff_id']    ?? '',
@@ -29,7 +46,7 @@ class RepairController
             'search'      => $_GET['search']      ?? '',
             'date_from'   => $_GET['date_from']   ?? '',
             'date_to'     => $_GET['date_to']     ?? '',
-            'order_by'    => $_GET['order_by']    ?? 'r.repair_id DESC',
+            'order_by'    => $orderBy,
         ];
 
         $page        = Utils::currentPage();
@@ -361,7 +378,13 @@ class RepairController
             'device_password'      => Utils::sanitize($post['device_password']      ?? ''),
             'date_in'              => $post['date_in'] ?: date('Y-m-d H:i:s'),
             'collection_date'      => !empty($post['date_expected_out']) ? $post['date_expected_out'] : null,
-            'date_out'             => !empty($post['date_out']) ? $post['date_out'] : null,
+            // A manually entered Completed/Out Date always wins. Otherwise, saving
+            // the full edit form with status set to Completed/Ready for Pickup
+            // auto-fills it - matching what the quick "Move to" status buttons
+            // already do via Repair::updateStatus(), which this form bypasses.
+            'date_out'             => !empty($post['date_out'])
+                ? $post['date_out']
+                : (in_array($status, ['completed', 'ready_for_pickup'], true) ? date('Y-m-d H:i:s') : null),
             'problem_description'  => Utils::sanitize($post['problem_description']  ?? ''),
             'diagnosis'            => Utils::sanitize($post['diagnosis_notes']      ?? ''),
             'internal_notes'       => Utils::sanitize($post['internal_notes']       ?? ''),
