@@ -409,7 +409,7 @@ $currentIdx  = array_search($repair['status'], $allStatuses, true);
         <div class="section-card">
             <div class="section-header"><h2 class="section-title">Assignment & Dates</h2></div>
             <ul class="info-list">
-                <?php if (!empty($repair['assigned_to'])): ?>
+                <?php if (!empty($repair['technician_name'])): ?>
                 <li class="info-item">
                     <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
@@ -417,7 +417,7 @@ $currentIdx  = array_search($repair['status'], $allStatuses, true);
                     </svg>
                     <div class="info-body">
                         <span class="info-label">Assigned To</span>
-                        <span class="info-value"><?= Utils::e($repair['assigned_to']) ?></span>
+                        <span class="info-value"><?= Utils::e($repair['technician_name']) ?></span>
                     </div>
                 </li>
                 <?php endif; ?>

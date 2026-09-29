@@ -209,7 +209,7 @@ $rs         = $repairStats ?? [];
         <div class="section-card">
             <div class="section-header">
                 <h2 class="section-title">Recent Repairs</h2>
-                <a href="<?= BASE_URL ?>/repairs?assigned_to=<?= $staff['staff_id'] ?>" class="btn btn-xs btn-secondary">All</a>
+                <a href="<?= BASE_URL ?>/repairs?staff_id=<?= $staff['staff_id'] ?>" class="btn btn-xs btn-secondary">All</a>
             </div>
             <?php
             $recentRepairs = Database::getInstance()->fetchAll(

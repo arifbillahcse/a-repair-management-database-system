@@ -210,10 +210,10 @@
                         <?= Utils::e(ucfirst($repair['priority'] ?? 'Normal')) ?>
                     </div>
                 </div>
-                <?php if (!empty($repair['assigned_to'])): ?>
+                <?php if (!empty($repair['technician_name'])): ?>
                 <div class="field" style="margin-top:2mm;margin-bottom:0">
                     <div class="field-label">Technician</div>
-                    <div class="field-value"><?= Utils::e($repair['assigned_to']) ?></div>
+                    <div class="field-value"><?= Utils::e($repair['technician_name']) ?></div>
                 </div>
                 <?php endif; ?>
             </div>
