@@ -397,7 +397,7 @@ $currentIdx  = array_search($repair['status'], $allStatuses, true);
             <div class="photo-gallery">
                 <?php foreach ($photos as $i => $photo): ?>
                 <div class="gallery-item" onclick="openLightbox(<?= $i ?>)" title="View photo">
-                    <img src="<?= BASE_URL ?>/uploads/<?= Utils::e($photo) ?>"
+                    <img src="<?= BASE_URL ?>/<?= Utils::e($photo) ?>"
                          alt="Repair photo <?= $i + 1 ?>" loading="lazy">
                 </div>
                 <?php endforeach; ?>
@@ -499,7 +499,7 @@ $currentIdx  = array_search($repair['status'], $allStatuses, true);
 </div>
 <script>
 var photos = <?= json_encode(array_values($photos), JSON_HEX_TAG) ?>;
-var baseUrl = '<?= BASE_URL ?>/uploads/';
+var baseUrl = '<?= BASE_URL ?>/';
 var lbIdx = 0;
 function openLightbox(i) {
     lbIdx = i;

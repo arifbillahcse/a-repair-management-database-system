@@ -169,7 +169,7 @@ $statusFlow  = REPAIR_STATUS_FLOW[$repair['status']] ?? [];
                     <div class="photo-gallery" id="existingPhotos">
                         <?php foreach ($photos as $photo): ?>
                         <div class="gallery-item" data-path="<?= Utils::e($photo) ?>">
-                            <img src="<?= BASE_URL ?>/uploads/<?= Utils::e($photo) ?>"
+                            <img src="<?= BASE_URL ?>/<?= Utils::e($photo) ?>"
                                  alt="Repair photo" loading="lazy">
                             <button type="button" class="gallery-item-rm" title="Remove photo"
                                     data-path="<?= Utils::e($photo) ?>"
