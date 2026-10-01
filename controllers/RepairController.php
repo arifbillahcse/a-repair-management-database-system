@@ -268,9 +268,22 @@ class RepairController
         Auth::requireAuth();
         Auth::checkCSRF();
 
+        // Only ever called via the Edit page's AJAX delete button - always
+        // respond with JSON, never a redirect, so the fetch().then(r => r.json())
+        // call in edit.php doesn't throw a parse error and surface as a
+        // misleading "Network error" even when the delete actually succeeded.
+        header('Content-Type: application/json');
+
+        $repair = $this->model->findById($id);
+        if (!$repair) {
+            echo json_encode(['success' => false, 'message' => 'Repair not found.']);
+            exit;
+        }
+
         $path = $_POST['photo_path'] ?? '';
         if (empty($path)) {
-            Utils::redirect('/repairs/' . $id);
+            echo json_encode(['success' => false, 'message' => 'No photo specified.']);
+            exit;
         }
 
         // Remove from DB
@@ -283,8 +296,9 @@ class RepairController
         }
 
         Logger::log('updated', 'repair', $id, null, ['deleted_photo' => $path]);
-        Utils::flashSuccess('Photo removed.');
-        Utils::redirect('/repairs/' . $id);
+
+        echo json_encode(['success' => true]);
+        exit;
     }
 
     // ── GET /repairs/:id/print ────────────────────────────────────────────────
