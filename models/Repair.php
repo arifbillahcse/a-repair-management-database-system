@@ -97,7 +97,7 @@ class Repair extends BaseModel
         );
 
         $paging  = Utils::paginate($total, $page, PAGE_SIZE_REPAIRS);
-        $orderBy = $this->sanitizeOrderBy($filters['order_by'] ?? 'r.date_in DESC');
+        $orderBy = $this->sanitizeOrderBy($filters['order_by'] ?? 'r.updated_at DESC');
 
         $rows = $this->db->fetchAll(
             "SELECT r.*,
@@ -348,10 +348,11 @@ class Repair extends BaseModel
             'r.date_out DESC', 'r.date_out ASC',
             'r.actual_amount DESC', 'r.actual_amount ASC',
             'r.created_at DESC', 'r.created_at ASC',
+            'r.updated_at DESC', 'r.updated_at ASC',
             'days_in_lab DESC', 'days_in_lab ASC',
             'c.full_name ASC', 'c.full_name DESC',
             'r.status ASC', 'r.status DESC',
         ];
-        return in_array($raw, $allowed, true) ? $raw : 'r.repair_id DESC';
+        return in_array($raw, $allowed, true) ? $raw : 'r.updated_at DESC';
     }
 }

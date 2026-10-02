@@ -5,7 +5,7 @@ require VIEWS_PATH . '/layouts/header.php';
 $search       = Utils::e($_GET['search'] ?? '');
 $filterSt     = $_GET['status']      ?? '';
 $filterType   = $_GET['client_type'] ?? '';
-$sort         = $_GET['sort']        ?? 'date_in';
+$sort         = $_GET['sort']        ?? 'updated_at';
 $dir          = $_GET['dir']         ?? 'DESC';
 $custFilter   = (int)($_GET['customer_id'] ?? 0);
 $pg           = $pagination;

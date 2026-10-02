@@ -33,8 +33,13 @@ class RepairController
             'date_in'       => 'r.date_in',
             'date_out'      => 'r.date_out',
             'actual_amount' => 'r.actual_amount',
+            'updated_at'    => 'r.updated_at',
         ];
-        $sortKey = $_GET['sort'] ?? 'date_in';
+        // Default to most-recently-created-or-modified first. date_in isn't a
+        // safe default - it's a fixed fact that never changes and can be wrong
+        // on old/imported records, which then wrongly sort as "newest".
+        // updated_at always reflects real recent activity (create or edit).
+        $sortKey = $_GET['sort'] ?? 'updated_at';
         $sortDir = strtoupper($_GET['dir'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC';
         $orderBy = isset($sortMap[$sortKey]) ? $sortMap[$sortKey] . ' ' . $sortDir : 'r.date_in DESC';
 
