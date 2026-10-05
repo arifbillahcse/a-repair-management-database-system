@@ -173,9 +173,7 @@ $rs         = $repairStats ?? [];
                     </svg>
                     <div class="info-body">
                         <span class="info-label">Last Login</span>
-                        <span class="info-value">
-                            <?= !empty($userAccount['last_login']) ? Utils::formatDateTime($userAccount['last_login']) : '<em style="color:var(--text-muted)">Never</em>' ?>
-                        </span>
+                        <span class="info-value"><?= !empty($userAccount['last_login']) ? Utils::formatDateTime($userAccount['last_login']) : '<em style="color:var(--text-muted)">Never</em>' ?></span>
                     </div>
                 </li>
                 <li class="info-item">
@@ -184,9 +182,7 @@ $rs         = $repairStats ?? [];
                     </svg>
                     <div class="info-body">
                         <span class="info-label">Account Status</span>
-                        <span class="info-value">
-                            <?= $userAccount['is_active'] ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Disabled</span>' ?>
-                        </span>
+                        <span class="info-value"><?= $userAccount['is_active'] ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Disabled</span>' ?></span>
                     </div>
                 </li>
             </ul>

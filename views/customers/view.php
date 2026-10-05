@@ -227,11 +227,9 @@ require VIEWS_PATH . '/layouts/header.php';
                     </svg>
                     <div class="info-body">
                         <span class="info-label">Mobile Phone</span>
-                        <span class="info-value">
-                            <?= $customer['phone_mobile']
+                        <span class="info-value"><?= $customer['phone_mobile']
                                 ? '<a href="tel:'.Utils::e($customer['phone_mobile']).'">'.Utils::e($customer['phone_mobile']).'</a>'
-                                : '<span class="info-empty">Not provided</span>' ?>
-                        </span>
+                                : '<span class="info-empty">Not provided</span>' ?></span>
                     </div>
                 </li>
                 <?php if ($customer['phone_landline']): ?>
@@ -241,9 +239,7 @@ require VIEWS_PATH . '/layouts/header.php';
                     </svg>
                     <div class="info-body">
                         <span class="info-label">Landline</span>
-                        <span class="info-value">
-                            <a href="tel:<?= Utils::e($customer['phone_landline']) ?>"><?= Utils::e($customer['phone_landline']) ?></a>
-                        </span>
+                        <span class="info-value"><a href="tel:<?= Utils::e($customer['phone_landline']) ?>"><?= Utils::e($customer['phone_landline']) ?></a></span>
                     </div>
                 </li>
                 <?php endif; ?>
@@ -254,11 +250,9 @@ require VIEWS_PATH . '/layouts/header.php';
                     </svg>
                     <div class="info-body">
                         <span class="info-label">Email</span>
-                        <span class="info-value">
-                            <?= $customer['email']
+                        <span class="info-value"><?= $customer['email']
                                 ? '<a href="mailto:'.Utils::e($customer['email']).'">'.Utils::e($customer['email']).'</a>'
-                                : '<span class="info-empty">Not provided</span>' ?>
-                        </span>
+                                : '<span class="info-empty">Not provided</span>' ?></span>
                     </div>
                 </li>
                 <li class="info-item">
@@ -268,8 +262,7 @@ require VIEWS_PATH . '/layouts/header.php';
                     </svg>
                     <div class="info-body">
                         <span class="info-label">Address</span>
-                        <span class="info-value">
-                            <?php
+                        <span class="info-value"><?php
                             $addrParts = array_filter([
                                 $customer['address'],
                                 trim(($customer['postal_code'] ?? '') . ' ' . ($customer['city'] ?? '')),
@@ -278,8 +271,7 @@ require VIEWS_PATH . '/layouts/header.php';
                             echo $addrParts
                                 ? Utils::e(implode(', ', $addrParts))
                                 : '<span class="info-empty">Not provided</span>';
-                            ?>
-                        </span>
+                            ?></span>
                     </div>
                 </li>
             </ul>

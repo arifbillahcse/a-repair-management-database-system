@@ -220,13 +220,7 @@ $isOverdue = ($invoice['status'] === 'overdue')
                     </svg>
                     <div class="info-body">
                         <span class="info-label">Name</span>
-                        <span class="info-value">
-                            <a href="<?= BASE_URL ?>/customers/<?= $invoice['customer_id'] ?>"
-                               style="color:inherit;text-decoration:none"
-                               onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'">
-                                <?= Utils::e($invoice['customer_name'] ?? '—') ?>
-                            </a>
-                        </span>
+                        <span class="info-value"><a href="<?= BASE_URL ?>/customers/<?= $invoice['customer_id'] ?>" style="color:inherit;text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'"><?= Utils::e($invoice['customer_name'] ?? '—') ?></a></span>
                     </div>
                 </li>
                 <?php if (!empty($invoice['customer_phone'])): ?>

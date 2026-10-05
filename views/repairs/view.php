@@ -194,15 +194,7 @@ $currentIdx  = array_search($repair['status'], $allStatuses, true);
                     </svg>
                     <div class="info-body">
                         <span class="info-label">Name</span>
-                        <span class="info-value">
-                            <?php if (!empty($repair['customer_id'])): ?>
-                            <a href="<?= BASE_URL ?>/customers/<?= $repair['customer_id'] ?>"
-                               style="color:var(--text-primary);text-decoration:none"
-                               onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-primary)'">
-                                <?= Utils::e($repair['customer_name'] ?? '—') ?>
-                            </a>
-                            <?php else: ?><?= Utils::e($repair['customer_name'] ?? '—') ?><?php endif; ?>
-                        </span>
+                        <span class="info-value"><?php if (!empty($repair['customer_id'])): ?><a href="<?= BASE_URL ?>/customers/<?= $repair['customer_id'] ?>" style="color:var(--text-primary);text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-primary)'"><?= Utils::e($repair['customer_name'] ?? '—') ?></a><?php else: ?><?= Utils::e($repair['customer_name'] ?? '—') ?><?php endif; ?></span>
                     </div>
                 </li>
                 <?php $phone = $repair['customer_phone'] ?? ($repair['customer_phone_mobile'] ?? ''); ?>
