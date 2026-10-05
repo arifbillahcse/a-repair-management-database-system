@@ -66,23 +66,20 @@ define('REPAIR_STATUS', [
 ]);
 
 // Allowed status transitions.
-// 'collected', 'cancelled' and 'withdrawn' can be reopened to any other
-// status so a mistaken final status can be corrected — they are not full
-// dead ends.
-// 'withdrawn' = customer took the device back after refusing the estimate,
-// without ever accepting/paying for a repair. Reachable from every status,
-// since the buyer may realize the customer withdrew even after marking a
-// repair completed/ready/collected by mistake.
-define('REPAIR_STATUS_FLOW', [
-    'in_progress'       => ['on_hold', 'waiting_for_parts', 'completed', 'cancelled', 'withdrawn'],
-    'on_hold'           => ['in_progress', 'waiting_for_parts', 'cancelled', 'withdrawn'],
-    'waiting_for_parts' => ['in_progress', 'on_hold', 'cancelled', 'withdrawn'],
-    'completed'         => ['ready_for_pickup', 'in_progress', 'withdrawn'],
-    'ready_for_pickup'  => ['collected', 'on_hold', 'in_progress', 'withdrawn'],
-    'collected'         => ['ready_for_pickup', 'in_progress', 'on_hold', 'cancelled', 'withdrawn'],
-    'cancelled'         => ['in_progress', 'on_hold', 'waiting_for_parts', 'withdrawn'],
-    'withdrawn'         => ['in_progress', 'on_hold', 'waiting_for_parts'],
-]);
+// Fully flexible by design: every status can move to every other status,
+// with no enforced step-by-step order. Status changes are left entirely to
+// staff judgment (e.g. jumping straight from In Progress to Collected, or
+// reopening a Cancelled/Withdrawn repair) rather than forcing a fixed
+// in_progress -> completed -> ready_for_pickup -> collected sequence.
+$repairStatusKeys = array_keys(REPAIR_STATUS);
+define('REPAIR_STATUS_FLOW', array_combine(
+    $repairStatusKeys,
+    array_map(
+        fn(string $status): array => array_values(array_diff($repairStatusKeys, [$status])),
+        $repairStatusKeys
+    )
+));
+unset($repairStatusKeys);
 
 // Status badge CSS classes (mapped to style.css)
 define('REPAIR_STATUS_CLASS', [
