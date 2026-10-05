@@ -397,13 +397,11 @@ class RepairController
             'device_password'      => Utils::sanitize($post['device_password']      ?? ''),
             'date_in'              => $post['date_in'] ?: date('Y-m-d H:i:s'),
             'collection_date'      => !empty($post['date_expected_out']) ? $post['date_expected_out'] : null,
-            // A manually entered Completed/Out Date always wins. Otherwise, saving
-            // the full edit form with status set to Completed/Ready for Pickup
-            // auto-fills it - matching what the quick "Move to" status buttons
-            // already do via Repair::updateStatus(), which this form bypasses.
-            'date_out'             => !empty($post['date_out'])
-                ? $post['date_out']
-                : (in_array($status, ['completed', 'ready_for_pickup'], true) ? date('Y-m-d H:i:s') : null),
+            // Completed/Out Date is purely manual - whatever is typed into the
+            // field, exactly as typed, never auto-filled based on status. A
+            // status change elsewhere on this same form must never silently
+            // overwrite (or fill in) this date.
+            'date_out'             => !empty($post['date_out']) ? $post['date_out'] : null,
             'problem_description'  => Utils::sanitize($post['problem_description']  ?? ''),
             'diagnosis'            => Utils::sanitize($post['diagnosis_notes']      ?? ''),
             'internal_notes'       => Utils::sanitize($post['internal_notes']       ?? ''),

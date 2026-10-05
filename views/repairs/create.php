@@ -258,7 +258,7 @@ $custPhone = Utils::e($preCustomer['phone_mobile'] ?? ($preCustomer['phone_landl
                         <label class="form-label" for="dateOut">Completed/Out Date</label>
                         <input type="date" id="dateOut" name="date_out" class="form-input"
                                value="<?= Utils::e($fd['date_out'] ?? '') ?>">
-                        <div class="form-hint" style="font-size:.72rem;color:var(--text-muted);margin-top:.25rem">Leave blank — the repair hasn't been completed yet. Set automatically once its status becomes Completed or Ready for Pickup.</div>
+                        <div class="form-hint" style="font-size:.72rem;color:var(--text-muted);margin-top:.25rem">Leave blank — the repair hasn't been completed yet. This is never filled in automatically; set it by hand once the repair is actually finished.</div>
                     </div>
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label" for="priority">Priority</label>

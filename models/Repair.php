@@ -123,13 +123,12 @@ class Repair extends BaseModel
 
     public function updateStatus(int $id, string $newStatus): int
     {
-        $data = ['status' => $newStatus];
-
-        if (in_array($newStatus, ['completed', 'ready_for_pickup'], true)) {
-            $data['date_out'] = date('Y-m-d H:i:s');
-        }
-
-        return $this->update($id, $data);
+        // A pure status change - never touches date_out, even when moving to
+        // Completed/Ready for Pickup. Otherwise this would silently overwrite
+        // a Completed/Out Date the repair already had (set manually on
+        // create/edit) every time the status is changed afterward. Set the
+        // real completion date explicitly on the repair's Edit page instead.
+        return $this->update($id, ['status' => $newStatus]);
     }
 
     // ── Photo management (stored as JSON in photo_path) ───────────────────────

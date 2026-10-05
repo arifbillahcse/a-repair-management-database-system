@@ -270,7 +270,7 @@ $statusFlow  = REPAIR_STATUS_FLOW[$repair['status']] ?? [];
                         <label class="form-label" for="dateOut">Completed/Out Date</label>
                         <input type="date" id="dateOut" name="date_out" class="form-input"
                                value="<?= Utils::e(substr($fd['date_out'] ?? '', 0, 10)) ?>">
-                        <div class="form-hint" style="font-size:.72rem;color:var(--text-muted);margin-top:.25rem">The real date this repair was finished/collected. Normally set automatically when status becomes Completed or Ready for Pickup — edit here only to correct it.</div>
+                        <div class="form-hint" style="font-size:.72rem;color:var(--text-muted);margin-top:.25rem">The real date this repair was finished/collected. Set this manually — changing status alone never fills in or changes this date.</div>
                     </div>
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label" for="priority">Priority</label>
