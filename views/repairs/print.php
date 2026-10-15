@@ -258,7 +258,7 @@
     <div class="card">
         <div class="card-header">Diagnosis / Work Performed</div>
         <div class="card-body">
-            <div class="notes-box" style="min-height:20mm"><?= Utils::e($repair['diagnosis_notes'] ?? '') ?></div>
+            <div class="notes-box" style="min-height:20mm"><?= Utils::e($repair['diagnosis'] ?? '') ?></div>
         </div>
     </div>
 

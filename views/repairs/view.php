@@ -351,11 +351,11 @@ $currentIdx  = array_search($repair['status'], $allStatuses, true);
         </div>
 
         <!-- Diagnosis / work notes -->
-        <?php if (!empty($repair['diagnosis_notes'])): ?>
+        <?php if (!empty($repair['diagnosis'])): ?>
         <div class="section-card">
             <div class="section-header"><h2 class="section-title">Diagnosis / Work Notes</h2></div>
             <div style="padding:1rem 1.25rem;font-size:.86rem;color:var(--text-secondary);line-height:1.7">
-                <?= Utils::e($repair['diagnosis_notes']) ?>
+                <?= Utils::e($repair['diagnosis']) ?>
             </div>
         </div>
         <?php endif; ?>
